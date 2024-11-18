@@ -1,5 +1,6 @@
 ---
 layout: default
+menus: header
 ---
 
 # Labs to practice
