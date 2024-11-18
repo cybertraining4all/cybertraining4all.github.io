@@ -47,4 +47,84 @@ Hack The Box gives individuals, businesses and universities the tools they need 
 
 </td>
  </tr> 
+ <tr>
+    <td><b style="font-size:30px">LinkedIn Learning</b></td>
+    <td><b style="font-size:30px">Cisco Networking Academy</b></td>
+ </tr>
+ <tr>
+    <td>Online Learning Platform — Get Unlimited Access To Full Course Library Anywhere, Anytime With Linkedin Learning. An Online Learning Platform Tailored For Employee Training And Professional Development.
+<p></p><p></p>
+     
+<a href="https://www.linkedin.com/learning/">https://www.linkedin.com/learning/</a>
+
+</td>
+    <td>Cyber attacks increase with every digital connection made around the world. Learn how to protect and defend an organization and gain employable skills to start your cyber career.
+
+ <p></p><p></p>
+
+Junior Cybersecurity Analyst
+<p></p><p></p>
+
+<a href="https://skillsforall.com/career-path/cybersecurity?userLang=en-US&courseLang=en-US">https://skillsforall.com/career-path/cybersecurity?userLang=en-US&courseLang=en-US</a>
+
+</td>
+ </tr>  
+ <tr>
+    <td><b style="font-size:30px">Cybrary</b></td>
+    <td><b style="font-size:30px">Coursera</b></td>
+ </tr>
+ <tr>
+    <td>Cybrary's accessible, affordable training platform provides curated career paths, threat-informed training, and certification preparation for professionals at all levels.
+<p></p>
+<p></p>
+
+<a href="https://www.cybrary.it/">https://www.cybrary.it/</a>
+</td>
+    <td>Start, switch, or advance your career with more than 7,000 courses, Professional Certificates, and degrees from world-class universities and companies.
+<p></p><p></p>
+
+ <a href="https://www.coursera.org/courses?query=cybersecurity">https://www.coursera.org/courses?query=cybersecurity</a> 
+ 
+ </td>
+ </tr> 
+
+
+ <tr>
+    <td><b style="font-size:30px">Udemy</b></td>
+    <td><b style="font-size:30px">EC-Council</b></td>
+ </tr>
+ <tr>
+    <td>Udemy is an online learning and teaching marketplace with over 213000 courses and 62 million students. Learn programming, marketing, data science and more.
+
+<p></p>
+<p></p>
+
+ <a href="https://www.udemy.com/topic/cyber-security/">https://www.udemy.com/topic/cyber-security/</a> 
+</td>
+    <td>Start, switch, or advance your career with more than 7,000 courses, Professional Certificates, and degrees from world-class universities and companies.
+<p></p><p></p>
+
+ <a href="https://www.eccouncil.org/">https://www.eccouncil.org/</a> 
+ 
+ </td>
+ </tr> 
+ <tr>
+    <td><b style="font-size:30px">pwn.college</b></td>
+    <td><b style="font-size:30px"></b></td>
+ </tr>
+ <tr>
+    <td>pwn.college is an education platform for students (and other interested parties) to learn about, and practice, core cybersecurity concepts in a hands-on fashion. In martial arts terms, it is designed to take a “white belt” in cybersecurity through the journey to becoming a “blue belt”, able to approach (simple) cybersecurity competitions (CTFs) and wargames. Our philosophy is “practice makes perfect”.
+
+
+<p></p>
+<p></p>
+
+<a href="https://pwn.college/">https://pwn.college/</a>
+</td>
+    <td>
+ </td>
+ </tr> 
+ 
+
+ 
 </table>
