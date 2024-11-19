@@ -5,7 +5,7 @@ menus: header
 
 # Keeping your skills fresh
 
-<img src="../assets/youtube.jpeg" alt="YouTube" width="400"/>
+<img src="../assets/youtube.jpg" alt="YouTube" width="400"/>
 
 ## Homelab and Linux
 
