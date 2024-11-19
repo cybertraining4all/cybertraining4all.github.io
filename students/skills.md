@@ -69,7 +69,7 @@ menus: header
 
 ---
 
-<img src="../assets/cybermillion.jpeg" alt="CyberMillion" width="400"/>
+<img src="../assets/cybermillion.jpeg" alt="CyberMillion" width="600"/>
 
 ### Cyber Fundamentals
 
