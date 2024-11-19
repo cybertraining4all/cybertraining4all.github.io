@@ -8,25 +8,25 @@ menus: header
 
 ## Homelab and Linux
 
-https://www.youtube.com/@AwesomeOpenSource
+[AwesomeOpenSource](https://www.youtube.com/@AwesomeOpenSource) 
 
-https://www.youtube.com/@CraftComputing
+[CraftComputing](https://www.youtube.com/@CraftComputing)
 
-https://www.youtube.com/@DrZzs
+[DrZzs](https://www.youtube.com/@DrZzs)
 
-https://www.youtube.com/@JeffGeerling
+[JeffGeerling](https://www.youtube.com/@JeffGeerling)
 
-https://www.youtube.com/@LearnLinuxTV
+[LearnLinuxTV](https://www.youtube.com/@LearnLinuxTV)
 
-https://www.youtube.com/@NerdOnTheStreet
+[NerdOnTheStreet](https://www.youtube.com/@NerdOnTheStreet)
 
-https://www.youtube.com/@NetworkChuck
+[NetworkChuck](https://www.youtube.com/@NetworkChuck)
 
-https://www.youtube.com/@NullByteWHT
+[NullByteWHT](https://www.youtube.com/@NullByteWHT)
 
-https://www.youtube.com/@TechnoTim
+[TechnoTim](https://www.youtube.com/@TechnoTim)
 
-https://www.youtube.com/@tutoriaLinux
+[tutoriaLinux](https://www.youtube.com/@tutoriaLinux)
 
  
 
@@ -34,23 +34,23 @@ https://www.youtube.com/@tutoriaLinux
 
 ## Cyber Security
 
-https://www.youtube.com/@DeviantOllam
+[DeviantOllam](https://www.youtube.com/@DeviantOllam)
 
-https://www.youtube.com/HackerSploit
+[HackerSploit](https://www.youtube.com/HackerSploit)
 
-https://www.youtube.com/@hak5
+[hak5](https://www.youtube.com/@hak5)
 
-https://www.youtube.com/@NetworkChuck
+[NetworkChuck](https://www.youtube.com/@NetworkChuck)
 
-https://www.youtube.com/@NullByteWHT
+[NullByteWHT](https://www.youtube.com/@NullByteWHT)
 
-https://www.youtube.com/@SANSForensics
+[SANSForensics](https://www.youtube.com/@SANSForensics)
 
-https://www.youtube.com/@pcsecuritychannel
+[The PC Security Channel](https://www.youtube.com/@pcsecuritychannel)
 
-https://www.youtube.com/@zSecurity
+[zSecurity](https://www.youtube.com/@zSecurity)
 
-https://www.youtube.com/professormesser
+[Professor Messer](https://www.youtube.com/professormesser)
 
  
 
@@ -58,10 +58,10 @@ https://www.youtube.com/professormesser
 
 ## Programming
 
-https://www.youtube.com/@freecodecamp
+[FreeCodeCamp](https://www.youtube.com/@freecodecamp)
 
  
 
 ## Other
 
-https://www.youtube.com/@LinusTechTips
+[LinusTechTips](https://www.youtube.com/@LinusTechTips)
