@@ -67,6 +67,7 @@ menus: header
 
 [LinusTechTips](https://www.youtube.com/@LinusTechTips)
 
+---
 
 <img src="../assets/cybermillion.jpeg" alt="CyberMillion" width="400"/>
 
