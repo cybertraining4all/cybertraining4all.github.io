@@ -5,6 +5,7 @@ menus: header
 
 # Keeping your skills fresh
 
+<img src="../assets/youtube.jpeg" alt="YouTube" width="400"/>
 
 ## Homelab and Linux
 
@@ -65,3 +66,6 @@ menus: header
 ## Other
 
 [LinusTechTips](https://www.youtube.com/@LinusTechTips)
+
+
+<img src="../assets/cybermillion.jpeg" alt="CyberMillion" width="400"/>
