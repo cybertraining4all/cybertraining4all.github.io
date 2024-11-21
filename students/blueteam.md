@@ -1,5 +1,6 @@
 ---
 layout: default
+title: Blue Team
 menus: header
 ---
 
