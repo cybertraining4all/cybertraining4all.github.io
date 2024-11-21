@@ -1,6 +1,29 @@
 <p style="text-align: center; background-color: white;">
     <a href="{{site.baseurl}}/">Home</a> |
-    <a href="{{site.baseurl}}/students/">Students</a> | 
+    <a href="{{site.baseurl}}/students/">Students</a> 
     <a href="{{site.baseurl}}/employees/">Employees</a> | 
     <a href="{{site.baseurl}}/executive/">Executives</a> | 
   </p>
+
+  <ul class="bar">
+    <li><a href="#home">Home</a></li>
+    <li class="dropdown">
+      <a href="{{site.baseurl}}/students/">Students</a>
+      <div class="dropdown-content">
+        <a href="{{site.baseurl}}/students/blueteam">Blue Team</a>
+        <a href="{{site.baseurl}}/students/redteam">Red Team</a>
+        <a href="{{site.baseurl}}/students/certifications">Certifications</a>
+        <a href="{{site.baseurl}}/students/cheat_sheets">Cheat Sheets</a>
+        <a href="{{site.baseurl}}/students/dfir_resources">DFIR Resources</a>
+        <a href="{{site.baseurl}}/students/skills">Continuing Skills</a>
+      </div>
+    </li>
+    <li class="dropdown">
+      <a href="{{site.baseurl}}/executive/">Executive</a>
+      <div class="dropdown-content">
+        <a href="{{site.baseurl}}/executive/governance">Governance</a>
+        <a href="{{site.baseurl}}/executive/frameworks">Frameworks</a>
+        <a href="{{site.baseurl}}/executive/tooling">Tooling</a>
+      </div>
+    </li>    
+  </ul>
