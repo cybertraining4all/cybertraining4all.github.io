@@ -3,12 +3,10 @@ layout: default
 menus: header
 ---
 
-# Cyber Training 4 All
-
 <div class="container">
   <img src="assets/hacker.png" alt="hacker" style="width:100%;">
   <div class="content">
-    <h1>Cybe Training</h1>
+    <h1>Cyber Security Training</h1>
     <p>Learn new skills and help build your team's effectiveness. This site helps buildings skill for all levels from executives to students.</p>
   </div>
 </div>
