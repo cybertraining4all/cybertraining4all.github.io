@@ -3,9 +3,9 @@ layout: default
 menus: header
 ---
 
-<div class="container">
+<div class="hero-container">
   <img src="assets/hacker.png" alt="hacker" style="width:100%;">
-  <div class="content">
+  <div class="hero-content">
     <h1>Cyber Security Training</h1>
     <p>Learn new skills and help build your team's effectiveness. This site helps buildings skill for all levels from executives to students.</p>
   </div>
