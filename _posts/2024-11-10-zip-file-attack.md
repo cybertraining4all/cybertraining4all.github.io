@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Hackers now use ZIP file concatenation to evade detection"
-tags: threats, zip, windows
+tags: threats zip windows
 author: Scott McCarthy
 ---
 

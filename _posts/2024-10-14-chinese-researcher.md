@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Chinese researchers break RSA encryption with a quantum computer"
-tags: threats, research, encryption
+tags: threats research encryption
 author: Scott McCarthy
 ---
 

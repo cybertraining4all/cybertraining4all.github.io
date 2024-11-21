@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Meta pays the price for storing hundreds of millions of passwords in plaintext"
-tags: threats, research, encryption
+tags: encryption
 author: Scott McCarthy
 ---
 

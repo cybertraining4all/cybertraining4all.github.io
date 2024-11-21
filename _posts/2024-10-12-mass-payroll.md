@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Massachusetts shuts down payroll system after successful phishing campaign"
-tags: threats, research, encryption
+tags: threats phishing
 author: Scott McCarthy
 ---
 
