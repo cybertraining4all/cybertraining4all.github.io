@@ -1,9 +1,9 @@
 ---
 layout: post
 title:  "Hackers now use ZIP file concatenation to evade detection"
+tags: threats, zip, windows
+author: Scott McCarthy
 ---
-
-# Hackers now use ZIP file concatenation to evade detection
 
 Hackers are targeting Windows machines using the ZIP file concatenation technique to deliver malicious payloads in compressed archives without security solutions detecting them.
 
