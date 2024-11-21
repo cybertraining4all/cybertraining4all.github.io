@@ -15,8 +15,8 @@ menus: header
 
 <table border="0">
  <tr>
-    <td><b style="font-size:30px">Title</b></td>
-    <td><b style="font-size:30px">Title 2</b></td>
+    <td><b style="font-size:30px">Students</b></td>
+    <td><b style="font-size:30px">Executive</b></td>
  </tr>
  <tr>
     <td>Lorem ipsum ...</td>
