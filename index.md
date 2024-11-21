@@ -12,27 +12,27 @@ menus: header
 </div>
 
 <div style="display: table;">
-<div style="display: table-row">
-<div class="hero-container" style="display: table-cell;" >
-  <img src="assets/students.jpg" alt="hacker" style="width:300px;">
-  <div class="hero-content">
-    <h2>Students</h2>
+  <div style="display: table-row">
+   <div class="hero-container" style="display: table-cell; margin:10px" >
+    <img src="assets/students.jpg" alt="hacker" style="width:300px;">
+    <div class="hero-content">
+      <h2>Students</h2>
+    </div>
+   </div>
+   <div class="hero-container" style="display: table-cell;">
+    <img src="assets/executives.jpg" alt="hacker" style="width:300px;">
+    <div class="hero-content">
+     <h2>Executives</h2>
+    </div>
+   </div>
+   <div class="hero-container" style="display: table-cell;">
+    <img src="assets/employees.jpg" alt="hacker" style="width:300px;">
+    <div class="hero-content">
+      <h2>Employees</h2>
+    </div>
+   </div>
   </div>
 </div>
-<div class="hero-container" style="display: table-cell;">
-  <img src="assets/executives.jpg" alt="hacker" style="width:300px;">
-  <div class="hero-content">
-    <h2>Executives</h2>
-  </div>
-</div>
-<div class="hero-container" style="display: table-cell;">
-  <img src="assets/employees.jpg" alt="hacker" style="width:300px;">
-  <div class="hero-content">
-    <h2>Employees</h2>
-  </div>
-</div>
-</div>
-
 
 <table border="0">
  <tr>
