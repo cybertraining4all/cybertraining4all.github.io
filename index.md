@@ -45,10 +45,10 @@ menus: header
 </div>
 
 <p>
----
+<hr></hr>
 <p>
 
-## Posts
+<h2>Posts</h2>
 
 <ul>
   {% for post in site.posts %}
