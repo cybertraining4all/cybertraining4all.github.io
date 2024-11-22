@@ -8,10 +8,35 @@ menus: header
 
 The following set of resources which targets students trying to learn technical information to build a career in Cyber Security.
 
-['text'](blueteam.md)
+<div style="text-algin:center;width:100%">
+<div style="display: table;margin:auto;padding:20px;">
+  <div style="display: table-row">
+  <a href="blueteam.md">
+   <div class="hero-container" style="display: table-cell; margin:10px" >
+    <img src="/assets/blueteam.jpg" alt="hacker" style="width:300px;">
+    <div class="hero-content">
+      <h2 style="15px;">Blue Team</h2>
+    </div>
+   </div>
+   </a>
+  <a href="dfir_resources.md">   
+   <div class="hero-container" style="display: table-cell;">
+    <img src="assets/dfir.png" alt="hacker" style="width:300px;">
+    <div class="hero-content">
+     <h2 style="15px;">DFIR Resources</h2>
+    </div>
+   </div>
+   </a>
+  <a href="redteam.md">   
+   <div class="hero-container" style="display: table-cell;">
+    <img src="assets/redteam.jpg" alt="hacker" style="width:300px;">
+    <div class="hero-content">
+      <h2 style="15px;">Red Team</h2>
+    </div>
+   </div>
+   </a>
+  </div>
+</div>
+</div>
 
-![Blue Team](../assets/blueteam.jpg)
 
-![DFIR](../assets/dfir.png)
-
-![Red Team](../assets/redteam.jpg)
