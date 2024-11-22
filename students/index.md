@@ -50,7 +50,7 @@ The following set of resources which targets students trying to learn technical 
     </div>
    </div>
    </a>
-  <a href="Cheat_Sheets">   
+  <a href="cheat_sheets">   
    <div class="hero-container" style="display: table-cell;">
     <img src="/assets/cheatsheet.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
