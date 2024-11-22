@@ -52,7 +52,7 @@ The following set of resources which targets students trying to learn technical 
    </a>
   <a href="Cheat_Sheets">   
    <div class="hero-container" style="display: table-cell;">
-    <img src="/assets/cheatsheets.jpg" alt="hacker" style="width:300px;">
+    <img src="/assets/cheatsheet.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
      <h2 style="15px;">Cheat Sheets</h2>
     </div>
