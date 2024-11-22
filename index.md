@@ -13,6 +13,7 @@ menus: header
   </div>
 </div>
 
+<div style="text-algin:center;width:100%">
 <div style="display: table;">
   <div style="display: table-row">
    <div class="hero-container" style="display: table-cell; margin:10px" >
@@ -34,6 +35,7 @@ menus: header
     </div>
    </div>
   </div>
+</div>
 </div>
 
 
