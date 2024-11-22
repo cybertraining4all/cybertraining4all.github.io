@@ -24,7 +24,7 @@ menus: header
     </div>
    </div>
    </a>
-  <a href="students">   
+  <a href="executive">   
    <div class="hero-container" style="display: table-cell;">
     <img src="assets/executives.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
@@ -32,7 +32,7 @@ menus: header
     </div>
    </div>
    </a>
-  <a href="students">   
+  <a href="employees">   
    <div class="hero-container" style="display: table-cell;">
     <img src="assets/employees.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
