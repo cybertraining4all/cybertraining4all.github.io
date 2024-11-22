@@ -45,7 +45,7 @@ menus: header
 </div>
 
 <p>
-<hr></hr>
+<hr>
 <p>
 
 <h2>Posts</h2>
