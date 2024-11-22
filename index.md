@@ -14,7 +14,7 @@ menus: header
 </div>
 
 <div style="text-algin:center;width:100%">
-<div style="display: table;margin:auto;padding:20px;>
+<div style="display: table;margin:auto;padding:20px;">
   <div style="display: table-row">
    <div class="hero-container" style="display: table-cell; margin:10px" >
     <img src="assets/students.jpg" alt="hacker" style="width:300px;">
