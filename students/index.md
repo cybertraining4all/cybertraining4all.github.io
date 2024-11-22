@@ -15,7 +15,7 @@ The following set of resources which targets students trying to learn technical 
    <div class="hero-container" style="display: table-cell; margin:10px" >
     <img src="/assets/blueteam.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
-      <h2 style="15px;">Blue Team</h2>
+      <h2 style="padding:15px;;">Blue Team</h2>
     </div>
    </div>
    </a>
@@ -23,7 +23,7 @@ The following set of resources which targets students trying to learn technical 
    <div class="hero-container" style="display: table-cell;">
     <img src="/assets/dfir.png" alt="hacker" style="width:300px;">
     <div class="hero-content">
-     <h2 style="15px;">DFIR Resources</h2>
+     <h2 style="padding:15px;;">DFIR Resources</h2>
     </div>
    </div>
    </a>
@@ -31,7 +31,7 @@ The following set of resources which targets students trying to learn technical 
    <div class="hero-container" style="display: table-cell;">
     <img src="/assets/redteam2.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
-      <h2 style="15px;">Red Team</h2>
+      <h2 style="padding:15px;;">Red Team</h2>
     </div>
    </div>
    </a>
@@ -46,7 +46,7 @@ The following set of resources which targets students trying to learn technical 
    <div class="hero-container" style="display: table-cell; margin:10px" >
     <img src="/assets/certifications.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
-      <h2 style="15px;">Certifications</h2>
+      <h2 style="padding:15px;;">Certifications</h2>
     </div>
    </div>
    </a>
@@ -54,7 +54,7 @@ The following set of resources which targets students trying to learn technical 
    <div class="hero-container" style="display: table-cell;">
     <img src="/assets/cheatsheet.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
-     <h2 style="15px;">Cheat Sheets</h2>
+     <h2 style="padding:15px;;">Cheat Sheets</h2>
     </div>
    </div>
    </a>
@@ -62,7 +62,7 @@ The following set of resources which targets students trying to learn technical 
    <div class="hero-container" style="display: table-cell;">
     <img src="/assets/continuing.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
-      <h2 style="15px;">Continuing Skills</h2>
+      <h2 style="padding:15px;;">Continuing Skills</h2>
     </div>
    </div>
    </a>
