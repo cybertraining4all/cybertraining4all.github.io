@@ -16,24 +16,30 @@ menus: header
 <div style="text-algin:center;width:100%">
 <div style="display: table;margin:auto;padding:20px;">
   <div style="display: table-row">
+  <a href="students">
    <div class="hero-container" style="display: table-cell; margin:10px" >
     <img src="assets/students.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
       <h2 style="15px;">Students</h2>
     </div>
    </div>
+   </a>
+  <a href="students">   
    <div class="hero-container" style="display: table-cell;">
     <img src="assets/executives.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
      <h2 style="15px;">Executives</h2>
     </div>
    </div>
+   </a>
+  <a href="students">   
    <div class="hero-container" style="display: table-cell;">
     <img src="assets/employees.jpg" alt="hacker" style="width:300px;">
     <div class="hero-content">
       <h2 style="15px;">Employees</h2>
     </div>
    </div>
+   </a>
   </div>
 </div>
 </div>
@@ -41,6 +47,7 @@ menus: header
 <p>
 ---
 <p>
+
 ## Posts
 
 <ul>
