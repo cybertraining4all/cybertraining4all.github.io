@@ -26,11 +26,11 @@ The following set of resources is targets non-technical executive and directors 
     </div>
    </div>
    </a>
-  <a href="tools">   
+  <a href="tooling">   
    <div class="hero-container" style="display: table-cell;">
-    <img src="/assets/tools.jpg" alt="tools" style="width:300px;">
+    <img src="/assets/tools.jpg" alt="tooling" style="width:300px;">
     <div class="hero-content">
-      <h2 style="padding:15px;">Tools</h2>
+      <h2 style="padding:15px;">Tooling</h2>
     </div>
    </div>
    </a>
