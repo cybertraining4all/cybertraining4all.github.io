@@ -20,7 +20,7 @@ The following set of resources target non-technical employees to help provide tr
    </a>
   <a href="physical">   
    <div class="hero-container" style="display: table-cell;">
-    <img src="/assets/physical.jpg" alt="physical" style="width:300px;">
+    <img src="/assets/security.jpg" alt="physical" style="width:300px;">
     <div class="hero-content">
      <h2 style="padding:15px;;">Physical Security</h2>
     </div>
