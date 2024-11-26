@@ -2,5 +2,5 @@
 const element = document.querySelector('.popup');
 element.addEventListener('click', function(event) {
     const clickedElement = event.target;
-    clickedElement.firstElementChild.toggle("show")
+    clickedElement.firstElementChild.classList.toggle("show")
 });
