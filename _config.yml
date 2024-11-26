@@ -8,3 +8,9 @@ description: Use this site to build your cyber security capabilities
 
 # Google Analytics
 google_analytics: G-TN12HBMZE7
+
+defaults:
+  - scope:
+      path: "students/Cheat_Sheets"
+    values:
+      pdf: true

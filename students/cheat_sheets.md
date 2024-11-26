@@ -5,6 +5,11 @@ menus: header
 
 # Cheat Sheets
 <ul>
+{% assign pdf_files = site.static_files | where: "pdf", true %}
+{% for pdf_file in pdf_files %}
+  <li><a href="{{ pdf_file.path }}" target="_blank">pdf_file.basename</a></li>
+{% endfor %}
+<!--
 <li><a href="Cheat_Sheets/504-incident-response-cycle.pdf" target="_blank">504-incident-response-cycle.pdf</a></li>
 <li><a href="Cheat_Sheets/Bloodhound Cheat Sheet.pdf" target="_blank">Bloodhound Cheat Sheet.pdf</a></li>
 <li><a href="Cheat_Sheets/Buffer Overflow Cheatsheet.pdf" target="_blank">Buffer Overflow Cheatsheet.pdf</a></li>
@@ -38,5 +43,6 @@ menus: header
 <li><a href="Cheat_Sheets/Windows Command Line Cheat Sheet.pdf" target="_blank">Windows Command Line Cheat Sheet.pdf</a></li>
 <li><a href="Cheat_Sheets/Windows Forensic Analysis.pdf" target="_blank">Windows Forensic Analysis.pdf</a></li>
 <li><a href="Cheat_Sheets/Windows to Unix Cheat Sheet.pdf" target="_blank">Windows to Unix Cheat Sheet.pdf</a></li>
+-->
 </ul>
 
