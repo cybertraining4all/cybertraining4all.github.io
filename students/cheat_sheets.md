@@ -7,7 +7,7 @@ menus: header
 <ul>
 {% assign pdf_files = site.static_files | where: "pdf", true %}
 {% for pdf_file in pdf_files %}
-  <li><a href="{{ pdf_file.path }}" target="_blank">pdf_file.basename</a></li>
+  <li><a href="{{ pdf_file.path }}" target="_blank">{{ pdf_file.basename }}</a></li>
 {% endfor %}
 <!--
 <li><a href="Cheat_Sheets/504-incident-response-cycle.pdf" target="_blank">504-incident-response-cycle.pdf</a></li>
