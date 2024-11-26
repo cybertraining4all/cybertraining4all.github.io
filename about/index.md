@@ -4,14 +4,13 @@ title: Students
 menus: header
 ---
 
-# About the author
-
 <div style="display: table;margin:auto;padding:20px;">
   <div style="display: table-row">
    <div style="display: table-cell; margin:10px; padding:20px;width: 300px;" >
     <img src="/assets/author.jpg">
    </div>
    <div style="display: table-cell; margin:10px; padding:20px;vertical-align: top; " >
+<h1>About the author</h1>
 
 Scott McCarthy Cyber Security Engineering Manager of National Grid, a multi-national energy company, an Adjunct Professor of Cyber Security at Clark University, and sits on the Board of Directors and IT Steering Committee Chair of Central One Federal Credit Union. Scott has presented at multiple conferences about his experience in cyber security. Scott has a Bachelor of Science in Computer Science from Worcester State University, a Master of Science in Information Technology from Clark University and holds many certifications in the field of Cyber Security. 
 <p></P>
