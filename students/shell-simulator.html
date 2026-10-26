@@ -1201,7 +1201,7 @@ class Shell {
     this.sink = [];
     let saved = null;
     if (this.storage) { try { saved = JSON.parse(this.storage.getItem(STORE_KEY) || 'null'); } catch (e) { saved = null; } }
-    if (saved && saved.v === 1) this.s = saved; else this.factoryReset(opts.user || 'user', opts.fullname || 'user McCarthy');
+    if (saved && saved.v === 1) this.s = saved; else this.factoryReset(opts.user || 'user', opts.fullname || 'user');
     INO = Math.max(INO, this.s.ino || INO);
   }
 
@@ -1256,7 +1256,7 @@ class Shell {
     this.s.ino = INO;
     try { this.storage.setItem(STORE_KEY, JSON.stringify(this.s)); } catch (e) { /* quota */ }
   }
-  wipe() { if (this.storage) this.storage.removeItem(STORE_KEY); this.factoryReset(this.s.baseUser || 'user', (this.s.users[this.s.baseUser] || {}).name || 'user McCarthy'); this.save(); }
+  wipe() { if (this.storage) this.storage.removeItem(STORE_KEY); this.factoryReset(this.s.baseUser || 'user', (this.s.users[this.s.baseUser] || {}).name || 'user'); this.save(); }
 
   get env() { return this.s.env; }
   get user() { return this.s.user; }
@@ -4714,7 +4714,7 @@ if (typeof module !== 'undefined') module.exports = { Shell, stripAnsi, CMDS };
   const $ = id => document.getElementById(id);
   const term = $('term'), outEl = $('out'), lineEl = $('line'), kbd = $('kbd'), titleEl = $('title');
   let storage = null; try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); storage = localStorage; } catch (e) { storage = null; }
-  const shell = new Shell({ storage, user: 'user', fullname: 'user McCarthy' });
+  const shell = new Shell({ storage, user: 'user', fullname: 'user' });
   shell.syncBinaries();
   let promptStr = '', mode = 'boot', askPassword = false, histIdx = -1, draft = '', lastTabLine = null, busy = false;
 
