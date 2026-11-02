@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Injection Training Lab</title>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--bd:#30363d;--tx:#c9d1d9;--mut:#8b949e;--acc:#58a6ff;--ok:#3fb950;--bad:#f85149;--warn:#d29922;--mono:'Consolas','Courier New',monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px}
+  header{padding:14px 22px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;color:#fff}
+  header .tag{font-size:12px;color:var(--mut)}
+  .wrap{display:grid;grid-template-columns:300px 1fr 340px;gap:14px;padding:14px;align-items:start}
+  @media(max-width:1200px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--bd);border-radius:8px;padding:14px;margin-bottom:14px}
+  .card h2{font-size:14px;margin:0 0 10px;color:#fff;text-transform:uppercase;letter-spacing:.5px}
+  .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .tabs button{background:var(--panel2);border:1px solid var(--bd);color:var(--tx);padding:7px 12px;border-radius:6px;cursor:pointer}
+  .tabs button.on{background:var(--acc);color:#000;border-color:var(--acc);font-weight:600}
+  label{display:block;font-size:12px;color:var(--mut);margin:8px 0 4px}
+  input[type=text]{width:100%;background:#0b0f14;border:1px solid var(--bd);color:#fff;padding:9px;border-radius:6px;font-family:var(--mono)}
+  .btn{background:var(--ok);color:#000;border:0;padding:9px 16px;border-radius:6px;font-weight:600;cursor:pointer;margin-top:10px}
+  .btn.sec{background:var(--panel2);color:var(--tx);border:1px solid var(--bd)}
+  .def{display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:6px;border:1px solid transparent;cursor:pointer}
+  .def:hover{background:var(--panel2)}
+  .def input{margin-top:3px}
+  .def b{display:block;color:#fff;font-size:13px}
+  .def span{font-size:12px;color:var(--mut)}
+  .def.on{border-color:var(--ok);background:rgba(63,185,80,.07)}
+  pre.q{background:#0b0f14;border:1px solid var(--bd);padding:10px;border-radius:6px;font-family:var(--mono);white-space:pre-wrap;word-break:break-all;margin:0}
+  .inj{background:rgba(248,81,73,.25);color:#ffa198;border-radius:3px}
+  .bind{background:rgba(63,185,80,.2);color:#7ee787;border-radius:3px}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12px}
+  th,td{border:1px solid var(--bd);padding:5px 7px;text-align:left}
+  th{background:var(--panel2);color:var(--acc)}
+  .verdict{padding:10px 12px;border-radius:6px;margin:10px 0;font-weight:600}
+  .v-bad{background:rgba(248,81,73,.12);border:1px solid var(--bad);color:#ffa198}
+  .v-ok{background:rgba(63,185,80,.12);border:1px solid var(--ok);color:#7ee787}
+  .v-warn{background:rgba(210,153,34,.12);border:1px solid var(--warn);color:#e3b341}
+  .ch{border:1px solid var(--bd);border-radius:6px;padding:10px;margin-bottom:8px;background:var(--panel2)}
+  .ch .t{font-weight:600;color:#fff;display:flex;justify-content:space-between;gap:6px}
+  .ch .d{font-size:12px;color:var(--mut);margin:5px 0}
+  .ch code{font-family:var(--mono);color:#ffa198;font-size:12px;word-break:break-all}
+  .ch button{background:transparent;border:1px solid var(--acc);color:var(--acc);border-radius:4px;padding:3px 8px;cursor:pointer;font-size:11px;white-space:nowrap}
+  .done{color:var(--ok)}
+  .lesson{font-size:13px;line-height:1.55}
+  .lesson code{font-family:var(--mono);background:#0b0f14;padding:1px 4px;border-radius:3px;color:#7ee787}
+  .log{font-family:var(--mono);font-size:11px;max-height:220px;overflow:auto}
+  .log div{padding:3px 0;border-bottom:1px dashed var(--bd)}
+  .score{font-size:12px;color:var(--mut)}
+  .codecmp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .codecmp pre{font-size:11px;margin:4px 0 0}
+  .muted{color:var(--mut);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛡️ SQL Injection Training Lab</h1>
+  <span class="tag">Everything runs in your browser against a fake, in-memory database. Nothing leaves the page.</span>
+  <span style="flex:1"></span>
+  <span class="score" id="score"></span>
+  <button class="btn sec" style="margin:0" onclick="resetDB()">↺ Reset Database</button>
+</header>
+
+<div class="wrap">
+  <!-- LEFT: defenses -->
+  <div>
+    <div class="card">
+      <h2>Defenses</h2>
+      <div class="muted" style="margin-bottom:8px">Turn these on one at a time and replay the attacks. Watch which ones actually stop each attack.</div>
+      <div id="defs"></div>
+    </div>
+    <div class="card">
+      <h2>Database</h2>
+      <div class="muted" id="dbinfo"></div>
+    </div>
+  </div>
+
+  <!-- MIDDLE: app -->
+  <div>
+    <div class="card">
+      <div class="tabs" id="tabs"></div>
+      <div id="app"></div>
+    </div>
+    <div class="card">
+      <h2>Query sent to the database</h2>
+      <pre class="q" id="query">(submit the form)</pre>
+      <div id="verdict"></div>
+      <div id="result"></div>
+    </div>
+    <div class="card">
+      <h2>What the code looks like</h2>
+      <div id="code"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: guide -->
+  <div>
+    <div class="card">
+      <h2>Guided challenges</h2>
+      <div id="challenges"></div>
+    </div>
+    <div class="card">
+      <h2>Lesson</h2>
+      <div class="lesson" id="lesson"></div>
+    </div>
+    <div class="card">
+      <h2>Attempt log</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   1. FAKE DATABASE
+   ========================================================= */
+const SEED = {
+  users:[
+    {id:1,username:'admin',password:'Sup3rS3cret!',role:'administrator',email:'admin@example.test'},
+    {id:2,username:'jsmith',password:'summer2026',role:'user',email:'jsmith@example.test'},
+    {id:3,username:'mlee',password:'P@ssw0rd',role:'user',email:'mlee@example.test'},
+    {id:4,username:'svc_backup',password:'backup#99',role:'service',email:'backup@example.test'}],
+  products:[
+    {id:1,name:'Smart Meter X1',category:'meters',price:129.99},
+    {id:2,name:'Smart Meter X2',category:'meters',price:179.99},
+    {id:3,name:'Transformer Monitor',category:'sensors',price:899.00},
+    {id:4,name:'Line Fault Sensor',category:'sensors',price:449.50},
+    {id:5,name:'Field Tablet',category:'devices',price:1199.00}],
+  orders:[
+    {id:1001,customer:'jsmith',item:'Smart Meter X1',total:129.99},
+    {id:1002,customer:'mlee',item:'Field Tablet',total:1199.00},
+    {id:1003,customer:'jsmith',item:'Line Fault Sensor',total:449.50}],
+  api_keys:[
+    {id:1,service:'billing',api_key:'sk_test_FAKE_9f8a7b6c5d'},
+    {id:2,service:'scada-gw',api_key:'sk_test_FAKE_1a2b3c4d5e'}]
+};
+let DB;
+const fakeHash = s => { let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))>>>0; return '$2b$12$'+h.toString(36).padStart(8,'x')+'Qz.fakeHashForTraining'; };
+function resetDB(){ DB = JSON.parse(JSON.stringify(SEED)); renderDBInfo(); addLog('Database reset.'); }
+function renderDBInfo(){
+  document.getElementById('dbinfo').innerHTML = Object.keys(SEED).map(t =>
+    DB[t] ? `<div>✅ <b>${t}</b> (${DB[t].length} rows): ${Object.keys(SEED[t][0]).join(', ')}</div>`
+          : `<div style="color:var(--bad)">💥 <b>${t}</b>: DROPPED</div>`).join('') +
+    `<div style="margin-top:6px">Engine: MiniSQL (simulated)</div>`;
+}
+
+/* =========================================================
+   2. MINI SQL ENGINE (tokenizer, parser, evaluator)
+   ========================================================= */
+class SQLError extends Error{}
+const KW = new Set(['SELECT','FROM','WHERE','AND','OR','NOT','UNION','ALL','LIKE','NULL','DROP','TABLE','DELETE','ORDER','BY','LIMIT','ASC','DESC']);
+
+function tokenize(sql){
+  const t=[]; let i=0;
+  while(i<sql.length){
+    const c=sql[i];
+    if(/\s/.test(c)){i++;continue;}
+    if(c==='-'&&sql[i+1]==='-'){ while(i<sql.length&&sql[i]!=='\n')i++; continue; }
+    if(c==='#'){ while(i<sql.length&&sql[i]!=='\n')i++; continue; }
+    if(c==='/'&&sql[i+1]==='*'){ const e=sql.indexOf('*/',i+2); i = e<0?sql.length:e+2; continue; }
+    if(c==="'"){
+      let s=''; i++;
+      while(true){
+        if(i>=sql.length) throw new SQLError(`Unclosed quotation mark near: ${sql.slice(Math.max(0,i-15))}`);
+        if(sql[i]==="'"){ if(sql[i+1]==="'"){s+="'";i+=2;continue;} i++; break; }
+        s+=sql[i++];
+      }
+      t.push({k:'str',v:s}); continue;
+    }
+    if(/[0-9]/.test(c)){ let n=''; while(i<sql.length&&/[0-9.]/.test(sql[i]))n+=sql[i++]; t.push({k:'num',v:parseFloat(n)}); continue; }
+    if(/[A-Za-z_]/.test(c)){ let w=''; while(i<sql.length&&/[A-Za-z0-9_]/.test(sql[i]))w+=sql[i++];
+      const U=w.toUpperCase(); t.push(KW.has(U)?{k:'kw',v:U}:{k:'id',v:w.toLowerCase()}); continue; }
+    const two=sql.substr(i,2);
+    if(['<>','!=','<=','>=','||'].includes(two)){ t.push({k:'op',v:two}); i+=2; continue; }
+    if('=<>(),;*?'.includes(c)){ t.push({k:'op',v:c}); i++; continue; }
+    throw new SQLError(`Syntax error near '${sql.slice(i,i+10)}'`);
+  }
+  return t;
+}
+
+function parse(tokens, params){
+  let p=0, pi=0;
+  const peek=()=>tokens[p], nx=()=>tokens[p++];
+  const isKw=v=>peek()&&peek().k==='kw'&&peek().v===v;
+  const isOp=v=>peek()&&peek().k==='op'&&peek().v===v;
+  const expectKw=v=>{ if(!isKw(v)) throw new SQLError(`Syntax error: expected ${v} near '${tokDesc()}'`); p++; };
+  const expectOp=v=>{ if(!isOp(v)) throw new SQLError(`Syntax error: expected '${v}' near '${tokDesc()}'`); p++; };
+  const tokDesc=()=>peek()? String(peek().v):'end of input';
+  const ident=()=>{ const t=nx(); if(!t||t.k!=='id') throw new SQLError(`Syntax error: expected identifier near '${t?t.v:'end of input'}'`); return t.v; };
+
+  function statements(){
+    const out=[];
+    while(p<tokens.length){
+      if(isOp(';')){p++;continue;}
+      out.push(statement());
+      if(p<tokens.length && !isOp(';')) throw new SQLError(`Syntax error near '${tokDesc()}'`);
+    }
+    return out;
+  }
+  function statement(){
+    if(isKw('SELECT')) return select();
+    if(isKw('DROP')){ p++; expectKw('TABLE'); return {type:'drop',table:ident()}; }
+    if(isKw('DELETE')){ p++; expectKw('FROM'); const table=ident(); let where=null; if(isKw('WHERE')){p++;where=expr();} return {type:'delete',table,where}; }
+    throw new SQLError(`Unsupported or invalid statement near '${tokDesc()}'`);
+  }
+  function select(){
+    expectKw('SELECT');
+    const cols=[];
+    do{ if(isOp('*')){p++;cols.push({star:true});} else cols.push(expr()); } while(isOp(',')&&++p);
+    let from=null, where=null, order=null, limit=null;
+    if(isKw('FROM')){ p++; from=ident(); }
+    if(isKw('WHERE')){ p++; where=expr(); }
+    let union=null;
+    if(isKw('UNION')){ p++; if(isKw('ALL'))p++; union=select(); }
+    if(isKw('ORDER')){ p++; expectKw('BY'); order=nx(); if(isKw('ASC')||isKw('DESC'))p++; }
+    if(isKw('LIMIT')){ p++; limit=nx().v; }
+    return {type:'select',cols,from,where,union,order,limit};
+  }
+  function expr(){ let l=andE(); while(isKw('OR')){p++; l={op:'OR',l,r:andE()};} return l; }
+  function andE(){ let l=notE(); while(isKw('AND')){p++; l={op:'AND',l,r:notE()};} return l; }
+  function notE(){ if(isKw('NOT')){p++; return {op:'NOT',e:notE()};} return cmp(); }
+  function cmp(){
+    let l=prim();
+    const t=peek();
+    if(t&&t.k==='op'&&['=','<>','!=','<','>','<=','>='].includes(t.v)){ p++; return {op:t.v,l,r:prim()}; }
+    if(isKw('LIKE')){ p++; return {op:'LIKE',l,r:prim()}; }
+    if(isKw('NOT')&&tokens[p+1]&&tokens[p+1].v==='LIKE'){ p+=2; return {op:'NOT',e:{op:'LIKE',l,r:prim()}}; }
+    return l;
+  }
+  function prim(){
+    const t=nx();
+    if(!t) throw new SQLError('Syntax error: unexpected end of input');
+    if(t.k==='str'||t.k==='num') return {lit:t.v};
+    if(t.k==='kw'&&t.v==='NULL') return {lit:null};
+    if(t.k==='op'&&t.v==='?'){ if(pi>=params.length) throw new SQLError('Missing bound parameter'); return {lit:params[pi++],bound:true}; }
+    if(t.k==='op'&&t.v==='('){ const e=expr(); expectOp(')'); return e; }
+    if(t.k==='id'){
+      if(isOp('(')){ p++; const args=[]; if(!isOp(')')){ do{args.push(expr());}while(isOp(',')&&++p);} expectOp(')'); return {fn:t.v,args}; }
+      return {col:t.v};
+    }
+    throw new SQLError(`Syntax error near '${t.v}'`);
+  }
+  return statements();
+}
+
+const FN = { version:()=>'MiniSQL 8.0.36-training', user:()=>'app_user@localhost', current_user:()=>'app_user@localhost',
+  database:()=>'grid_shop', length:a=>String(a??'').length, upper:a=>String(a??'').toUpperCase(), lower:a=>String(a??'').toLowerCase() };
+
+function evalE(e,row){
+  if('lit' in e) return e.lit;
+  if(e.col){ if(!row||!(e.col in row)) throw new SQLError(`Unknown column '${e.col}'`); return row[e.col]; }
+  if(e.fn){ const f=FN[e.fn]; if(!f) throw new SQLError(`Unknown function '${e.fn}'`); return f(...e.args.map(a=>evalE(a,row))); }
+  const L=()=>evalE(e.l,row), R=()=>evalE(e.r,row);
+  const num=(a,b)=> (typeof a==='number'||typeof b==='number') && !isNaN(+a) && !isNaN(+b);
+  switch(e.op){
+    case 'OR': return truthy(L())||truthy(R());
+    case 'AND': return truthy(L())&&truthy(R());
+    case 'NOT': return !truthy(evalE(e.e,row));
+    case '=': { const a=L(),b=R(); if(a==null||b==null) return false; return num(a,b)? +a===+b : String(a)===String(b); }
+    case '<>': case '!=': { const a=L(),b=R(); if(a==null||b==null) return false; return num(a,b)? +a!==+b : String(a)!==String(b); }
+    case '<': return +L()<+R(); case '>': return +L()>+R();
+    case '<=': return +L()<=+R(); case '>=': return +L()>=+R();
+    case 'LIKE': { const re=new RegExp('^'+String(R()).replace(/[.*+^${}()|[\]\\]/g,'\\$&').replace(/%/g,'.*').replace(/_/g,'.')+'$','i'); return re.test(String(L()??'')); }
+  }
+}
+const truthy=v=> v!==null && v!==false && v!==0 && v!=='0' && v!=='' ? true : (typeof v==='string' && v!=='' && isNaN(+v));
+
+function checkTable(t,ctx){
+  if(!DB[t]) throw new SQLError(SEED[t] ? `Table '${t}' doesn't exist (it was dropped)` : `Table '${t}' doesn't exist`);
+  if(ctx.allowed && !ctx.allowed.includes(t)) throw new SQLError(`SELECT command denied to user 'app_user' for table '${t}'`);
+  ctx.touched.add(t);
+}
+function runSelect(s,ctx){
+  let rows=[{}], src=null;
+  if(s.from){ checkTable(s.from,ctx); src=DB[s.from]; rows=src.map(r=>{ const c={...r}; if(ctx.hash&&'password' in c) c.password=fakeHash(c.password); return c; }); }
+  if(s.where) rows=rows.filter(r=>truthy(evalE(s.where,r)));
+  let headers=[];
+  s.cols.forEach(c=>{ if(c.star){ if(!src) throw new SQLError('SELECT * requires FROM'); headers.push(...Object.keys(src[0]||{})); } else headers.push(c.col||c.fn&&c.fn+'()'||String(c.lit)); });
+  let out=rows.map(r=>{ const a=[]; s.cols.forEach(c=>{ if(c.star) a.push(...Object.keys(src[0]).map(k=>r[k])); else a.push(evalE(c,r)); }); a._t=s.from; return a; });
+  if(s.union){
+    const u=runSelect(s.union,ctx);
+    if(u.headers.length!==headers.length) throw new SQLError(`The used SELECT statements have a different number of columns (${headers.length} vs ${u.headers.length})`);
+    out=out.concat(u.rows);
+  }
+  if(s.limit!=null) out=out.slice(0,s.limit);
+  return {headers,rows:out};
+}
+function execute(sql,params,ctx){
+  const stmts=parse(tokenize(sql),params);
+  if(!stmts.length) throw new SQLError('Empty query');
+  let result=null; ctx.destructive=[];
+  stmts.forEach((s,i)=>{
+    if(i>0 && !ctx.multi) throw new SQLError('Multiple statements are not allowed by this driver');
+    if(s.type==='select') result=runSelect(s,ctx);
+    else if(s.type==='drop'){ if(ctx.leastPriv) throw new SQLError(`DROP command denied to user 'app_user' for table '${s.table}'`); checkTable(s.table,{...ctx,allowed:null}); delete DB[s.table]; ctx.destructive.push(`DROP TABLE ${s.table}`); }
+    else if(s.type==='delete'){ if(ctx.leastPriv) throw new SQLError(`DELETE command denied to user 'app_user' for table '${s.table}'`); checkTable(s.table,{...ctx,allowed:null}); const before=DB[s.table].length; DB[s.table]=DB[s.table].filter(r=>!(s.where?truthy(evalE(s.where,r)):true)); ctx.destructive.push(`DELETE ${before-DB[s.table].length} rows from ${s.table}`); }
+  });
+  renderDBInfo();
+  return result||{headers:[],rows:[]};
+}
+
+/* =========================================================
+   3. DEFENSES
+   ========================================================= */
+const DEFS = [
+  {id:'params', name:'Parameterized queries', desc:'User input is sent separately from the SQL as bound data. The #1 fix.'},
+  {id:'validate', name:'Input validation (allowlist)', desc:'Reject input that does not match an expected pattern (e.g. digits only, known categories).'},
+  {id:'escape', name:'Escape quotes', desc:"Replace ' with ''. A partial measure that is easy to bypass."},
+  {id:'leastPriv', name:'Least-privilege DB account', desc:'App account can read only the tables it needs. No DROP/DELETE.'},
+  {id:'genericErr', name:'Generic error messages', desc:'Hide raw SQL errors from users (log them server-side instead).'},
+  {id:'hash', name:'Hash stored passwords', desc:'Does not prevent SQLi, but limits damage if data is stolen.'},
+];
+const D = {};
+function renderDefs(){
+  document.getElementById('defs').innerHTML = DEFS.map(d=>`
+    <label class="def ${D[d.id]?'on':''}"><input type="checkbox" ${D[d.id]?'checked':''} onchange="D['${d.id}']=this.checked;renderDefs();renderCode()">
+    <div><b>${d.name}</b><span>${d.desc}</span></div></label>`).join('');
+}
+
+/* =========================================================
+   4. SCENARIOS
+   ========================================================= */
+const SCN = {
+  login:{
+    title:'Login form',
+    fields:[{id:'u',label:'Username',ph:'jsmith'},{id:'p',label:'Password',ph:'summer2026'}],
+    button:'Log in',
+    tpl:"SELECT id, username, role FROM users WHERE username = '{u}' AND password = '{p}'",
+    ptpl:'SELECT id, username, role FROM users WHERE username = ? AND password = ?',
+    allowed:['users'],
+    validate:{u:/^[A-Za-z0-9_.]{1,32}$/},
+    validateNote:'username must match ^[A-Za-z0-9_.]{1,32}$ (passwords can contain anything, so they cannot be strictly allowlisted)',
+    judge(v,res,ctx){
+      if(!res.rows.length) return ['ok','Login failed. No matching user.'];
+      const legit = SEED.users.some(x=>x.username===v.u && x.password===v.p);
+      const who=res.rows[0][1];
+      if(legit) return ['ok',`Logged in legitimately as ${who}.`];
+      return ['bad',`AUTHENTICATION BYPASSED. Logged in as "${who}" (${res.rows[0][2]}) without valid credentials.`];
+    },
+    challenges:[
+      {t:'Normal login',d:'Baseline: a legitimate user logs in.',v:{u:'jsmith',p:'summer2026'}},
+      {t:'Break the query',d:'A single quote breaks the SQL syntax. Verbose errors tell an attacker the input is injectable.',v:{u:"jsmith'",p:'x'}},
+      {t:'Comment out the password check',d:'Close the string, then use -- to comment out the rest of the query.',v:{u:"admin'-- ",p:'anything'}},
+      {t:'Always-true condition',d:"Use OR '1'='1' in the password field so the WHERE clause is always true.",v:{u:'nobody',p:"' OR '1'='1"}},
+      {t:'Stacked query (destructive)',d:'Append a second statement with ;. Some drivers allow multiple statements.',v:{u:"x'; DROP TABLE orders; -- ",p:'x'}},
+    ],
+    lesson:`<p>The app builds SQL by <b>string concatenation</b>, so whatever you type becomes part of the SQL <i>code</i>.</p>
+<p>Try this sequence of defenses:</p>
+<ol><li><b>Input validation</b> alone: the username attacks are blocked, but the <code>' OR '1'='1</code> attack in the <i>password</i> field still works because passwords can't be allowlisted.</li>
+<li><b>Escape quotes</b>: blocks these attacks, but it is fragile. See the Order lookup tab.</li>
+<li><b>Parameterized queries</b>: every attack fails. Input is treated as a value and never as SQL.</li></ol>
+<p>Real-world fix: parameterize, and never store plaintext passwords. Compare a <i>hash</i> in application code instead of in the WHERE clause.</p>`
+  },
+  search:{
+    title:'Product search',
+    fields:[{id:'c',label:'Category',ph:'meters'}],
+    button:'Search',
+    tpl:"SELECT id, name, category, price FROM products WHERE category = '{c}'",
+    ptpl:'SELECT id, name, category, price FROM products WHERE category = ?',
+    allowed:['products'],
+    validate:{c:/^(meters|sensors|devices)$/},
+    validateNote:'category must be one of: meters, sensors, devices',
+    judge(v,res,ctx){
+      const foreign=[...ctx.touched].filter(t=>t!=='products');
+      if(foreign.length) return ['bad',`DATA EXFILTRATION. Rows were pulled from: ${foreign.join(', ')}`];
+      const legit=SEED.products.filter(p=>p.category===v.c).length;
+      if(res.rows.length>legit) return ['bad',`Returned ${res.rows.length} rows; a legitimate search would return ${legit}. The filter was bypassed.`];
+      if(res.rows.some(r=>r._t===undefined && r.length)) return ['warn','Injected SELECT returned attacker-controlled values (reconnaissance).'];
+      return ['ok',`${res.rows.length} product(s) found.`];
+    },
+    challenges:[
+      {t:'Normal search',d:'Baseline search.',v:{c:'meters'}},
+      {t:'Dump all products',d:'Bypass the filter with an always-true condition.',v:{c:"' OR 1=1 -- "}},
+      {t:'Find the column count',d:'UNION requires the same number of columns. Wrong counts produce an error, which helps the attacker.',v:{c:"x' UNION SELECT 1,2,3 -- "}},
+      {t:'Fingerprint the database',d:'Once the count is right (4), pull the version and DB user.',v:{c:"x' UNION SELECT 1, version(), user(), database() -- "}},
+      {t:'Steal credentials',d:'UNION another table into the results.',v:{c:"x' UNION SELECT id, username, password, role FROM users -- "}},
+      {t:'Steal API keys',d:'Any table the DB account can read is exposed.',v:{c:"x' UNION SELECT id, service, api_key, 0 FROM api_keys -- "}},
+    ],
+    lesson:`<p>A <b>UNION-based</b> attack appends a second SELECT, so <i>any table</i> the app's DB account can read leaks into the page.</p>
+<ul><li><b>Generic errors</b> hide the column-count error, which slows the attacker down but does not stop them.</li>
+<li><b>Least privilege</b> limits the damage: the users and api_keys tables become unreadable.</li>
+<li><b>Hashing</b> means stolen passwords aren't directly usable.</li>
+<li><b>Allowlist validation</b> works very well here because the valid values are a known set.</li>
+<li><b>Parameterized queries</b> remove the root cause.</li></ul>
+<p>Use defense in depth: parameterize first, then add least privilege, hashing, and generic errors.</p>`
+  },
+  order:{
+    title:'Order lookup (numeric)',
+    fields:[{id:'n',label:'Order ID',ph:'1001'}],
+    button:'Look up',
+    tpl:'SELECT id, customer, item, total FROM orders WHERE id = {n}',
+    ptpl:'SELECT id, customer, item, total FROM orders WHERE id = ?',
+    allowed:['orders'],
+    validate:{n:/^\d{1,9}$/},
+    validateNote:'order ID must be digits only (^\\d{1,9}$)',
+    judge(v,res,ctx){
+      const foreign=[...ctx.touched].filter(t=>t!=='orders');
+      if(foreign.length) return ['bad',`DATA EXFILTRATION. Rows were pulled from: ${foreign.join(', ')}`];
+      if(res.rows.length>1) return ['bad',`IDOR/filter bypass: returned ${res.rows.length} orders, including other customers' orders.`];
+      return ['ok',`${res.rows.length} order(s) found.`];
+    },
+    challenges:[
+      {t:'Normal lookup',d:'Baseline.',v:{n:'1001'}},
+      {t:'No quotes needed',d:'The value is numeric and not wrapped in quotes, so escaping quotes does nothing here.',v:{n:'0 OR 1=1'}},
+      {t:'UNION with no quotes at all',d:'Turn on "Escape quotes" and run this. It still works.',v:{n:'0 UNION SELECT id, username, password, role FROM users'}},
+      {t:'Destructive',d:'Delete every order via a stacked query.',v:{n:'1; DELETE FROM orders'}},
+    ],
+    lesson:`<p><b>Escaping is not a fix.</b> When input is placed in a <i>numeric</i> context there are no quotes to escape, so <code>0 OR 1=1</code> passes straight through.</p>
+<p>This is why OWASP lists escaping as a last resort. Parameterized queries work no matter where the value goes, and type validation (digits only, or casting to an integer) also helps here.</p>`
+  }
+};
+let cur='login';
+const solved=new Set();
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = Object.entries(SCN).map(([k,s])=>`<button class="${k===cur?'on':''}" onclick="cur='${k}';renderAll()">${s.title}</button>`).join('');
+}
+function renderApp(){
+  const s=SCN[cur];
+  document.getElementById('app').innerHTML = s.fields.map(f=>`<label>${f.label}</label><input type="text" id="f_${f.id}" placeholder="${f.ph}" onkeydown="if(event.key==='Enter')submitForm()">`).join('') +
+    `<button class="btn" onclick="submitForm()">${s.button}</button>`;
+}
+function renderChallenges(){
+  const s=SCN[cur];
+  document.getElementById('challenges').innerHTML = s.challenges.map((c,i)=>`
+    <div class="ch"><div class="t"><span>${solved.has(cur+i)?'<span class="done">✔</span> ':''}${i+1}. ${c.t}</span><button onclick="loadCh(${i})">Load</button></div>
+    <div class="d">${c.d}</div>${Object.values(c.v).map(x=>`<code>${esc(x)}</code>`).join(' <span class="muted">|</span> ')}</div>`).join('');
+  document.getElementById('lesson').innerHTML=s.lesson;
+  const total=Object.values(SCN).reduce((a,s)=>a+s.challenges.length,0);
+  document.getElementById('score').textContent=`Challenges run: ${solved.size}/${total}`;
+}
+function loadCh(i){ const c=SCN[cur].challenges[i]; Object.entries(c.v).forEach(([k,v])=>document.getElementById('f_'+k).value=v); window._ch=cur+i; submitForm(); }
+function renderCode(){
+  const s=SCN[cur];
+  const vulnerable = `// ❌ Vulnerable\nquery = "${s.tpl.replace(/\{(\w)\}/g,'" + $1 + "')}";\ndb.execute(query);`;
+  const safe = `// ✅ Parameterized\nquery = "${s.ptpl}";\ndb.execute(query, [${s.fields.map(f=>f.id).join(', ')}]);`;
+  const py = `# Python (psycopg / sqlite3)\ncur.execute("${s.ptpl.replace(/\?/g, '%s')}",\n            (${s.fields.map(f=>f.id).join(', ')},))`;
+  document.getElementById('code').innerHTML = `<div class="codecmp"><div><pre class="q">${esc(vulnerable)}</pre></div><div><pre class="q">${esc(D.params?safe:safe)}</pre><pre class="q">${esc(py)}</pre></div></div>
+   <div class="muted" style="margin-top:6px">Active: ${D.params?'<span style="color:var(--ok)">parameterized code path</span>':'<span style="color:var(--bad)">string-concatenation code path</span>'}</div>`;
+}
+
+/* =========================================================
+   5. SUBMIT
+   ========================================================= */
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function submitForm(){
+  const s=SCN[cur]; const v={};
+  s.fields.forEach(f=>v[f.id]=document.getElementById('f_'+f.id).value);
+  const qEl=document.getElementById('query'), vEl=document.getElementById('verdict'), rEl=document.getElementById('result');
+  rEl.innerHTML=''; const short=Object.values(v).join(' | ');
+  if(window._ch){ solved.add(window._ch); window._ch=null; }
+
+  // validation
+  if(D.validate){
+    for(const [k,re] of Object.entries(s.validate)){
+      if(!re.test(v[k])){
+        qEl.textContent='(query never sent)';
+        vEl.innerHTML=`<div class="verdict v-ok">🛡️ Blocked by input validation: ${s.validateNote}</div>`;
+        addLog(`[${s.title}] ${short} → blocked by validation`); renderChallenges(); return;
+      }
+    }
+  }
+  let sql, params=[], shown;
+  if(D.params){
+    sql=s.ptpl; params=s.fields.map(f=>v[f.id]);
+    let i=0; shown=esc(sql).replace(/\?/g,()=>`<span class="bind">?</span>`) +
+      `\n\n-- bound values (sent separately, treated as data):\n` + params.map((p,j)=>`--  $${j+1} = <span class="bind">${esc(JSON.stringify(p))}</span>`).join('\n');
+  } else {
+    const val=x=> D.escape? x.replace(/'/g,"''") : x;
+    sql=s.tpl.replace(/\{(\w)\}/g,(_,k)=>val(v[k]));
+    shown=esc(s.tpl).replace(/\{(\w)\}/g,(_,k)=>`<span class="inj">${esc(val(v[k]))}</span>`);
+  }
+  qEl.innerHTML=shown;
+
+  const ctx={allowed:D.leastPriv?s.allowed:null, leastPriv:D.leastPriv, hash:D.hash, multi:!D.params, touched:new Set()};
+  try{
+    const res=execute(sql,params,ctx);
+    let [lvl,msg]=s.judge(v,res,ctx);
+    if(ctx.destructive.length){ lvl='bad'; msg=`DESTRUCTIVE STATEMENT EXECUTED: ${ctx.destructive.join('; ')}. ` + msg; }
+    if(lvl==='ok' && D.params && /['\-;]|UNION|OR/i.test(short)) msg+=' The payload was treated as literal text.';
+    vEl.innerHTML=`<div class="verdict v-${lvl}">${lvl==='bad'?'⚠️':lvl==='warn'?'🔎':'✅'} ${esc(msg)}</div>`;
+    if(D.hash && [...ctx.touched].includes('users') && lvl==='bad') vEl.innerHTML+=`<div class="verdict v-warn">Passwords were hashed, so the stolen data is far less useful.</div>`;
+    rEl.innerHTML = res.headers.length ? `<table><tr>${res.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr>${res.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c??'NULL')}</td>`).join('')}</tr>`).join('')}</table>` : '';
+    addLog(`[${s.title}] ${short} → ${lvl.toUpperCase()}`);
+  }catch(e){
+    if(!(e instanceof SQLError)) throw e;
+    if(D.genericErr){
+      vEl.innerHTML=`<div class="verdict v-warn">An error occurred. Please try again. <span class="muted">(Real error hidden: "${esc(e.message)}". The user would not see this.)</span></div>`;
+    } else {
+      vEl.innerHTML=`<div class="verdict v-bad">💥 Database error leaked to user: ${esc(e.message)}</div><div class="muted">Verbose errors confirm injection and reveal structure (tables, column counts, permissions).</div>`;
+    }
+    addLog(`[${s.title}] ${short} → ERROR: ${e.message}`);
+  }
+  renderChallenges();
+}
+function addLog(m){ const l=document.getElementById('log'); if(!l)return; const d=document.createElement('div'); d.textContent=new Date().toLocaleTimeString()+'  '+m; l.prepend(d); }
+
+function renderAll(){ renderTabs(); renderApp(); renderChallenges(); renderCode();
+  document.getElementById('query').textContent='(submit the form)'; document.getElementById('verdict').innerHTML=''; document.getElementById('result').innerHTML=''; }
+resetDB(); renderDefs(); renderAll();
+</script>
+</body>
+</html>
