@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>x86-16 Register Lab — learn how a CPU works</title>
+<style>
+:root{--bg:#0d1220;--panel:#151c2e;--panel2:#1b2439;--border:#29344f;--text:#dbe3f3;--muted:#8792ad;--accent:#4cc2ff;--green:#7ee787;--warn:#ffb454;--err:#ff6b6b;--chg:#ffd34d;--si:#4cc2ff;--di:#7ee787;--bx:#c792ea;--sp:#ff9e64;--mono:'Cascadia Code','JetBrains Mono',Consolas,Menlo,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 'Segoe UI',system-ui,-apple-system,sans-serif}
+header{display:flex;align-items:center;gap:16px;padding:10px 18px;background:#0a0f1b;border-bottom:1px solid var(--border);flex-wrap:wrap}
+header h1{font-size:18px;margin:0;font-weight:600;letter-spacing:.3px}
+header h1 span{color:var(--accent);font-family:var(--mono)}
+.tabs{display:flex;gap:4px;margin-left:auto}
+.tab{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:6px;cursor:pointer;font:inherit}
+.tab.active{background:var(--accent);color:#05101c;border-color:var(--accent);font-weight:600}
+main{padding:14px;max-width:1700px;margin:0 auto}
+.grid{display:grid;grid-template-columns:minmax(330px,1.15fr) minmax(340px,1fr) minmax(360px,1fr);gap:14px;align-items:start}
+@media(max-width:1200px){.grid{grid-template-columns:1fr 1fr}.col3{grid-column:1/-1}}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px}
+.panel h2{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.panel h2 .grow{flex:1}
+select,input,button{font:inherit}
+select,input[type=text]{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 8px}
+select{width:100%}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.btn{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:#05101c;border-color:var(--accent);font-weight:600}
+.btn.go{background:#1f4d2e;border-color:#2f7a45}
+.btn kbd{font-size:10px;opacity:.7}
+.speed{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px}
+.lesson{background:var(--panel2);border-left:3px solid var(--accent);border-radius:6px;padding:8px 12px;font-size:13.5px}
+.lesson p{margin:6px 0}.lesson .try{color:var(--green)}
+code,.mono{font-family:var(--mono)}
+code{background:#0b1120;padding:1px 5px;border-radius:4px;font-size:12.5px}
+textarea#src{width:100%;height:440px;background:#0b1120;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font:13px/1.55 var(--mono);resize:vertical;tab-size:4}
+.listing{background:#0b1120;border:1px solid var(--border);border-radius:8px;height:440px;overflow:auto;font:13px/1.55 var(--mono);resize:vertical}
+.ln{display:flex;white-space:pre;padding-right:8px;border-left:3px solid transparent}
+.ln .bp{width:20px;flex:none;text-align:center;color:transparent;cursor:pointer;user-select:none}
+.ln.code .bp:hover{color:#ff6b6b66}
+.ln.brk .bp{color:var(--err)}
+.ln .ad{width:56px;flex:none;color:#55607a}
+.ln .no{width:30px;flex:none;color:#3e4860;text-align:right;padding-right:8px}
+.ln .tx{flex:1}
+.ln .cm{color:#6a7896;font-style:italic}
+.ln .lb{color:var(--warn)}
+.ln.cur{background:#16365a;border-left-color:var(--accent)}
+.ln.cur .ad{color:var(--accent)}
+.ln.prev{background:#1d2a1d40}
+.ln.errl{background:#4a1d24}
+.msg{margin-top:8px;padding:8px 10px;border-radius:6px;font-size:13px;display:none}
+.msg.show{display:block}.msg.err{background:#3b1820;border:1px solid #7a2f3a;color:#ffc2c8}.msg.ok{background:#16301f;border:1px solid #2f7a45;color:#bff5cb}.msg.info{background:#1a2840;border:1px solid #2c4870}
+/* registers */
+.regs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.reg{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;transition:background .25s,border-color .25s;position:relative}
+.reg.chg{border-color:var(--chg);background:#3a3417}
+.reg .top{display:flex;align-items:baseline;gap:8px}
+.reg .rn{font:700 15px var(--mono);color:var(--accent);width:28px}
+.reg .rh{font:600 17px var(--mono)}
+.reg .rd{color:var(--muted);font-size:12px;margin-left:auto;font-family:var(--mono)}
+.reg .role{font-size:11px;color:var(--muted);margin:1px 0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.halves{display:flex;gap:6px;margin:4px 0}
+.half{flex:1;font:12px var(--mono);background:#0b1120;border:1px solid var(--border);border-radius:5px;padding:2px 6px;display:flex;justify-content:space-between}
+.half b{color:#9fb3d9}.half.chg{border-color:var(--chg);color:var(--chg)}
+.bits{display:flex;gap:1px;font:10px var(--mono)}
+.bits i{font-style:normal;flex:1;text-align:center;background:#0b1120;color:#3e4860;border-radius:2px;padding:1px 0}
+.bits i.on{background:#24486b;color:#cfe8ff}
+.bits i.gap{margin-left:4px}
+.reg.wide{grid-column:1/-1}
+.flags{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.flag{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center;cursor:help}
+.flag .fn{font:700 14px var(--mono)}.flag .fl{font-size:11px;color:var(--muted)}
+.flag.on{background:#1f4d2e;border-color:#2f7a45}.flag.on .fn{color:var(--green)}
+.flag.chg{box-shadow:0 0 0 2px var(--chg)}
+.flagsval{font:12px var(--mono);color:var(--muted);margin-top:6px}
+.explain{background:var(--panel2);border-radius:8px;padding:10px 12px;min-height:70px}
+.explain .ins{font:600 14px var(--mono);color:var(--chg);margin-bottom:4px}
+.explain .nx{margin-top:8px;font-size:12px;color:var(--muted)}
+.explain .nx code{color:var(--accent)}
+.halt{margin-top:8px;padding:6px 10px;border-radius:6px;background:#3b2a12;border:1px solid #7a5a2f;color:#ffd9a6;font-size:13px}
+.halt.e{background:#3b1820;border-color:#7a2f3a;color:#ffc2c8}
+/* memory */
+.memtbl{font:12px var(--mono);border-collapse:collapse;width:100%}
+.memtbl th{color:#55607a;font-weight:400;padding:1px 2px}
+.memtbl td{padding:1px 2px;text-align:center;border-radius:3px;color:#5d6984}
+.memtbl td.nz{color:var(--text)}
+.memtbl td.addr{color:#55607a;text-align:left;padding-right:6px}
+.memtbl td.asc{color:#7f8aa5;text-align:left;padding-left:8px;white-space:pre;letter-spacing:1px}
+.memtbl td.chg{background:var(--chg);color:#1a1400;font-weight:700}
+.memtbl td.si{box-shadow:inset 0 0 0 2px var(--si)}
+.memtbl td.di{box-shadow:inset 0 0 0 2px var(--di)}
+.memtbl td.bx{box-shadow:inset 0 0 0 2px var(--bx)}
+.memtbl td.lbl{text-decoration:underline dotted #ffb45488}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:6px}
+.legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.lg-c::before{background:var(--chg)}.lg-si::before{box-shadow:inset 0 0 0 2px var(--si)}.lg-di::before{box-shadow:inset 0 0 0 2px var(--di)}.lg-bx::before{box-shadow:inset 0 0 0 2px var(--bx)}
+.memnav{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.memnav input{width:90px;font-family:var(--mono)}
+.memnav .btn{padding:4px 9px}
+.syms{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sym{font:12px var(--mono);background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer}
+.sym b{color:var(--warn);font-weight:600}.sym:hover{border-color:var(--warn)}
+.stack{font:12.5px var(--mono)}
+.srow{display:flex;gap:10px;padding:3px 8px;border-radius:5px;border:1px solid transparent}
+.srow .sa{color:#55607a;width:60px}.srow .sv{flex:1}
+.srow.top{background:#3a2a17;border-color:var(--sp)}
+.srow.top .sp{color:var(--sp);font-weight:700}
+.srow.chg .sv{color:var(--chg);font-weight:700}
+.empty{color:var(--muted);font-style:italic;font-size:12.5px;padding:4px 8px}
+.out{background:#050810;border:1px solid var(--border);border-radius:8px;min-height:64px;max-height:160px;overflow:auto;padding:8px 10px;font:13px var(--mono);color:#b8f5c4;white-space:pre-wrap}
+.status{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:4px;flex-wrap:wrap}
+.status b{color:var(--text);font-family:var(--mono)}
+/* guide */
+#guide{max-width:980px;margin:0 auto;display:none}
+#guide h2{color:var(--accent);margin-top:28px;border-bottom:1px solid var(--border);padding-bottom:6px}
+#guide h3{margin-top:18px}
+#guide table{border-collapse:collapse;width:100%;margin:8px 0;font-size:13.5px}
+#guide th,#guide td{border:1px solid var(--border);padding:6px 9px;text-align:left;vertical-align:top}
+#guide th{background:var(--panel2)}
+#guide td:first-child{font-family:var(--mono);white-space:nowrap;color:var(--chg)}
+#guide pre{background:#0b1120;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font:13px var(--mono);overflow:auto}
+.note{background:var(--panel2);border-left:3px solid var(--warn);padding:8px 12px;border-radius:6px}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:16px}
+</style>
+</head>
+<body>
+<header>
+  <h1><span>x86-16</span> Register Lab</h1>
+  <div style="color:var(--muted);font-size:13px">A step-by-step 16-bit CPU simulator for learning how registers, memory and the stack work</div>
+  <div class="tabs">
+    <button class="tab active" data-tab="emu">Emulator</button>
+    <button class="tab" data-tab="guide">Guide &amp; Reference</button>
+  </div>
+</header>
+
+<main>
+<section id="emu">
+<div class="grid">
+  <!-- column 1: program -->
+  <div class="col1">
+    <div class="panel">
+      <h2>Lesson</h2>
+      <select id="sample"></select>
+      <div class="lesson" id="lesson" style="margin-top:10px"></div>
+    </div>
+    <div class="panel">
+      <h2><span class="grow">Program</span><span id="mode" style="text-transform:none;letter-spacing:0"></span></h2>
+      <div class="btns">
+        <button class="btn primary" id="bAsm" title="Ctrl+Enter">⚙ Assemble &amp; Load <kbd>Ctrl+⏎</kbd></button>
+        <button class="btn" id="bEdit">✎ Edit code</button>
+      </div>
+      <textarea id="src" spellcheck="false"></textarea>
+      <div class="listing" id="listing" style="display:none"></div>
+      <div class="msg" id="asmMsg"></div>
+      <div class="status" style="margin-top:8px">Tip: click the left margin of a code line to set a <span style="color:var(--err)">●</span> breakpoint.</div>
+    </div>
+  </div>
+
+  <!-- column 2: CPU -->
+  <div class="col2">
+    <div class="panel">
+      <h2>Controls</h2>
+      <div class="btns" style="margin-top:0">
+        <button class="btn go" id="bStep" title="F10">▶ Step <kbd>F10</kbd></button>
+        <button class="btn" id="bBack" title="Shift+F10">◀ Back <kbd>⇧F10</kbd></button>
+        <button class="btn" id="bRun" title="F5">⏵ Run <kbd>F5</kbd></button>
+        <button class="btn" id="bReset" title="Ctrl+R / F8">↺ Reset <kbd>F8</kbd></button>
+      </div>
+      <div class="speed">Run speed <input type="range" id="speed" min="0" max="5" value="2"> <span id="speedLbl"></span></div>
+      <div class="status"><span>Instructions executed: <b id="stCount">0</b></span><span>Next line: <b id="stLine">–</b></span></div>
+    </div>
+    <div class="panel">
+      <h2>What just happened?</h2>
+      <div class="explain" id="explain"></div>
+    </div>
+    <div class="panel">
+      <h2><span class="grow">Registers</span><span style="text-transform:none;letter-spacing:0;font-size:11px">hover for details · yellow = just changed</span></h2>
+      <div class="regs" id="regs"></div>
+    </div>
+    <div class="panel">
+      <h2>Flags</h2>
+      <div class="flags" id="flags"></div>
+      <div class="flagsval" id="flagsval"></div>
+    </div>
+  </div>
+
+  <!-- column 3: memory -->
+  <div class="col3">
+    <div class="panel">
+      <h2>Memory <span class="grow"></span></h2>
+      <div class="memnav">
+        <button class="btn" id="mPrev">◀</button>
+        <input type="text" id="mAddr" value="0x1000" title="Type an address and press Enter">
+        <button class="btn" id="mNext">▶</button>
+        <button class="btn" id="mData">Data</button>
+        <button class="btn" id="mStack">Stack</button>
+      </div>
+      <table class="memtbl" id="mem"></table>
+      <div class="legend"><span class="lg-c">just written</span><span class="lg-si">[SI]</span><span class="lg-di">[DI]</span><span class="lg-bx">[BX]</span><span>· values in hex</span></div>
+      <div class="syms" id="syms"></div>
+    </div>
+    <div class="panel">
+      <h2>Stack <span style="text-transform:none;letter-spacing:0;font-size:11px">(grows downward from 0xFFFE)</span></h2>
+      <div class="stack" id="stack"></div>
+    </div>
+    <div class="panel">
+      <h2>Output (INT 21h)</h2>
+      <div class="out" id="out"></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="guide">
+<h2 style="margin-top:6px">Quick start</h2>
+<ol>
+  <li>Pick a lesson from the <b>Lesson</b> menu (start with Lesson 1). Read the short explanation above the code.</li>
+  <li>Press <b>▶ Step</b> (or <code>F10</code>) to run <b>one</b> instruction. The highlighted line is the one that will run <i>next</i>.</li>
+  <li>Read <b>What just happened?</b> — it explains the instruction in plain English with the real numbers.</li>
+  <li>Watch the <span style="color:var(--chg)">yellow</span> highlights on registers, flags and memory to see exactly what changed.</li>
+  <li>Made a mistake or want to see it again? Press <b>◀ Back</b> to undo a step. <b>↺ Reset</b> starts over.</li>
+  <li><b>⏵ Run</b> executes continuously (adjust the speed slider); it pauses at breakpoints. Click it again to pause.</li>
+  <li>Click <b>✎ Edit code</b> to change the program, then <b>Assemble &amp; Load</b> (<code>Ctrl+Enter</code>).</li>
+</ol>
+<p class="note">Suggested exercise: before every Step, <b>predict</b> what will change. Then press Step and check. That habit is the fastest way to learn how a CPU thinks.</p>
+
+<h2>What is a register?</h2>
+<p>The CPU can only do math on values that are <i>inside</i> it. Registers are its tiny built-in storage boxes — much faster than memory, but there are only a few. On the 16-bit Intel 8086 (the ancestor of today's PCs), each register holds 16 bits: a number from <b>0 to 65,535</b> (or <b>−32,768 to 32,767</b> if treated as signed).</p>
+<table>
+<tr><th>Register</th><th>Name</th><th>Typical job</th></tr>
+<tr><td>AX (AH/AL)</td><td>Accumulator</td><td>Main math register. MUL and DIV always use it. DOS services read AH.</td></tr>
+<tr><td>BX (BH/BL)</td><td>Base</td><td>Often holds a memory address, e.g. <code>MOV AL, [BX]</code>.</td></tr>
+<tr><td>CX (CH/CL)</td><td>Counter</td><td>LOOP counts down with CX. Shift counts can come from CL.</td></tr>
+<tr><td>DX (DH/DL)</td><td>Data</td><td>High half of MUL results, remainder of DIV, address of text to print.</td></tr>
+<tr><td>SI</td><td>Source Index</td><td>Points at data you are reading (walking through an array).</td></tr>
+<tr><td>DI</td><td>Destination Index</td><td>Points at data you are writing.</td></tr>
+<tr><td>BP</td><td>Base Pointer</td><td>Used to reach data stored on the stack (function arguments).</td></tr>
+<tr><td>SP</td><td>Stack Pointer</td><td>Address of the top of the stack. Changed by PUSH, POP, CALL, RET.</td></tr>
+<tr><td>IP</td><td>Instruction Pointer</td><td>Address of the <i>next</i> instruction. Moves forward automatically; jumps change it.</td></tr>
+</table>
+<p>AX, BX, CX and DX can be split into two 8-bit halves: <b>H</b>igh and <b>L</b>ow. For example, if <code>AX = 0x1234</code> then <code>AH = 0x12</code> and <code>AL = 0x34</code>. Writing to AL changes only the right half of AX.</p>
+
+<h2>Flags</h2>
+<p>After most math instructions, the CPU records facts about the result in single-bit <b>flags</b>. Conditional jumps read these flags to make decisions.</p>
+<table>
+<tr><th>Flag</th><th>Meaning</th><th>Example</th></tr>
+<tr><td>ZF (Zero)</td><td>The result was exactly 0.</td><td><code>SUB AX, AX</code> → ZF=1</td></tr>
+<tr><td>CF (Carry)</td><td>Unsigned result didn't fit (carry out of the top), or subtraction needed a borrow.</td><td>8-bit 200+100 → CF=1</td></tr>
+<tr><td>SF (Sign)</td><td>Top bit of the result (1 = negative when read as signed).</td><td>0 − 1 → SF=1</td></tr>
+<tr><td>OF (Overflow)</td><td>Signed result didn't fit.</td><td>8-bit 127+1 → OF=1</td></tr>
+</table>
+<p>MOV, PUSH, POP, jumps, NOT and XCHG do <b>not</b> change flags. INC and DEC change ZF/SF/OF but never CF.</p>
+
+<h2>Memory, addresses and [brackets]</h2>
+<p>Memory is a long row of 65,536 bytes, each with an address (0x0000–0xFFFF). The Memory panel shows 256 of them at a time in hexadecimal.</p>
+<table>
+<tr><th>You write</th><th>Meaning</th></tr>
+<tr><td>MOV SI, numbers</td><td>Put the <b>address</b> of the label <code>numbers</code> into SI.</td></tr>
+<tr><td>MOV AL, [numbers]</td><td>Read the <b>byte stored at</b> that address.</td></tr>
+<tr><td>MOV AL, [SI]</td><td>Read the byte at the address held in SI.</td></tr>
+<tr><td>MOV AX, [BX+SI+2]</td><td>Address = BX + SI + 2. Only BX, SI, DI and BP may be used inside [ ].</td></tr>
+<tr><td>MOV BYTE [BX], 5</td><td>When nothing tells the CPU the size, say <code>BYTE</code> (8-bit) or <code>WORD</code> (16-bit).</td></tr>
+</table>
+<p><b>Little-endian:</b> a 16-bit word is stored low byte first. <code>MOV [total], AX</code> with AX = 0x1234 writes <code>34</code> then <code>12</code>.</p>
+
+<h2>The stack</h2>
+<p>The stack lives at the top of memory and grows <b>downward</b>. <code>PUSH AX</code> does <i>SP = SP − 2</i>, then stores AX at [SP]. <code>POP AX</code> loads [SP] into AX, then <i>SP = SP + 2</i>. <code>CALL</code> pushes the return address and jumps; <code>RET</code> pops it back into IP.</p>
+
+<h2>Program syntax</h2>
+<pre>; comment                      Everything after ; is ignored
+label:                         A named spot you can jump to
+    MOV AX, 5                  Instruction  destination, source
+name  DB 1, 2, 'Hi', '$'       Bytes in memory (text allowed)
+name  DW 1000, -5              16-bit words in memory
+buf   DB 10 DUP(0)             10 zero bytes</pre>
+<table>
+<tr><th>Number format</th><th>Example</th></tr>
+<tr><td>Decimal</td><td><code>42</code>, <code>-5</code></td></tr>
+<tr><td>Hexadecimal</td><td><code>0x2A</code> or <code>2Ah</code> (must start with a digit: <code>0FFh</code>)</td></tr>
+<tr><td>Binary</td><td><code>101010b</code> or <code>0b101010</code></td></tr>
+<tr><td>Character</td><td><code>'A'</code> (= 65)</td></tr>
+</table>
+<p>Instructions, registers and labels are not case-sensitive. Data is placed in memory starting at <b>0x1000</b>; code starts at <b>0x0100</b>.</p>
+
+<h2>Instruction reference</h2>
+<table>
+<tr><th>Instruction</th><th>What it does</th><th>Flags</th></tr>
+<tr><td>MOV a, b</td><td>a = b (copy)</td><td>none</td></tr>
+<tr><td>XCHG a, b</td><td>swap a and b</td><td>none</td></tr>
+<tr><td>LEA r, [..]</td><td>r = the address computed inside [ ] (no memory read)</td><td>none</td></tr>
+<tr><td>ADD a, b</td><td>a = a + b</td><td>ZF SF CF OF</td></tr>
+<tr><td>SUB a, b</td><td>a = a − b</td><td>ZF SF CF OF</td></tr>
+<tr><td>CMP a, b</td><td>compute a − b, keep only the flags</td><td>ZF SF CF OF</td></tr>
+<tr><td>INC a / DEC a</td><td>a = a + 1 / a = a − 1</td><td>ZF SF OF (not CF)</td></tr>
+<tr><td>NEG a</td><td>a = 0 − a (change sign)</td><td>ZF SF CF OF</td></tr>
+<tr><td>MUL src</td><td>8-bit: AX = AL × src. 16-bit: DX:AX = AX × src</td><td>CF OF</td></tr>
+<tr><td>DIV src</td><td>8-bit: AL = AX ÷ src, AH = remainder. 16-bit: AX = DX:AX ÷ src, DX = remainder</td><td>—</td></tr>
+<tr><td>AND / OR / XOR a, b</td><td>bitwise logic, result in a</td><td>ZF SF, CF=OF=0</td></tr>
+<tr><td>TEST a, b</td><td>AND but keep only the flags</td><td>ZF SF, CF=OF=0</td></tr>
+<tr><td>NOT a</td><td>flip every bit</td><td>none</td></tr>
+<tr><td>SHL a, n / SHR a, n</td><td>shift bits left/right by n (number or CL). SAL = SHL</td><td>ZF SF CF (OF)</td></tr>
+<tr><td>PUSH x / POP r</td><td>put a 16-bit value on / take it off the stack</td><td>none</td></tr>
+<tr><td>JMP label</td><td>always jump</td><td>none</td></tr>
+<tr><td>JE / JZ, JNE / JNZ</td><td>jump if equal (ZF=1) / not equal (ZF=0)</td><td>reads ZF</td></tr>
+<tr><td>JG, JGE, JL, JLE</td><td>signed greater / ≥ / less / ≤ (after CMP)</td><td>reads ZF SF OF</td></tr>
+<tr><td>JA, JAE, JB, JBE</td><td>unsigned above / ≥ / below / ≤ (after CMP)</td><td>reads CF ZF</td></tr>
+<tr><td>JC/JNC, JS/JNS, JO/JNO</td><td>jump on carry / sign / overflow flag</td><td>reads one flag</td></tr>
+<tr><td>LOOP label</td><td>CX = CX − 1; jump if CX ≠ 0</td><td>none</td></tr>
+<tr><td>CALL label / RET</td><td>call a subroutine / return from it</td><td>none</td></tr>
+<tr><td>INT 21h</td><td>DOS service selected by AH (see below)</td><td>none</td></tr>
+<tr><td>CLC / STC / CMC</td><td>clear / set / flip the Carry Flag</td><td>CF</td></tr>
+<tr><td>NOP / HLT</td><td>do nothing / stop the CPU</td><td>none</td></tr>
+</table>
+
+<h3>INT 21h services (simulated MS-DOS)</h3>
+<table>
+<tr><th>AH</th><th>Service</th><th>Input</th></tr>
+<tr><td>02h</td><td>Print one character</td><td>DL = character code</td></tr>
+<tr><td>09h</td><td>Print a string</td><td>DX = address of text ending in <code>'$'</code></td></tr>
+<tr><td>4Ch</td><td>Exit the program</td><td>AL = exit code</td></tr>
+</table>
+<p><code>INT 20h</code> also exits.</p>
+
+<h2>Keyboard shortcuts</h2>
+<table>
+<tr><th>Key</th><th>Action</th></tr>
+<tr><td>F10</td><td>Step one instruction</td></tr>
+<tr><td>Shift + F10</td><td>Step back (undo)</td></tr>
+<tr><td>F5</td><td>Run / Pause</td></tr>
+<tr><td>F8</td><td>Reset the CPU</td></tr>
+<tr><td>Ctrl + Enter</td><td>Assemble &amp; Load</td></tr>
+</table>
+
+<h2>How this differs from a real 8086</h2>
+<ul>
+  <li>Instructions are not converted into real machine-code bytes. Every instruction counts as <b>2 bytes</b> so IP moves in steps of 2 (real x86 instructions are 1–6 bytes long).</li>
+  <li>Segment registers (CS, DS, SS, ES) are not simulated — memory is one flat 64 KB space.</li>
+  <li>Only the 4 most useful flags are shown (the real FLAGS register also has PF, AF, DF, IF, TF).</li>
+  <li>The instruction set is a teaching subset; everything else on this page behaves like the real CPU.</li>
+</ul>
+</section>
+</main>
+<footer>x86-16 Register Lab · single-file web app · runs entirely in your browser — host it on any static web server.</footer>
+<script>
+/* ===== x86-16 Register Lab : CPU core + assembler (no DOM) ===== */
+const CODE_BASE = 0x0100, DATA_BASE = 0x1000, ISZ = 2, SP_INIT = 0xFFFE;
+const R16 = ['AX','BX','CX','DX','SI','DI','BP','SP'];
+const R8 = {AL:['AX',0],AH:['AX',8],BL:['BX',0],BH:['BX',8],CL:['CX',0],CH:['CX',8],DL:['DX',0],DH:['DX',8]};
+const JCC = {
+  JE:[f=>f.ZF,'equal / result was zero (ZF=1)'], JZ:[f=>f.ZF,'zero (ZF=1)'],
+  JNE:[f=>!f.ZF,'not equal (ZF=0)'], JNZ:[f=>!f.ZF,'not zero (ZF=0)'],
+  JG:[f=>!f.ZF&&f.SF===f.OF,'greater, signed (ZF=0 and SF=OF)'], JNLE:[f=>!f.ZF&&f.SF===f.OF,'greater, signed'],
+  JGE:[f=>f.SF===f.OF,'greater or equal, signed (SF=OF)'], JNL:[f=>f.SF===f.OF,'greater or equal, signed'],
+  JL:[f=>f.SF!==f.OF,'less, signed (SF≠OF)'], JNGE:[f=>f.SF!==f.OF,'less, signed'],
+  JLE:[f=>f.ZF||f.SF!==f.OF,'less or equal, signed (ZF=1 or SF≠OF)'], JNG:[f=>f.ZF||f.SF!==f.OF,'less or equal, signed'],
+  JA:[f=>!f.CF&&!f.ZF,'above, unsigned (CF=0 and ZF=0)'], JNBE:[f=>!f.CF&&!f.ZF,'above, unsigned'],
+  JAE:[f=>!f.CF,'above or equal, unsigned (CF=0)'], JNB:[f=>!f.CF,'not below, unsigned (CF=0)'], JNC:[f=>!f.CF,'no carry (CF=0)'],
+  JB:[f=>f.CF,'below, unsigned (CF=1)'], JNAE:[f=>f.CF,'below, unsigned (CF=1)'], JC:[f=>f.CF,'carry (CF=1)'],
+  JBE:[f=>f.CF||f.ZF,'below or equal, unsigned (CF=1 or ZF=1)'], JNA:[f=>f.CF||f.ZF,'not above, unsigned'],
+  JS:[f=>f.SF,'sign / negative (SF=1)'], JNS:[f=>!f.SF,'not negative (SF=0)'],
+  JO:[f=>f.OF,'overflow (OF=1)'], JNO:[f=>!f.OF,'no overflow (OF=0)']
+};
+const SPEC = {MOV:2,ADD:2,SUB:2,CMP:2,AND:2,OR:2,XOR:2,TEST:2,XCHG:2,LEA:2,SHL:2,SAL:2,SHR:2,
+  INC:1,DEC:1,NEG:1,NOT:1,MUL:1,DIV:1,PUSH:1,POP:1,JMP:1,LOOP:1,CALL:1,INT:1,
+  RET:0,NOP:0,HLT:0,CLC:0,STC:0,CMC:0};
+for (const k in JCC) SPEC[k] = 1;
+const BRANCH = new Set(['JMP','LOOP','CALL',...Object.keys(JCC)]);
+
+const M = s => s === 8 ? 0xFF : 0xFFFF;
+const SB = s => s === 8 ? 0x80 : 0x8000;
+const H = (v, s = 16) => '0x' + (v & M(s)).toString(16).toUpperCase().padStart(s / 4, '0');
+const SGN = (v, s) => (v & SB(s)) ? (v & M(s)) - (M(s) + 1) : (v & M(s));
+const BIN = (v, s) => (v & M(s)).toString(2).padStart(s, '0');
+const FV = (v, s) => { v &= M(s); const sg = SGN(v, s); return `${v} (${H(v, s)}${sg !== v ? ', signed ' + sg : ''})`; };
+
+function asmErr(line, msg) { const e = new Error(msg); e.line = line; return e; }
+
+function stripComment(s) {
+  let q = null;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (q) { if (c === q) q = null; }
+    else if (c === "'" || c === '"') q = c;
+    else if (c === ';') return s.slice(0, i);
+  }
+  return s;
+}
+function splitArgs(s) {
+  const out = []; let q = null, depth = 0, cur = '';
+  for (const c of s) {
+    if (q) { cur += c; if (c === q) q = null; continue; }
+    if (c === "'" || c === '"') { q = c; cur += c; continue; }
+    if (c === '[' || c === '(') depth++;
+    if (c === ']' || c === ')') depth--;
+    if (c === ',' && depth === 0) { out.push(cur.trim()); cur = ''; continue; }
+    cur += c;
+  }
+  if (cur.trim() !== '') out.push(cur.trim());
+  return out;
+}
+function parseNum(s) {
+  s = s.trim(); let m;
+  if ((m = s.match(/^'(.)'$/)) || (m = s.match(/^"(.)"$/))) return m[1].charCodeAt(0);
+  let neg = false;
+  if (s[0] === '-') { neg = true; s = s.slice(1).trim(); } else if (s[0] === '+') s = s.slice(1).trim();
+  let v = null;
+  if (/^0x[0-9a-f]+$/i.test(s)) v = parseInt(s.slice(2), 16);
+  else if (/^0b[01]+$/i.test(s)) v = parseInt(s.slice(2), 2);
+  else if (/^[0-9][0-9a-f]*h$/i.test(s)) v = parseInt(s.slice(0, -1), 16);
+  else if (/^[01]+b$/i.test(s)) v = parseInt(s.slice(0, -1), 2);
+  else if (/^\d+$/.test(s)) v = parseInt(s, 10);
+  if (v === null) return null;
+  return neg ? -v : v;
+}
+const fits = (v, s) => v >= -(1 << (s - 1)) && v <= M(s);
+
+function parseData(kind, s, ln) {
+  const bytes = []; const items = splitArgs(s);
+  if (!items.length) throw asmErr(ln, `${kind} needs at least one value, e.g. ${kind} 5`);
+  const sz = kind === 'DB' ? 8 : 16;
+  for (let it of items) {
+    let rep = 1; const m = it.match(/^(\S+)\s+DUP\s*\((.*)\)$/i);
+    if (m) {
+      rep = parseNum(m[1]);
+      if (rep === null || rep < 1 || rep > 4096) throw asmErr(ln, `Bad DUP count "${m[1]}"`);
+      it = m[2].trim();
+    }
+    let vals;
+    const sm = it.match(/^(['"])(.*)\1$/);
+    if (sm && (kind === 'DB' || sm[2].length !== 1)) {
+      if (kind === 'DW') throw asmErr(ln, 'Strings must use DB (bytes), not DW');
+      vals = [...sm[2]].map(c => c.charCodeAt(0) & 0xFF);
+    } else if (it === '?') vals = [0];
+    else {
+      const n = parseNum(it);
+      if (n === null) throw asmErr(ln, `"${it}" is not a number`);
+      if (!fits(n, sz)) throw asmErr(ln, `${n} doesn't fit in ${sz} bits`);
+      vals = [n & M(sz)];
+    }
+    for (let k = 0; k < rep; k++) for (const v of vals) {
+      if (sz === 8) bytes.push(v); else bytes.push(v & 0xFF, (v >> 8) & 0xFF);
+    }
+  }
+  return bytes;
+}
+
+function parseOperand(src, A, ln) {
+  let t = src.trim(), size = null;
+  const pm = t.match(/^(BYTE|WORD)(\s+PTR)?\s+(.*)$/i);
+  if (pm) { size = pm[1].toUpperCase() === 'BYTE' ? 8 : 16; t = pm[3].trim(); }
+  const U = t.toUpperCase();
+  if (U === 'IP') throw asmErr(ln, 'IP can\'t be used directly — change it with JMP, CALL, RET or a conditional jump.');
+  if (R16.includes(U)) return { type: 'reg', name: U, size: 16 };
+  if (R8[U]) return { type: 'reg', name: U, size: 8 };
+  if (t.startsWith('[') && t.endsWith(']')) {
+    const inner = t.slice(1, -1).replace(/\s+/g, '');
+    if (!inner) throw asmErr(ln, 'Empty brackets []');
+    const parts = inner.match(/[+-]?[^+-]+/g) || [];
+    const regs = []; let disp = 0, lsz = null;
+    for (let p of parts) {
+      let sign = 1;
+      if (p[0] === '-') { sign = -1; p = p.slice(1); } else if (p[0] === '+') p = p.slice(1);
+      const P = p.toUpperCase();
+      if (['BX','SI','DI','BP'].includes(P)) {
+        if (sign < 0) throw asmErr(ln, `Can't subtract a register inside [ ]`);
+        regs.push(P);
+      } else if (R16.includes(P) || R8[P]) {
+        throw asmErr(ln, `Only BX, SI, DI and BP can be used inside [ ] on a 16-bit x86 (you used ${P})`);
+      } else if (A.labels[p.toLowerCase()] !== undefined) {
+        disp += sign * A.labels[p.toLowerCase()];
+        if (lsz === null) lsz = A.lsize[p.toLowerCase()];
+      } else {
+        const n = parseNum(p);
+        if (n === null) throw asmErr(ln, `Unknown label or number "${p}" inside [ ]`);
+        disp += sign * n;
+      }
+    }
+    return { type: 'mem', regs, disp, size: size || lsz || null, explicit: !!size, text: t };
+  }
+  if (size) throw asmErr(ln, 'BYTE/WORD only makes sense in front of a memory operand like [BX]');
+  const om = t.match(/^OFFSET\s+(.+)$/i); if (om) t = om[1].trim();
+  if (A.labels[t.toLowerCase()] !== undefined) return { type: 'imm', value: A.labels[t.toLowerCase()] & 0xFFFF, label: t };
+  const n = parseNum(t);
+  if (n !== null) return { type: 'imm', value: n };
+  throw asmErr(ln, `Don't understand operand "${src.trim()}" (unknown label, register or number)`);
+}
+
+function checkInstr(ins) {
+  const { op, args, line: ln } = ins; const n = SPEC[op];
+  if (args.length !== n) throw asmErr(ln, `${op} needs ${n} operand${n === 1 ? '' : 's'} but got ${args.length}`);
+  const [a, b] = args;
+  if (n === 0) return 0;
+  if (BRANCH.has(op)) {
+    if (a.type !== 'imm' || !a.label) throw asmErr(ln, `${op} needs a label to jump to, e.g. ${op} myLabel`);
+    return 16;
+  }
+  if (op === 'INT') { if (a.type !== 'imm') throw asmErr(ln, 'INT needs a number, e.g. INT 21h'); return 8; }
+  if (n === 2) {
+    if (op === 'LEA') {
+      if (a.type !== 'reg' || a.size !== 16 || b.type !== 'mem') throw asmErr(ln, 'LEA needs a 16-bit register and a memory operand, e.g. LEA SI, [BX+2]');
+      return 16;
+    }
+    if (a.type === 'imm') throw asmErr(ln, `The first operand (destination) can't be a number — where would the result go?`);
+    if (a.type === 'mem' && b.type === 'mem') throw asmErr(ln, 'x86 can\'t use two memory operands in one instruction. Load one into a register first.');
+    if (op === 'SHL' || op === 'SAL' || op === 'SHR') {
+      if (!(b.type === 'imm' || (b.type === 'reg' && b.name === 'CL'))) throw asmErr(ln, `${op} count must be a number or CL`);
+      const s = a.size; if (!s) throw asmErr(ln, 'Can\'t tell byte or word — add BYTE or WORD, e.g. SHL BYTE [BX], 1');
+      return s;
+    }
+    if (op === 'XCHG' && b.type === 'imm') throw asmErr(ln, 'XCHG swaps two places; it can\'t swap with a number');
+    if (a.type === 'reg' && b.type === 'reg' && a.size !== b.size)
+      throw asmErr(ln, `Size mismatch: ${a.name} is ${a.size}-bit but ${b.name} is ${b.size}-bit`);
+    if (a.type === 'mem' && a.explicit && b.type === 'reg' && a.size !== b.size)
+      throw asmErr(ln, `Size mismatch: memory marked ${a.size === 8 ? 'BYTE' : 'WORD'} but ${b.name} is ${b.size}-bit`);
+    if (b.type === 'mem' && b.explicit && a.type === 'reg' && a.size !== b.size)
+      throw asmErr(ln, `Size mismatch: ${a.name} is ${a.size}-bit but memory marked ${b.size === 8 ? 'BYTE' : 'WORD'}`);
+    const s = a.type === 'reg' ? a.size : b.type === 'reg' ? b.size : a.size;
+    if (!s) throw asmErr(ln, 'Can\'t tell if this is a byte or a word — add BYTE or WORD, e.g. MOV BYTE [BX], 5');
+    if (b.type === 'imm' && !fits(b.value, s)) throw asmErr(ln, `${b.value} doesn't fit in ${s} bits (range ${-(1 << (s - 1))} to ${M(s)})`);
+    return s;
+  }
+  // one operand
+  if (op === 'PUSH') {
+    if (a.type === 'reg' && a.size === 8) throw asmErr(ln, 'PUSH only works with 16-bit values (use AX, not AL)');
+    if (a.type === 'imm' && !fits(a.value, 16)) throw asmErr(ln, 'Value too big for 16 bits');
+    return 16;
+  }
+  if (a.type === 'imm') throw asmErr(ln, `${op} needs a register or memory operand, not a number`);
+  if (op === 'POP') { if (a.size === 8) throw asmErr(ln, 'POP only works with 16-bit destinations'); return 16; }
+  if (!a.size) throw asmErr(ln, `Can't tell byte or word — add BYTE or WORD, e.g. ${op} WORD [BX]`);
+  return a.size;
+}
+
+function assemble(src) {
+  const lines = src.split(/\r?\n/);
+  const A = { labels: {}, lsize: {}, instrs: [], data: [], lineAddr: {}, lines };
+  let dp = DATA_BASE;
+  const define = (name, addr, size, ln) => {
+    const k = name.toLowerCase(), U = name.toUpperCase();
+    if (R16.includes(U) || R8[U] || SPEC[U]) throw asmErr(ln, `"${name}" is a reserved word and can't be a label`);
+    if (k in A.labels) throw asmErr(ln, `Label "${name}" is defined twice`);
+    A.labels[k] = addr; A.lsize[k] = size;
+  };
+  lines.forEach((raw, ln) => {
+    let line = stripComment(raw).trim(); if (!line) return;
+    let label = null, m = line.match(/^([A-Za-z_.][\w.]*)\s*:(.*)$/);
+    if (m) { label = m[1]; line = m[2].trim(); }
+    const dm = !label && line.match(/^([A-Za-z_.][\w.]*)\s+(DB|DW)(\s+(.*))?$/i);
+    if (dm && !/^(DB|DW)$/i.test(dm[1])) { label = dm[1]; line = dm[2] + ' ' + (dm[4] || ''); }
+    const dd = line.match(/^(DB|DW)(\s+(.*))?$/i);
+    if (dd) {
+      const kind = dd[1].toUpperCase();
+      if (label) define(label, dp, kind === 'DB' ? 8 : 16, ln);
+      const bytes = parseData(kind, (dd[3] || '').trim(), ln);
+      A.data.push({ addr: dp, bytes, line: ln, label });
+      A.lineAddr[ln] = { addr: dp, kind: 'data' };
+      dp += bytes.length;
+      if (dp > 0xE000) throw asmErr(ln, 'Too much data');
+      return;
+    }
+    if (label) define(label, CODE_BASE + A.instrs.length * ISZ, null, ln);
+    if (!line) return;
+    const im = line.match(/^([A-Za-z]+)\b\s*(.*)$/);
+    if (!im) throw asmErr(ln, `Can't understand "${line}"`);
+    const op = im[1].toUpperCase();
+    if (!(op in SPEC)) throw asmErr(ln, `Unknown instruction "${im[1]}" — see the Guide tab for the supported list`);
+    if (CODE_BASE + A.instrs.length * ISZ >= DATA_BASE) throw asmErr(ln, 'Program too long');
+    A.lineAddr[ln] = { addr: CODE_BASE + A.instrs.length * ISZ, kind: 'code', idx: A.instrs.length };
+    A.instrs.push({ op, raw: im[2], line: ln, text: line });
+  });
+  for (const ins of A.instrs) {
+    ins.args = splitArgs(ins.raw).map(a => parseOperand(a, A, ins.line));
+    ins.size = checkInstr(ins);
+  }
+  if (!A.instrs.length) throw asmErr(0, 'No instructions found');
+  return A;
+}
+
+/* ---------------- CPU ---------------- */
+let cpu = null, prog = null, history = [], cur = null, output = '';
+let lastExplain = '', lastIns = null;
+const changedRegs = new Set(), changedFlags = new Set(), changedMem = new Set();
+
+function resetCPU() {
+  cpu = { r: { AX:0,BX:0,CX:0,DX:0,SI:0,DI:0,BP:0,SP:SP_INIT,IP:CODE_BASE }, f: { CF:0,ZF:0,SF:0,OF:0 },
+          mem: new Uint8Array(65536), halted: false, haltMsg: '' };
+  if (prog) for (const d of prog.data) cpu.mem.set(d.bytes, d.addr);
+  history = []; output = ''; lastExplain = ''; lastIns = null;
+  changedRegs.clear(); changedFlags.clear(); changedMem.clear();
+}
+function getReg(n) { if (R8[n]) { const [b, sh] = R8[n]; return (cpu.r[b] >> sh) & 0xFF; } return cpu.r[n]; }
+function setReg(n, v) {
+  if (R8[n]) { const [b, sh] = R8[n]; cpu.r[b] = (cpu.r[b] & (sh ? 0x00FF : 0xFF00)) | ((v & 0xFF) << sh); }
+  else cpu.r[n] = v & 0xFFFF;
+}
+function ea(o) { let a = o.disp; for (const r of o.regs) a += cpu.r[r]; return a & 0xFFFF; }
+function wb(a, v) { a &= 0xFFFF; cur.mem.push([a, cpu.mem[a]]); cpu.mem[a] = v & 0xFF; changedMem.add(a); }
+const rw = a => cpu.mem[a & 0xFFFF] | (cpu.mem[(a + 1) & 0xFFFF] << 8);
+function ww(a, v) { wb(a, v & 0xFF); wb(a + 1, (v >> 8) & 0xFF); }
+function rd(o, s) { if (o.type === 'imm') return o.value & M(s); if (o.type === 'reg') return getReg(o.name); const a = ea(o); return s === 8 ? cpu.mem[a] : rw(a); }
+function wr(o, s, v) { if (o.type === 'reg') setReg(o.name, v); else { const a = ea(o); if (s === 8) wb(a, v); else ww(a, v); } }
+function szf(r, s) { cpu.f.ZF = +((r & M(s)) === 0); cpu.f.SF = +!!(r & SB(s)); }
+function addF(a, b, s) { const r = a + b, res = r & M(s); cpu.f.CF = +(r > M(s)); cpu.f.OF = +!!((a ^ res) & (b ^ res) & SB(s)); szf(res, s); return res; }
+function subF(a, b, s) { const res = (a - b) & M(s); cpu.f.CF = +(a < b); cpu.f.OF = +!!((a ^ b) & (a ^ res) & SB(s)); szf(res, s); return res; }
+function logF(r, s) { cpu.f.CF = 0; cpu.f.OF = 0; r &= M(s); szf(r, s); return r; }
+function push16(v) { cpu.r.SP = (cpu.r.SP - 2) & 0xFFFF; ww(cpu.r.SP, v); }
+function pop16() { const v = rw(cpu.r.SP); cpu.r.SP = (cpu.r.SP + 2) & 0xFFFF; return v; }
+function putc(c) { if (c === 13) return; output += String.fromCharCode(c); }
+function nm(o) {
+  if (o.type === 'reg') return o.name;
+  if (o.type === 'imm') return o.label ? `the address of "${o.label}"` : 'the number';
+  return `memory ${o.text} (address ${H(ea(o))})`;
+}
+const sizeWord = s => s === 8 ? '8-bit byte' : '16-bit word';
+
+function exec(ins) {
+  const op = ins.op, [a, b] = ins.args, s = ins.size;
+  const A = a && nm(a), B = b && nm(b);
+  switch (op) {
+    case 'MOV': { const v = rd(b, s); wr(a, s, v);
+      return `Copied ${B === 'the number' ? 'the number ' + FV(v, s) : B + ' = ' + FV(v, s)} into ${A}. MOV never changes the flags.`; }
+    case 'ADD': { const x = rd(a, s), y = rd(b, s), r = addF(x, y, s); wr(a, s, r);
+      return `${A}: ${x} + ${y} = ${r}.` + (cpu.f.CF ? ` The true answer (${x + y}) is too big for ${s} bits, so it wrapped around and the Carry Flag was set.` : '') + (cpu.f.OF ? ' Signed overflow (OF=1): two numbers with the same sign gave a result with the opposite sign.' : ''); }
+    case 'SUB': { const x = rd(a, s), y = rd(b, s), r = subF(x, y, s); wr(a, s, r);
+      return `${A}: ${x} − ${y} = ${r}.` + (cpu.f.CF ? ` ${y} is bigger than ${x}, so a "borrow" was needed (CF=1) and the result wrapped around (as signed it is ${SGN(r, s)}).` : '') + (cpu.f.ZF ? ' The result is zero, so ZF=1.' : ''); }
+    case 'CMP': { const x = rd(a, s), y = rd(b, s); subF(x, y, s);
+      return `Compared ${A} (${x}) with ${b.type === 'imm' ? y : B + ' (' + y + ')'} by secretly computing ${x} − ${y}. The answer is thrown away — only the flags change. ` +
+        (x === y ? 'They are EQUAL, so ZF=1.' : `They are NOT equal (ZF=0); ${x < y ? 'the first is smaller (CF=1)' : 'the first is bigger (CF=0)'} when treated as unsigned.`); }
+    case 'AND': case 'OR': case 'XOR': case 'TEST': {
+      const x = rd(a, s), y = rd(b, s);
+      const r = logF(op === 'OR' ? x | y : op === 'XOR' ? x ^ y : x & y, s);
+      if (op !== 'TEST') wr(a, s, r);
+      const opn = op === 'TEST' ? 'AND' : op;
+      const why = { AND: '1 only where BOTH bits are 1', OR: '1 where EITHER bit is 1', XOR: '1 where the bits are DIFFERENT' }[opn];
+      return `${op === 'TEST' ? 'Tested (AND without saving)' : A + ' ='} ${BIN(x, s)} ${opn} ${BIN(y, s)} = ${BIN(r, s)} (${why}).` +
+        (op === 'XOR' && a.type === 'reg' && b.type === 'reg' && a.name === b.name ? ' XOR-ing a register with itself is the classic trick to set it to 0.' : '') + ` Flags: ZF=${cpu.f.ZF}, CF and OF cleared.`; }
+    case 'XCHG': { const x = rd(a, s), y = rd(b, s); wr(a, s, y); wr(b, s, x); return `Swapped: ${A} is now ${FV(y, s)} and ${B} is now ${FV(x, s)}.`; }
+    case 'LEA': { const v = ea(b); setReg(a.name, v); return `Loaded the ADDRESS ${b.text} = ${H(v)} into ${a.name} (no memory was read — LEA just does the address math).`; }
+    case 'INC': case 'DEC': { const x = rd(a, s), cf = cpu.f.CF; const r = op === 'INC' ? addF(x, 1, s) : subF(x, 1, s); cpu.f.CF = cf; wr(a, s, r);
+      return `${A}: ${x} ${op === 'INC' ? '+' : '−'} 1 = ${r}.` + ((op === 'INC' && r === 0) || (op === 'DEC' && x === 0) ? ` It wrapped around (${sizeWord(s)})! Note: ${op} never changes the Carry Flag.` : '') + (cpu.f.ZF ? ' Result is zero → ZF=1.' : ''); }
+    case 'NEG': { const x = rd(a, s), r = subF(0, x, s); cpu.f.CF = +(x !== 0); wr(a, s, r);
+      return `${A} = 0 − ${SGN(x, s)} = ${SGN(r, s)} (stored as ${H(r, s)} — this is "two's complement").`; }
+    case 'NOT': { const x = rd(a, s), r = (~x) & M(s); wr(a, s, r); return `Flipped every bit of ${A}: ${BIN(x, s)} → ${BIN(r, s)}. NOT does not change flags.`; }
+    case 'SHL': case 'SAL': case 'SHR': {
+      const x = rd(a, s), cnt = (b.type === 'reg' ? getReg('CL') : b.value) & 31;
+      if (!cnt) return `Shift count is 0 — nothing happened.`;
+      let r = x;
+      for (let i = 0; i < cnt; i++) {
+        if (op === 'SHR') { cpu.f.CF = r & 1; r >>= 1; } else { cpu.f.CF = +!!(r & SB(s)); r = (r << 1) & M(s); }
+      }
+      if (cnt === 1) cpu.f.OF = op === 'SHR' ? +!!(x & SB(s)) : (+!!(r & SB(s))) ^ cpu.f.CF;
+      szf(r, s); wr(a, s, r);
+      return `Shifted the bits of ${A} ${op === 'SHR' ? 'right' : 'left'} by ${cnt}: ${BIN(x, s)} → ${BIN(r, s)}. ` +
+        `That's like ${op === 'SHR' ? 'dividing' : 'multiplying'} by ${2 ** cnt} (${x} → ${r}). The last bit pushed out landed in CF (${cpu.f.CF}).`; }
+    case 'MUL': { const x = rd(a, s);
+      if (s === 8) { const al = getReg('AL'), r = al * x; setReg('AX', r); cpu.f.CF = cpu.f.OF = +(r > 0xFF);
+        return `8-bit MUL: AX = AL × ${A} = ${al} × ${x} = ${r}. The result always goes into AX (AH:AL).`; }
+      const ax = cpu.r.AX, r = ax * x; cpu.r.DX = Math.floor(r / 65536) & 0xFFFF; cpu.r.AX = r & 0xFFFF; cpu.f.CF = cpu.f.OF = +(cpu.r.DX !== 0);
+      return `16-bit MUL: DX:AX = AX × ${A} = ${ax} × ${x} = ${r}. High half → DX (${cpu.r.DX}), low half → AX (${cpu.r.AX}).`; }
+    case 'DIV': { const x = rd(a, s);
+      if (x === 0) throw new Error('Divide by zero! A real CPU would trigger interrupt 0 and crash the program.');
+      if (s === 8) { const d = cpu.r.AX, q = Math.floor(d / x); if (q > 0xFF) throw new Error(`Divide overflow: ${d} ÷ ${x} = ${q}, which doesn't fit in AL.`);
+        setReg('AL', q); setReg('AH', d % x); return `8-bit DIV: AX ÷ ${A} = ${d} ÷ ${x} → quotient ${q} in AL, remainder ${d % x} in AH.`; }
+      const d = cpu.r.DX * 65536 + cpu.r.AX, q = Math.floor(d / x);
+      if (q > 0xFFFF) throw new Error(`Divide overflow: ${d} ÷ ${x} = ${q}, which doesn't fit in AX. (Did you forget to clear DX before DIV?)`);
+      cpu.r.AX = q; cpu.r.DX = d % x;
+      return `16-bit DIV: DX:AX ÷ ${A} = ${d} ÷ ${x} → quotient ${q} in AX, remainder ${d % x} in DX.`; }
+    case 'PUSH': { const v = rd(a, 16); push16(v); return `Pushed ${FV(v, 16)} onto the stack. SP moved DOWN by 2 to ${H(cpu.r.SP)} and the value was written there.`; }
+    case 'POP': { const at = cpu.r.SP, v = pop16(); wr(a, 16, v); return `Popped ${FV(v, 16)} from the top of the stack (address ${H(at)}) into ${A}. SP moved UP by 2 to ${H(cpu.r.SP)}.`; }
+    case 'JMP': cpu.r.IP = a.value; return `Unconditional jump: IP set to ${H(a.value)} ("${a.label}"). Execution continues there.`;
+    case 'LOOP': { cpu.r.CX = (cpu.r.CX - 1) & 0xFFFF;
+      if (cpu.r.CX !== 0) { cpu.r.IP = a.value; return `LOOP: CX − 1 = ${cpu.r.CX}. CX is not zero, so jump back to "${a.label}".`; }
+      return `LOOP: CX − 1 = 0. CX reached zero, so the loop is finished — continue to the next line.`; }
+    case 'CALL': { const ret = cpu.r.IP; push16(ret); cpu.r.IP = a.value;
+      return `CALL: pushed the return address ${H(ret)} onto the stack (so we can come back), then jumped to "${a.label}" (${H(a.value)}).`; }
+    case 'RET': { const v = pop16(); cpu.r.IP = v; return `RET: popped the return address ${H(v)} off the stack into IP — back to just after the CALL.`; }
+    case 'INT': {
+      if (a.value === 0x20) { cpu.halted = true; cpu.haltMsg = 'Program exited (INT 20h).'; return 'INT 20h: exit the program.'; }
+      if (a.value !== 0x21) throw new Error(`INT ${H(a.value, 8)} is not supported here — only INT 21h (functions 02h, 09h, 4Ch) and INT 20h.`);
+      const ah = getReg('AH');
+      if (ah === 0x02) { const c = getReg('DL'); putc(c); return `INT 21h, AH=02h: print the character in DL (${c} = '${c === 10 ? '\\n' : c === 13 ? '\\r' : String.fromCharCode(c)}'). Check the Output panel.`; }
+      if (ah === 0x09) { let p = cpu.r.DX, str = '', n = 0;
+        while (cpu.mem[p] !== 0x24) { if (++n > 4096) throw new Error('No "$" found to end the string (AH=09h strings must end with $).'); putc(cpu.mem[p]); str += String.fromCharCode(cpu.mem[p]); p = (p + 1) & 0xFFFF; }
+        return `INT 21h, AH=09h: printed the text stored in memory from DX=${H(cpu.r.DX)} up to the "$" (${n} characters). Check the Output panel.`; }
+      if (ah === 0x4C) { cpu.halted = true; cpu.haltMsg = `Program exited with code ${getReg('AL')} (INT 21h, AH=4Ch).`; return 'INT 21h, AH=4Ch: exit the program.'; }
+      throw new Error(`INT 21h function AH=${H(ah, 8)} isn't supported. Use 02h (print char), 09h (print string) or 4Ch (exit).`); }
+    case 'HLT': cpu.halted = true; cpu.haltMsg = 'HLT — the CPU has halted. Press Reset to run again.'; return 'HLT: stop the processor.';
+    case 'NOP': return 'NOP: "no operation" — does nothing except move IP to the next instruction.';
+    case 'CLC': cpu.f.CF = 0; return 'Cleared the Carry Flag (CF=0).';
+    case 'STC': cpu.f.CF = 1; return 'Set the Carry Flag (CF=1).';
+    case 'CMC': cpu.f.CF ^= 1; return `Flipped the Carry Flag (CF=${cpu.f.CF}).`;
+    default:
+      if (JCC[op]) { const [cond, d] = JCC[op], t = !!cond(cpu.f);
+        if (t) cpu.r.IP = a.value;
+        return `${op} jumps if ${d}. Condition is ${t ? 'TRUE → jumped to "' + a.label + '"' : 'FALSE → did not jump; continue with the next line'}.`; }
+      throw new Error('Not implemented: ' + op);
+  }
+}
+
+function currentIdx() { const off = cpu.r.IP - CODE_BASE; return (off >= 0 && off % ISZ === 0 && off / ISZ < prog.instrs.length) ? off / ISZ : -1; }
+
+function step() {
+  if (!prog || cpu.halted) return false;
+  changedRegs.clear(); changedFlags.clear(); changedMem.clear();
+  const idx = currentIdx();
+  if (idx < 0) {
+    cpu.halted = true;
+    cpu.haltMsg = (cpu.r.IP - CODE_BASE) / ISZ >= prog.instrs.length ? 'Reached the end of the program (tip: finish programs with HLT).' : `IP (${H(cpu.r.IP)}) doesn't point at an instruction — did RET pop a wrong value?`;
+    return false;
+  }
+  const ins = prog.instrs[idx];
+  cur = { r: { ...cpu.r }, f: { ...cpu.f }, mem: [], out: output.length, halted: false, haltMsg: '', explain: lastExplain, lastIns };
+  const prevIP = cpu.r.IP;
+  cpu.r.IP = (cpu.r.IP + ISZ) & 0xFFFF;
+  try { lastExplain = exec(ins); }
+  catch (e) {
+    for (const [ad, v] of cur.mem.slice().reverse()) cpu.mem[ad] = v;
+    cpu.r = { ...cur.r }; cpu.f = { ...cur.f }; output = output.slice(0, cur.out); cur.mem = [];
+    history.push(cur);
+    cpu.halted = true; cpu.haltMsg = `Error on line ${ins.line + 1}: ${e.message}`; lastIns = ins; lastExplain = e.message;
+    changedMem.clear();
+    return false;
+  }
+  lastIns = ins;
+  history.push(cur); if (history.length > 5000) history.shift();
+  for (const k in cpu.r) if (cpu.r[k] !== cur.r[k]) changedRegs.add(k);
+  if (cpu.r.IP === ((prevIP + ISZ) & 0xFFFF)) changedRegs.delete('IP');
+  for (const k in cpu.f) if (cpu.f[k] !== cur.f[k]) changedFlags.add(k);
+  return !cpu.halted;
+}
+function stepBack() {
+  const h = history.pop(); if (!h) return false;
+  for (const [a, v] of h.mem.slice().reverse()) cpu.mem[a] = v;
+  cpu.r = { ...h.r }; cpu.f = { ...h.f }; output = output.slice(0, h.out);
+  cpu.halted = h.halted; cpu.haltMsg = h.haltMsg; lastExplain = h.explain; lastIns = h.lastIns;
+  changedRegs.clear(); changedFlags.clear(); changedMem.clear();
+  return true;
+}
+/* ===== Lesson programs ===== */
+const SAMPLES = [
+{ title: '1 · First steps: MOV, ADD, SUB', expect: { AX: 7, BX: 2, CX: 8 },
+  lesson: `<p>A <b>register</b> is a tiny, super-fast storage box inside the CPU. This 16-bit CPU has a handful of them, each holding a number from 0 to 65,535.</p>
+<p><b>MOV</b> copies a value into a register. <b>ADD</b>, <b>SUB</b>, <b>INC</b> (+1) and <b>DEC</b> (−1) do math <i>in place</i> — the answer replaces the first operand.</p>
+<p class="try">▶ Press <b>Step</b> (F10) and watch the yellow highlight show which register changed.</p>`,
+  code: `; Lesson 1: Putting numbers into registers
+; Everything after a semicolon is a comment.
+
+    MOV AX, 5        ; AX = 5
+    MOV BX, 3        ; BX = 3
+    ADD AX, BX       ; AX = AX + BX  -> 8
+    SUB AX, 1        ; AX = AX - 1   -> 7
+    MOV CX, AX       ; copy AX into CX (AX keeps its value)
+    INC CX           ; CX = CX + 1   -> 8
+    DEC BX           ; BX = BX - 1   -> 2
+    HLT              ; stop the CPU
+` },
+{ title: '2 · High and low bytes (AH / AL)', expect: { AX: 0x0100, BX: 44, DX: 0 },
+  lesson: `<p>AX, BX, CX and DX are 16 bits wide, but each can also be used as two separate 8-bit halves: <b>AH</b> (high byte) and <b>AL</b> (low byte). Changing AL changes AX, and vice-versa.</p>
+<p>An 8-bit register can only hold 0–255. Go past that and the value <b>wraps around</b>, and the <b>Carry Flag (CF)</b> lights up.</p>
+<p class="try">▶ Watch the binary bits: the left 8 are AH, the right 8 are AL.</p>`,
+  code: `; Lesson 2: Each 16-bit register = two 8-bit halves
+; AX = AH (high byte) : AL (low byte)
+
+    MOV AX, 0x1234   ; AH = 0x12, AL = 0x34
+    MOV AL, 0xFF     ; only the low byte changes  -> AX = 0x12FF
+    MOV AH, 0        ; only the high byte changes -> AX = 0x00FF
+    INC AX           ; 0x00FF + 1 = 0x0100 (the carry moves into AH!)
+
+    MOV BL, 200
+    ADD BL, 100      ; 300 doesn't fit in 8 bits -> BL = 44, CF = 1
+
+    MOV DX, 0xFFFF   ; all 16 bits on (65535)
+    INC DX           ; wraps around to 0 -> ZF = 1
+    HLT
+` },
+{ title: '3 · Loops: counting with CX', expect: { AX: 15, CX: 0 },
+  lesson: `<p><b>CX</b> is the "counter" register. The <b>LOOP</b> instruction subtracts 1 from CX and jumps back to a label as long as CX isn't zero.</p>
+<p>A <b>label</b> (a name followed by a colon) marks a spot in the program you can jump to. Watch <b>IP</b> (Instruction Pointer) jump backwards each time the loop repeats.</p>
+<p class="try">▶ This program adds 5+4+3+2+1. Predict AX before you finish!</p>`,
+  code: `; Lesson 3: Add 5+4+3+2+1 with a loop
+
+    MOV AX, 0        ; running total
+    MOV CX, 5        ; repeat 5 times
+again:
+    ADD AX, CX       ; total += CX   (5, then 4, 3, 2, 1)
+    LOOP again       ; CX = CX - 1; if CX != 0, jump to 'again'
+    HLT              ; AX = 15
+` },
+{ title: '4 · Memory and arrays', expect: { AX: 105 }, expectMem: { total: 105 },
+  lesson: `<p>Registers are few, so data usually lives in <b>memory</b> — a long row of numbered bytes. <b>DB</b> reserves bytes, <b>DW</b> reserves 16-bit words.</p>
+<p><b>Square brackets mean "the memory at this address".</b> <code>MOV SI, numbers</code> loads the <i>address</i>; <code>MOV BL, [SI]</code> loads the <i>value stored there</i>.</p>
+<p class="try">▶ Watch SI walk through the array (blue outline in the Memory panel). At the end, look at how <b>total</b> is stored: low byte first ("little-endian").</p>`,
+  code: `; Lesson 4: Add up an array stored in memory
+numbers DB 10, 20, 30, 40, 5    ; five bytes
+count   DW 5                    ; one 16-bit word
+total   DW 0                    ; result goes here
+
+    MOV SI, numbers      ; SI = ADDRESS of the array
+    MOV CX, [count]      ; CX = VALUE stored at 'count' (5)
+    MOV AX, 0
+sum:
+    MOV BL, [SI]         ; read one byte from memory at address SI
+    MOV BH, 0            ; clear the top half so BX = BL
+    ADD AX, BX
+    INC SI               ; point to the next byte
+    LOOP sum
+    MOV [total], AX      ; write the answer back into memory
+    HLT
+` },
+{ title: '5 · The stack: PUSH and POP', expect: { AX: 0x2222, BX: 0x1111, SP: 0xFFFE },
+  lesson: `<p>The <b>stack</b> is a region of memory used like a stack of plates: the last thing you put on is the first thing you take off (LIFO).</p>
+<p><b>SP</b> (Stack Pointer) holds the address of the top item. The stack grows <b>downward</b>: PUSH subtracts 2 from SP, then writes; POP reads, then adds 2.</p>
+<p class="try">▶ Watch the Stack panel and SP. This program swaps AX and BX using the stack.</p>`,
+  code: `; Lesson 5: The stack (Last In, First Out)
+
+    MOV AX, 1111h
+    MOV BX, 2222h
+    PUSH AX          ; SP = SP - 2, store 1111h
+    PUSH BX          ; SP = SP - 2, store 2222h (now on top)
+    POP AX           ; take the TOP item -> AX = 2222h
+    POP BX           ; take the next     -> BX = 1111h
+    HLT              ; AX and BX were swapped!
+` },
+{ title: '6 · Compare and branch (flags)', expect: { AX: 99 },
+  lesson: `<p><b>CMP</b> subtracts two values but throws away the answer — it only updates the <b>flags</b>. A conditional jump (<b>JE</b>, <b>JNE</b>, <b>JG</b>, <b>JL</b>, …) then reads those flags to decide whether to jump.</p>
+<p>This is how <code>if</code> statements work at the hardware level.</p>
+<p class="try">▶ Find the biggest of three numbers. Try changing the values in <code>values</code> and re-running.</p>`,
+  code: `; Lesson 6: Find the largest of three numbers
+values DW 42, 17, 99
+
+    MOV AX, [values]      ; AX = 1st value
+    MOV BX, [values+2]    ; words are 2 bytes apart
+    CMP AX, BX            ; compare (AX - BX), sets flags only
+    JGE keep1             ; if AX >= BX, skip the next line
+    MOV AX, BX            ; otherwise BX is bigger
+keep1:
+    MOV BX, [values+4]    ; 3rd value
+    CMP AX, BX
+    JGE done
+    MOV AX, BX
+done:
+    HLT                   ; AX = largest = 99
+` },
+{ title: '7 · Hello, World! (INT 21h)', expect: {}, expectOut: 'Hello, World!\nABCDE',
+  lesson: `<p>Programs talk to the operating system with <b>interrupts</b>. In MS-DOS, <code>INT 21h</code> is the "please do something" call; the value in <b>AH</b> picks the service.</p>
+<p>AH=09h prints a <code>$</code>-terminated string at address DX. AH=02h prints the single character in DL. AH=4Ch exits.</p>
+<p class="try">▶ Watch the Output panel. Notice that letters are just numbers: INC DL turns 'A' (65) into 'B' (66).</p>`,
+  code: `; Lesson 7: Printing text with DOS services
+msg DB 'Hello, World!', 13, 10, '$'   ; 13,10 = new line; '$' = end
+
+    MOV AH, 09h       ; service 09h = print string
+    MOV DX, msg       ; DX = address of the text
+    INT 21h           ; ask "DOS" to do it
+
+    MOV AH, 02h       ; service 02h = print one character (in DL)
+    MOV DL, 'A'       ; 'A' is just the number 65
+    MOV CX, 5
+print:
+    INT 21h
+    INC DL            ; next letter
+    LOOP print
+
+    MOV AH, 4Ch       ; service 4Ch = exit program
+    INT 21h
+` },
+{ title: '8 · Subroutines: CALL and RET', expect: { AX: 42, DX: 42 },
+  lesson: `<p>A <b>subroutine</b> (function) is a reusable piece of code. <b>CALL</b> pushes the return address on the stack and jumps; <b>RET</b> pops that address back into IP.</p>
+<p class="try">▶ Step through the CALL and watch the return address appear on the stack, then disappear at RET.</p>`,
+  code: `; Lesson 8: A subroutine that multiplies by repeated addition
+
+    MOV AX, 6
+    MOV BX, 7
+    CALL multiply      ; push return address, jump to 'multiply'
+    MOV DX, AX         ; we come back here: DX = 42
+    HLT
+
+; ---- multiply: AX = AX * BX ----
+multiply:
+    MOV CX, BX         ; repeat BX times
+    MOV BX, AX         ; BX = number to add
+    MOV AX, 0
+mloop:
+    ADD AX, BX
+    LOOP mloop
+    RET                ; pop return address into IP
+` },
+{ title: '9 · Bits: AND, OR, XOR, shifts, MUL, DIV', expect: { AX: 0, BX: 4, DX: 1 },
+  lesson: `<p>Every value is really a row of bits. <b>AND</b> keeps bits, <b>OR</b> turns bits on, <b>XOR</b> flips bits. <b>SHL</b>/<b>SHR</b> slide bits left/right — a fast way to multiply/divide by 2.</p>
+<p><b>MUL</b> and <b>DIV</b> always use AX (and DX for the big half / remainder).</p>
+<p class="try">▶ Watch the binary row under AL and BX as each instruction runs.</p>`,
+  code: `; Lesson 9: Working with bits
+
+    MOV AL, 10110110b   ; 'b' suffix = binary
+    AND AL, 00001111b   ; keep only the low 4 bits -> 00000110b
+    OR  AL, 10000000b   ; turn on the top bit       -> 10000110b
+    XOR AL, 11111111b   ; flip every bit            -> 01111001b
+
+    MOV BX, 1
+    SHL BX, 1           ; shift left 1 = x2  -> 2
+    SHL BX, 3           ; shift left 3 = x8  -> 16
+    SHR BX, 2           ; shift right 2 = /4 -> 4
+
+    MOV AX, 12
+    MOV CX, 10
+    MUL CX              ; DX:AX = AX * CX = 120
+    MOV CX, 7
+    DIV CX              ; AX = 120 / 7 = 17, DX = remainder 1
+    XOR AX, AX          ; classic trick: AX = 0 (and ZF = 1)
+    HLT
+` },
+{ title: '10 · Signed numbers and overflow', expect: { AX: 0x80, BX: 0xFF, CX: 5 },
+  lesson: `<p>The same bits can mean two things. As <b>unsigned</b>, 8 bits hold 0–255. As <b>signed</b> ("two's complement"), they hold −128 to 127 — the top bit means negative.</p>
+<p><b>CF</b> reports unsigned trouble (carry/borrow). <b>OF</b> reports signed trouble (overflow). <b>SF</b> is just the top bit.</p>
+<p class="try">▶ Watch 127 + 1 become −128 and 0 − 1 become 255.</p>`,
+  code: `; Lesson 10: Signed vs unsigned
+
+    MOV AL, 127      ; largest positive signed 8-bit number
+    ADD AL, 1        ; 128 unsigned = -128 signed! OF=1, SF=1
+    MOV BL, 0
+    SUB BL, 1        ; 0 - 1 = 255 unsigned (-1 signed), CF=1 (borrow)
+    MOV CX, -5       ; stored as FFFBh (two's complement)
+    NEG CX           ; CX = 5
+    HLT
+` },
+{ title: '✎ Playground (blank)', expect: null,
+  lesson: `<p>Write your own program! Open the <b>Guide</b> tab for the full list of instructions and syntax. Press <b>Assemble &amp; Load</b> (Ctrl+Enter) when ready.</p>`,
+  code: `; Your program here
+data1 DB 1, 2, 3
+
+    MOV AX, 0
+    HLT
+` }
+];
+/* ===== UI ===== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ROLE = {
+  AX: 'Accumulator — main math register; MUL/DIV use it', BX: 'Base — often holds a memory address',
+  CX: 'Counter — used by LOOP and shift counts', DX: 'Data — high half of MUL, remainder of DIV',
+  SI: 'Source Index — points at data being read', DI: 'Destination Index — points at data being written',
+  BP: 'Base Pointer — reaches data on the stack', SP: 'Stack Pointer — address of the top of the stack',
+  IP: 'Instruction Pointer — address of the NEXT instruction'
+};
+const FLAGINFO = {
+  CF: ['Carry', 'Set when an unsigned result is too big to fit, or a subtraction needed a borrow.'],
+  ZF: ['Zero', 'Set when the result is exactly zero (also: CMP found two equal values).'],
+  SF: ['Sign', 'Copy of the top bit of the result: 1 means negative when read as signed.'],
+  OF: ['Overflow', 'Set when a SIGNED result is too big or too small to fit (e.g. 127+1 in 8 bits).']
+};
+const FLAGBIT = { CF: 0, ZF: 6, SF: 7, OF: 11 };
+const SPEEDS = [1, 2, 5, 15, 60, 'max'];
+let editing = false, running = false, runTimer = null, memBase = DATA_BASE, sampleIdx = 0, errLine = -1;
+const breakpoints = new Set();
+
+function showMsg(text, kind) { const m = $('#asmMsg'); m.className = 'msg show ' + kind; m.innerHTML = text; }
+function hideMsg() { $('#asmMsg').className = 'msg'; }
+
+function setEditing(on) {
+  editing = on;
+  $('#src').style.display = on ? '' : 'none';
+  $('#listing').style.display = on ? 'none' : '';
+  $('#bEdit').disabled = on;
+  $('#mode').textContent = on ? 'editing — press Assemble & Load when ready' : 'loaded ✓ (read-only while running)';
+  ['#bStep', '#bBack', '#bRun', '#bReset'].forEach(b => $(b).disabled = on);
+  if (on) pause();
+}
+
+function assembleAndLoad() {
+  pause(); errLine = -1;
+  try {
+    prog = assemble($('#src').value);
+  } catch (e) {
+    prog = null; errLine = e.line ?? -1;
+    showMsg(`<b>Line ${errLine + 1}:</b> ${esc(e.message)}`, 'err');
+    setEditing(true);
+    highlightErr();
+    return false;
+  }
+  for (const b of [...breakpoints]) if (!prog.lineAddr[b] || prog.lineAddr[b].kind !== 'code') breakpoints.delete(b);
+  resetCPU(); memBase = DATA_BASE;
+  const nd = prog.data.reduce((n, d) => n + d.bytes.length, 0);
+  showMsg(`Assembled ${prog.instrs.length} instructions${nd ? ` and ${nd} bytes of data` : ''}. Press <b>Step</b> to begin.`, 'ok');
+  setEditing(false); render();
+  return true;
+}
+function highlightErr() {
+  if (errLine < 0) return;
+  const ta = $('#src'), lines = ta.value.split('\n');
+  let pos = 0; for (let i = 0; i < errLine && i < lines.length; i++) pos += lines[i].length + 1;
+  ta.focus(); ta.setSelectionRange(pos, pos + (lines[errLine] || '').length);
+}
+
+function loadSample(i) {
+  sampleIdx = i; const s = SAMPLES[i];
+  $('#lesson').innerHTML = s.lesson; $('#src').value = s.code;
+  breakpoints.clear(); hideMsg(); assembleAndLoad();
+}
+
+/* ---------- run control ---------- */
+function curLine() { if (!prog || !cpu) return -1; const i = currentIdx(); return i < 0 ? -1 : prog.instrs[i].line; }
+function doStep() { if (editing || !prog) return; if (cpu.halted) { render(); return; } step(); render(); }
+function doBack() { if (editing || !prog) return; pause(); stepBack(); render(); }
+function doReset() { if (!prog) return; pause(); resetCPU(); render(); }
+function pause() { running = false; clearTimeout(runTimer); $('#bRun').innerHTML = '⏵ Run <kbd>F5</kbd>'; }
+function run() {
+  if (running) { pause(); render(); return; }
+  if (editing || !prog || cpu.halted) return;
+  running = true; $('#bRun').innerHTML = '⏸ Pause <kbd>F5</kbd>';
+  let first = true;
+  const tick = () => {
+    if (!running) return;
+    const sp = SPEEDS[$('#speed').value], batch = sp === 'max' ? 1000 : 1;
+    for (let i = 0; i < batch; i++) {
+      if (!first && breakpoints.has(curLine())) { pause(); render(); showMsg(`Paused at breakpoint on line ${curLine() + 1}.`, 'info'); return; }
+      first = false;
+      if (!step()) { pause(); break; }
+    }
+    render();
+    if (running) runTimer = setTimeout(tick, sp === 'max' ? 0 : 1000 / sp);
+  };
+  tick();
+}
+
+/* ---------- rendering ---------- */
+function bitsHTML(v, n) {
+  let h = '';
+  for (let i = n - 1; i >= 0; i--) h += `<i class="${(v >> i) & 1 ? 'on' : ''}${i === 7 && n === 16 ? ' gap' : ''}" title="bit ${i}">${(v >> i) & 1}</i>`;
+  return `<div class="bits">${h}</div>`;
+}
+function regCard(n) {
+  const v = cpu.r[n], ch = changedRegs.has(n), prev = history.length ? history[history.length - 1].r[n] : v;
+  const sg = SGN(v, 16);
+  let halves = '';
+  if (/^[ABCD]X$/.test(n)) {
+    const L = n[0];
+    const hc = ch && (prev >> 8) !== (v >> 8), lc = ch && (prev & 255) !== (v & 255);
+    halves = `<div class="halves"><span class="half ${hc ? 'chg' : ''}"><b>${L}H</b>${H(v >> 8, 8)} <span>${v >> 8}</span></span><span class="half ${lc ? 'chg' : ''}"><b>${L}L</b>${H(v & 255, 8)} <span>${v & 255}</span></span></div>`;
+  }
+  const extra = n === 'IP' && prog ? (() => { const i = currentIdx(); return i >= 0 ? ` → line ${prog.instrs[i].line + 1}` : ''; })() : '';
+  return `<div class="reg ${ch ? 'chg' : ''} ${n === 'IP' ? 'wide' : ''}" title="${esc(ROLE[n])}">
+    <div class="top"><span class="rn">${n}</span><span class="rh">${H(v)}</span><span class="rd">${v}${sg !== v ? ' / ' + sg : ''}${extra}</span></div>
+    <div class="role">${ROLE[n]}</div>${halves}${bitsHTML(v, 16)}</div>`;
+}
+function renderRegs() {
+  $('#regs').innerHTML = ['AX', 'BX', 'CX', 'DX', 'SI', 'DI', 'BP', 'SP', 'IP'].map(regCard).join('');
+  $('#flags').innerHTML = Object.keys(FLAGINFO).map(f => `<div class="flag ${cpu.f[f] ? 'on' : ''} ${changedFlags.has(f) ? 'chg' : ''}" title="${esc(FLAGINFO[f][1])}">
+    <div class="fn">${f} = ${cpu.f[f]}</div><div class="fl">${FLAGINFO[f][0]}</div></div>`).join('');
+  let fv = 2; for (const f in FLAGBIT) if (cpu.f[f]) fv |= 1 << FLAGBIT[f];
+  $('#flagsval').textContent = `FLAGS register = ${H(fv)}  (CF is bit 0, ZF bit 6, SF bit 7, OF bit 11)`;
+}
+function renderListing() {
+  const cl = curLine(), pl = lastIns ? lastIns.line : -1;
+  const html = prog.lines.map((raw, i) => {
+    const la = prog.lineAddr[i]; const isCode = la && la.kind === 'code';
+    const ci = raw.indexOf(';') >= 0 ? (() => { let q = null; for (let k = 0; k < raw.length; k++) { const c = raw[k]; if (q) { if (c === q) q = null; } else if (c === "'" || c === '"') q = c; else if (c === ';') return k; } return -1; })() : -1;
+    let codePart = ci >= 0 ? raw.slice(0, ci) : raw, cm = ci >= 0 ? raw.slice(ci) : '';
+    codePart = esc(codePart).replace(/^(\s*)([A-Za-z_.][\w.]*:)/, '$1<span class="lb">$2</span>').replace(/^([A-Za-z_.][\w.]*)(\s+(DB|DW)\b)/i, '<span class="lb">$1</span>$2');
+    const cls = ['ln', isCode ? 'code' : '', i === cl && !cpu.halted ? 'cur' : '', i === pl && i !== cl ? 'prev' : '', breakpoints.has(i) ? 'brk' : ''].join(' ');
+    return `<div class="${cls}" data-l="${i}"><span class="bp">●</span><span class="no">${i + 1}</span><span class="ad">${la ? H(la.addr).slice(2) : ''}</span><span class="tx">${codePart}<span class="cm">${esc(cm)}</span> </span></div>`;
+  }).join('');
+  const L = $('#listing'); L.innerHTML = html;
+  const c = L.querySelector('.cur');
+  if (c) { const top = c.offsetTop - L.offsetTop; if (top < L.scrollTop + 20 || top > L.scrollTop + L.clientHeight - 40) L.scrollTop = top - L.clientHeight / 3; }
+}
+function renderExplain() {
+  let h = '';
+  if (lastIns) h += `<div class="ins">Line ${lastIns.line + 1}: ${esc(lastIns.text)}</div><div>${esc(lastExplain)}</div>`;
+  else h += `<div style="color:var(--muted)">Nothing has run yet. Press <b>Step</b> to execute the highlighted instruction.</div>`;
+  const i = currentIdx();
+  if (cpu.halted) h += `<div class="halt ${/^Error/.test(cpu.haltMsg) ? 'e' : ''}">⏹ ${esc(cpu.haltMsg)} ${/^Error/.test(cpu.haltMsg) ? 'Press ◀ Back to undo, or fix the code.' : 'Press ↺ Reset to run again.'}</div>`;
+  else if (i >= 0) h += `<div class="nx">Next (IP = ${H(cpu.r.IP)}): <code>${esc(prog.instrs[i].text)}</code></div>`;
+  $('#explain').innerHTML = h;
+  $('#stCount').textContent = history.length;
+  $('#stLine').textContent = cpu.halted ? 'halted' : (i >= 0 ? prog.instrs[i].line + 1 : 'end');
+}
+function renderMem() {
+  memBase &= 0xFFF0;
+  const labelAt = {}; for (const k in prog.labels) if (prog.lsize[k]) labelAt[prog.labels[k]] = k;
+  const si = cpu.r.SI, di = cpu.r.DI, bx = cpu.r.BX;
+  let h = '<tr><th></th>' + [...Array(16)].map((_, i) => `<th>${i.toString(16).toUpperCase()}</th>`).join('') + '<th style="text-align:left;padding-left:8px">ASCII</th></tr>';
+  for (let r = 0; r < 16; r++) {
+    const base = (memBase + r * 16) & 0xFFFF; let asc = '';
+    h += `<tr><td class="addr">${H(base).slice(2)}</td>`;
+    for (let c = 0; c < 16; c++) {
+      const a = (base + c) & 0xFFFF, v = cpu.mem[a];
+      const cls = [v ? 'nz' : '', changedMem.has(a) ? 'chg' : '', a === si ? 'si' : a === di ? 'di' : a === bx ? 'bx' : '', labelAt[a] ? 'lbl' : ''].join(' ');
+      const tip = `address ${H(a)} = ${v}${labelAt[a] ? ' — label "' + labelAt[a] + '"' : ''}${v >= 32 && v < 127 ? " '" + String.fromCharCode(v) + "'" : ''}`;
+      h += `<td class="${cls}" title="${esc(tip)}">${v.toString(16).toUpperCase().padStart(2, '0')}</td>`;
+      asc += v >= 32 && v < 127 ? String.fromCharCode(v) : '·';
+    }
+    h += `<td class="asc">${esc(asc)}</td></tr>`;
+  }
+  $('#mem').innerHTML = h;
+  $('#mAddr').value = H(memBase);
+  $('#syms').innerHTML = Object.keys(prog.labels).filter(k => prog.lsize[k]).map(k => {
+    const a = prog.labels[k], s = prog.lsize[k], v = s === 8 ? cpu.mem[a] : rw(a);
+    return `<span class="sym" data-a="${a}" title="${s === 8 ? 'DB (bytes)' : 'DW (words)'} — click to view"><b>${esc(k)}</b> @${H(a)} = ${v}</span>`;
+  }).join('') || '<span class="empty">No data labels (use DB / DW to put data in memory).</span>';
+}
+function renderStack() {
+  const sp = cpu.r.SP; let h = '';
+  if (sp > SP_INIT) h = `<div class="empty" style="color:var(--err)">SP = ${H(sp)} is above the stack base — something was POPped that was never PUSHed!</div>`;
+  else if (sp === SP_INIT) h = `<div class="srow top"><span class="sa">${H(sp)}</span><span class="sv empty" style="padding:0">(empty — nothing pushed yet)</span><span class="sp">← SP</span></div>`;
+  else {
+    const n = Math.min((SP_INIT - sp) / 2, 14);
+    for (let i = 0; i < n; i++) {
+      const a = (sp + i * 2) & 0xFFFF, v = rw(a);
+      h += `<div class="srow ${i === 0 ? 'top' : ''} ${changedMem.has(a) ? 'chg' : ''}"><span class="sa">${H(a)}</span><span class="sv">${H(v)} &nbsp;<span style="color:var(--muted)">(${v})</span></span>${i === 0 ? '<span class="sp">← SP (top)</span>' : ''}</div>`;
+    }
+    if ((SP_INIT - sp) / 2 > n) h += `<div class="empty">… ${(SP_INIT - sp) / 2 - n} more below</div>`;
+    h += `<div class="srow"><span class="sa">${H(SP_INIT)}</span><span class="sv" style="color:var(--muted)">stack base (bottom)</span></div>`;
+  }
+  $('#stack').innerHTML = h;
+}
+function render() {
+  if (!prog || !cpu) return;
+  renderRegs(); renderListing(); renderExplain(); renderMem(); renderStack();
+  const o = $('#out'); o.textContent = output || ''; if (!output) o.innerHTML = '<span class="empty" style="padding:0">(nothing printed yet)</span>'; o.scrollTop = o.scrollHeight;
+  $('#bBack').disabled = editing || !history.length;
+  $('#bStep').disabled = editing || cpu.halted;
+  $('#bRun').disabled = editing || (cpu.halted && !running);
+}
+
+/* ---------- events ---------- */
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+  $('#emu').style.display = t.dataset.tab === 'emu' ? '' : 'none';
+  $('#guide').style.display = t.dataset.tab === 'guide' ? 'block' : 'none';
+});
+$('#sample').innerHTML = SAMPLES.map((s, i) => `<option value="${i}">${esc(s.title)}</option>`).join('');
+$('#sample').onchange = e => loadSample(+e.target.value);
+$('#bAsm').onclick = () => { hideMsg(); assembleAndLoad(); };
+$('#bEdit').onclick = () => { setEditing(true); hideMsg(); $('#src').focus(); };
+$('#bStep').onclick = doStep; $('#bBack').onclick = doBack; $('#bRun').onclick = run; $('#bReset').onclick = doReset;
+$('#speed').oninput = () => { const s = SPEEDS[$('#speed').value]; $('#speedLbl').textContent = s === 'max' ? 'max' : s + ' / sec'; };
+$('#speed').oninput();
+$('#listing').addEventListener('click', e => {
+  const row = e.target.closest('.ln'); if (!row || !e.target.classList.contains('bp')) return;
+  const l = +row.dataset.l; if (!row.classList.contains('code')) return;
+  breakpoints.has(l) ? breakpoints.delete(l) : breakpoints.add(l); renderListing();
+});
+$('#listing').addEventListener('dblclick', () => { setEditing(true); });
+$('#mPrev').onclick = () => { memBase = (memBase - 256) & 0xFFFF; renderMem(); };
+$('#mNext').onclick = () => { memBase = (memBase + 256) & 0xFFFF; renderMem(); };
+$('#mData').onclick = () => { memBase = DATA_BASE; renderMem(); };
+$('#mStack').onclick = () => { memBase = Math.min(cpu.r.SP & 0xFFF0, 0xFF00); renderMem(); };
+$('#mAddr').onkeydown = e => { if (e.key === 'Enter') { const n = parseNum(e.target.value); if (n !== null) { memBase = n & 0xFFFF; renderMem(); } } };
+$('#syms').addEventListener('click', e => { const s = e.target.closest('.sym'); if (s) { memBase = +s.dataset.a; renderMem(); } });
+$('#src').addEventListener('keydown', e => {
+  if (e.key === 'Tab') { e.preventDefault(); const t = e.target, p = t.selectionStart; t.value = t.value.slice(0, p) + '    ' + t.value.slice(t.selectionEnd); t.selectionStart = t.selectionEnd = p + 4; }
+});
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); hideMsg(); assembleAndLoad(); return; }
+  if (e.key === 'F10') { e.preventDefault(); e.shiftKey ? doBack() : doStep(); }
+  else if (e.key === 'F5') { e.preventDefault(); run(); }
+  else if (e.key === 'F8') { e.preventDefault(); doReset(); }
+});
+loadSample(0);
+</script>
+</body></html>
