@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nmap Lab &amp; Tutorial</title>
+<style>
+:root{--bg:#0b0f14;--panel:#111821;--panel2:#16202b;--line:#223042;--txt:#d6e2ee;--dim:#8193a6;--acc:#39d98a;--acc2:#4fb3ff;--warn:#ffcc4d;--bad:#ff5c6c;--pur:#c49bff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:Segoe UI,system-ui,-apple-system,sans-serif}
+header{height:54px;display:flex;align-items:center;gap:16px;padding:0 18px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#0f1822,#0b0f14)}
+header .logo{font-weight:700;font-size:18px;letter-spacing:.3px}
+header .logo span{color:var(--acc)}
+header .scope{font-size:12px;color:var(--dim);border:1px solid var(--line);padding:4px 10px;border-radius:20px}
+header .grow{flex:1}
+.pbar{width:200px;height:8px;background:#1d2835;border-radius:6px;overflow:hidden}
+.pbar>div{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));width:0;transition:width .4s}
+#ptext{font-size:12px;color:var(--dim);min-width:110px}
+button{background:#1a2532;color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px}
+button:hover{border-color:var(--acc2)}
+button.primary{background:#14402c;border-color:#1f6b47}
+main{display:flex;height:calc(100% - 54px)}
+aside{width:44%;min-width:380px;max-width:720px;display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel)}
+nav{display:flex;border-bottom:1px solid var(--line)}
+nav button{flex:1;border:0;border-radius:0;background:transparent;padding:12px 6px;color:var(--dim);border-bottom:2px solid transparent}
+nav button.active{color:var(--txt);border-bottom-color:var(--acc);background:var(--panel2)}
+#panel{flex:1;overflow:auto;padding:18px 22px 30px}
+#panel h2{margin:4px 0 10px;font-size:21px}
+#panel h3{margin:18px 0 8px;font-size:15px;color:var(--acc2)}
+#panel p,#panel li{line-height:1.55;font-size:14px}
+#panel code{background:#0b1118;border:1px solid var(--line);padding:1px 6px;border-radius:4px;font-family:Consolas,Menlo,monospace;font-size:12.5px;color:#b9f6d4}
+#panel code.try{cursor:pointer;display:inline-block;margin:2px 0}
+#panel code.try:hover{border-color:var(--acc);background:#0f1d16}
+#panel code.try::after{content:" ⏎";color:var(--dim)}
+#panel pre{background:#070b10;border:1px solid var(--line);border-radius:6px;padding:10px;font-size:12px;overflow:auto;color:#cfe}
+#panel table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0}
+#panel th,#panel td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+#panel th{background:var(--panel2);color:var(--acc2)}
+.callout{border-left:3px solid var(--warn);background:#1f1b0f;padding:8px 12px;border-radius:4px;font-size:13.5px;margin:10px 0}
+.callout.info{border-color:var(--acc2);background:#0f1a24}
+.lessonbar{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.lessonbar select{flex:1;background:#0b1118;color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:7px}
+.tasks{background:#0c141c;border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:16px}
+.tasks h4{margin:2px 0 8px;font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px}
+.task{display:flex;gap:10px;align-items:flex-start;font-size:14px;padding:5px 0}
+.task .box{width:18px;height:18px;border:2px solid var(--dim);border-radius:4px;flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.task.done .box{background:var(--acc);border-color:var(--acc);color:#04120a;font-weight:900}
+.task.done span.t{color:var(--dim);text-decoration:line-through}
+.navbtns{display:flex;justify-content:space-between;margin-top:16px}
+.chal{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0;background:#0c141c}
+.chal.solved{border-color:#1f6b47;background:#0d1a13}
+.chal .q{font-size:14px;margin-bottom:8px}
+.chal .row{display:flex;gap:8px}
+.chal input{flex:1;background:#070b10;color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:Consolas,monospace}
+.chal .pts{float:right;color:var(--warn);font-size:12px}
+.chal .hint{font-size:12.5px;color:var(--dim);margin-top:6px;display:none}
+#termwrap{flex:1;display:flex;flex-direction:column;background:#05080b;min-width:0}
+.termbar{height:34px;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--line);font-size:12px;color:var(--dim)}
+.dot{width:11px;height:11px;border-radius:50%}
+#term{flex:1;overflow:auto;padding:12px 14px;font-family:Consolas,"Cascadia Mono",Menlo,monospace;font-size:13.5px;line-height:1.42;cursor:text}
+.ln{white-space:pre-wrap;word-break:break-word;min-height:1.42em}
+.inl{display:flex;white-space:pre}
+#cmd{flex:1;background:transparent;border:0;outline:0;color:var(--txt);font:inherit;caret-color:var(--acc)}
+.pu{color:#ff6b6b;font-weight:700}.ph{color:var(--acc2);font-weight:700}
+.c-open{color:var(--acc);font-weight:700}.c-closed{color:var(--bad)}.c-filt{color:var(--warn)}.c-unf{color:var(--acc2)}
+.c-rep{color:var(--acc2);font-weight:700}.c-up{color:var(--acc)}.c-dim{color:#6f8295}.c-nse{color:var(--pur)}
+.c-vuln{color:#fff;background:#b3122a;font-weight:700;padding:0 3px;border-radius:3px}
+.c-warn{color:var(--warn)}.c-lab{color:#7cc7ff;font-style:italic}.c-err{color:var(--bad)}
+.spin{color:var(--dim)}
+#toast{position:fixed;bottom:22px;right:22px;background:#123524;border:1px solid #1f6b47;color:#bfffdc;padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;z-index:9}
+#toast.show{opacity:1;transform:none}
+.assets td{font-family:Consolas,monospace;font-size:12px}
+.tag{display:inline-block;background:#0f2a1c;border:1px solid #1f6b47;border-radius:4px;padding:0 5px;margin:1px;font-size:11.5px;color:#9ff0c6}
+.tag.u{background:#1c1a33;border-color:#4b3f8f;color:#cbbfff}
+@media (max-width:900px){main{flex-direction:column}aside{width:100%;max-width:none;min-width:0;height:48%}#termwrap{height:52%}.pbar{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">nmap<span>::</span>lab</div>
+  <div class="scope">Scope: 10.10.10.0/24 (LAN) · 10.10.20.0/24 (DMZ) · You: kali 10.10.10.5</div>
+  <div class="grow"></div>
+  <div id="ptext"></div>
+  <div class="pbar"><div id="pfill"></div></div>
+  <button id="resetBtn" title="Reset all progress">Reset</button>
+</header>
+<main>
+  <aside>
+    <nav>
+      <button data-tab="lessons" class="active">📘 Lessons</button>
+      <button data-tab="challenges">🏁 Challenges</button>
+      <button data-tab="assets">🗺️ Discovered</button>
+      <button data-tab="cheat">📋 Cheat Sheet</button>
+    </nav>
+    <div id="panel"></div>
+  </aside>
+  <section id="termwrap">
+    <div class="termbar"><span class="dot" style="background:#ff5f56"></span><span class="dot" style="background:#ffbd2e"></span><span class="dot" style="background:#27c93f"></span>&nbsp; root@kali: ~ &nbsp;—&nbsp; simulated terminal · type <b>help</b> · ↑/↓ history · Tab complete · Ctrl+C abort · Ctrl+L clear</div>
+    <div id="term"><div id="out"></div><div class="inl"><span id="prompt"></span><input id="cmd" autocomplete="off" spellcheck="false" autofocus></div></div>
+  </section>
+</main>
+<div id="toast"></div>
+<script>
+/* ===================== LAB NETWORK DATA ===================== */
+const S=(cats,...lines)=>({cats:cats.split(','),lines});
+const P=(p,proto,svc,ver,scripts,extra)=>Object.assign({p,proto,svc,ver,scripts:scripts||{}},extra||{});
+const DEF='default,safe,discovery';
+const HK=(a,b,c)=>S('default,safe','',`3072 ${a} (RSA)`,`256 ${b} (ECDSA)`,`256 ${c} (ED25519)`);
+
+const HOSTS_LIST=[
+{ip:'10.10.10.1',name:'gw.lab.local',mac:'00:08:A2:0C:11:01 (ADI Engineering)',ttl:64,hops:1,ping:true,win:false,
+ tcpDefault:'filtered',udpDefault:'open|filtered',
+ os:{type:'firewall',running:'FreeBSD 14.X',cpe:'cpe:/o:freebsd:freebsd:14',details:'pfSense 2.7 (FreeBSD 14.0)'},
+ svcInfo:'OS: FreeBSD; CPE: cpe:/o:freebsd:freebsd',
+ ports:[
+  P(53,'tcp','domain','Unbound 1.18.0'),
+  P(80,'tcp','http','nginx',{'http-title':S(DEF,'Did not follow redirect to https://gw.lab.local/'),'http-server-header':S(DEF,'nginx')}),
+  P(443,'tcp','ssl/http','nginx',{'http-title':S(DEF,'pfSense - Login'),'http-server-header':S(DEF,'nginx'),
+     'ssl-cert':S(DEF,'Subject: commonName=pfSense-6512a4c1e0b2a/organizationName=pfSense webConfigurator Self-Signed Certificate','Not valid before: 2026-01-15T14:02:11','Not valid after:  2027-02-17T14:02:11')}),
+  P(53,'udp','domain','Unbound 1.18.0'),
+  P(123,'udp','ntp','NTP v4 (secondary server)',{'ntp-info':S(DEF,'','receive time stamp: 2026-11-03T13:41:07')}),
+  P(161,'udp','snmp','SNMPv1 server; net-snmp SNMPv3 server (public)',{
+     'snmp-info':S(DEF,'','enterprise: net-snmp','engineIDFormat: unknown','engineIDData: 8c3a5e7f1b2d4a6b','snmpEngineBoots: 14','snmpEngineTime: 3d02h17m09s'),
+     'snmp-sysdescr':S(DEF,'pfSense gw.lab.local 2.7.2-RELEASE pfSense FreeBSD 14.0-CURRENT amd64'),
+     'snmp-brute':S('brute,intrusive','','public - Valid credentials')}),
+ ]},
+{ip:'10.10.10.5',name:'kali.lab.local',self:true,ttl:64,hops:0,ping:true,win:false,tcpDefault:'closed',udpDefault:'closed',
+ os:{type:'general purpose',running:'Linux 6.X',cpe:'cpe:/o:linux:linux_kernel:6',details:'Linux 6.1 - 6.8'},ports:[]},
+{ip:'10.10.10.10',name:'dc01.lab.local',mac:'00:15:5D:0A:0A:10 (Microsoft)',ttl:128,hops:1,ping:true,win:true,
+ tcpDefault:'filtered',udpDefault:'open|filtered',
+ os:{type:'general purpose',running:'Microsoft Windows 2019',cpe:'cpe:/o:microsoft:windows_server_2019',details:'Microsoft Windows Server 2019'},
+ svcInfo:'Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows',
+ ports:[
+  P(53,'tcp','domain','Simple DNS Plus'),
+  P(88,'tcp','kerberos-sec','Microsoft Windows Kerberos (server time: 2026-11-03 13:41:12Z)'),
+  P(135,'tcp','msrpc','Microsoft Windows RPC'),
+  P(139,'tcp','netbios-ssn','Microsoft Windows netbios-ssn'),
+  P(389,'tcp','ldap','Microsoft Windows Active Directory LDAP (Domain: lab.local0., Site: Default-First-Site-Name)'),
+  P(445,'tcp','microsoft-ds?',''),
+  P(464,'tcp','kpasswd5?',''),
+  P(593,'tcp','ncacn_http','Microsoft Windows RPC over HTTP 1.0'),
+  P(636,'tcp','tcpwrapped',''),
+  P(3268,'tcp','ldap','Microsoft Windows Active Directory LDAP (Domain: lab.local0., Site: Default-First-Site-Name)'),
+  P(3269,'tcp','tcpwrapped',''),
+  P(3389,'tcp','ms-wbt-server','Microsoft Terminal Services',{
+     'rdp-ntlm-info':S(DEF,'','Target_Name: LAB','NetBIOS_Domain_Name: LAB','NetBIOS_Computer_Name: DC01','DNS_Domain_Name: lab.local','DNS_Computer_Name: dc01.lab.local','DNS_Tree_Name: lab.local','Product_Version: 10.0.17763','System_Time: 2026-11-03T13:41:14+00:00'),
+     'ssl-cert':S(DEF,'Subject: commonName=dc01.lab.local','Not valid before: 2026-08-01T02:11:45','Not valid after:  2027-01-31T02:11:45')}),
+  P(5985,'tcp','http','Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)',{'http-title':S(DEF,'Not Found'),'http-server-header':S(DEF,'Microsoft-HTTPAPI/2.0')}),
+  P(53,'udp','domain','Simple DNS Plus'),
+  P(88,'udp','kerberos-sec','Microsoft Windows Kerberos (server time: 2026-11-03 13:41:20Z)'),
+  P(123,'udp','ntp','NTP v3'),
+  P(137,'udp','netbios-ns','Microsoft Windows netbios-ns (workgroup: LAB)'),
+  P(389,'udp','ldap','Microsoft Windows Active Directory LDAP (Domain: lab.local0., Site: Default-First-Site-Name)'),
+ ],
+ hostScripts:{
+  'smb2-security-mode':S(DEF,'','3:1:1: ','  Message signing enabled and required'),
+  'smb2-time':S(DEF,'','date: 2026-11-03T13:41:16','start_date: N/A'),
+  'nbstat':S('default,discovery,safe','NetBIOS name: DC01, NetBIOS user: <unknown>, NetBIOS MAC: 00:15:5d:0a:0a:10 (Microsoft)'),
+ }},
+{ip:'10.10.10.20',name:'web01.lab.local',mac:'00:50:56:A1:20:20 (VMware)',ttl:64,hops:1,ping:true,win:false,
+ tcpDefault:'closed',udpDefault:'closed',
+ os:{type:'general purpose',running:'Linux 5.X',cpe:'cpe:/o:linux:linux_kernel:5',details:'Linux 5.0 - 5.15'},
+ svcInfo:'OS: Linux; CPE: cpe:/o:linux:linux_kernel',
+ ports:[
+  P(22,'tcp','ssh','OpenSSH 8.9p1 Ubuntu 3ubuntu0.6 (Ubuntu Linux; protocol 2.0)',{'ssh-hostkey':HK('2b:7c:4e:91:0a:f3:5d:62:88:1e:c4:9b:d0:37:a5:6f','a1:9e:33:7b:c8:02:e4:5f:16:9d:aa:c2:71:0b:38:e4','5d:e0:12:9c:46:b7:f8:3a:20:c1:7e:94:6b:d5:08:af')}),
+  P(80,'tcp','http','Apache httpd 2.4.52 ((Ubuntu))',{
+     'http-title':S(DEF,'Acme Corp Intranet'),
+     'http-server-header':S(DEF,'Apache/2.4.52 (Ubuntu)'),
+     'http-robots.txt':S(DEF,'2 disallowed entries ','/admin/ /backup/'),
+     'http-enum':S('discovery,intrusive,vuln','','/admin/: Possible admin folder','/backup/: Backup folder w/ directory listing','/phpmyadmin/: phpMyAdmin','/robots.txt: Robots file'),
+     'http-headers':S('discovery,safe','','Date: Tue, 03 Nov 2026 13:41:10 GMT','Server: Apache/2.4.52 (Ubuntu)','Content-Type: text/html; charset=UTF-8','Connection: close','','(Request type: HEAD)')}),
+  P(443,'tcp','ssl/http','Apache httpd 2.4.52 ((Ubuntu))',{
+     'http-title':S(DEF,'Acme Corp Intranet'),'http-server-header':S(DEF,'Apache/2.4.52 (Ubuntu)'),
+     'ssl-cert':S(DEF,'Subject: commonName=web01.lab.local/organizationName=Acme Corp/countryName=US','Subject Alternative Name: DNS:web01.lab.local, DNS:intranet.lab.local','Not valid before: 2026-03-02T00:00:00','Not valid after:  2027-03-02T23:59:59'),
+     'tls-alpn':S(DEF,'','h2','http/1.1')}),
+  P(3306,'tcp','mysql','MySQL 8.0.36-0ubuntu0.22.04.1',{'mysql-info':S(DEF,'','Protocol: 10','Version: 8.0.36-0ubuntu0.22.04.1','Thread ID: 14','Capabilities flags: 65535','Status: Autocommit','Salt: 5\\x1Fg.?Ze\\x0C\\x14ar]Tp\\x16\\x1B)iJ','Auth Plugin Name: caching_sha2_password')}),
+ ]},
+{ip:'10.10.10.25',name:'ftp01.lab.local',mac:'00:50:56:A1:25:25 (VMware)',ttl:64,hops:1,ping:true,win:false,
+ tcpDefault:'closed',udpDefault:'closed',
+ os:{type:'general purpose',running:'Linux 4.X|5.X',cpe:'cpe:/o:linux:linux_kernel:4 cpe:/o:linux:linux_kernel:5',details:'Linux 4.15 - 5.8'},
+ svcInfo:'OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel',
+ ports:[
+  P(21,'tcp','ftp','vsftpd 2.3.4',{
+     'ftp-anon':S('default,auth,safe','Anonymous FTP login allowed (FTP code 230)','-rw-r--r--    1 0        0             118 Jan 12  2026 welcome.txt','drwxr-xr-x    2 0        0            4096 Jan 12  2026 pub'),
+     'ftp-syst':S(DEF,'','STAT: ','FTP server status:','     Connected to 10.10.10.5','     Logged in as ftp','     TYPE: ASCII','     No session bandwidth limit','     Session timeout in seconds is 300','     Control connection is plain text','     Data connections will be plain text','     vsFTPd 2.3.4 - secure, fast, stable','End of status'),
+     'ftp-vsftpd-backdoor':S('exploit,intrusive,malware,vuln','','VULNERABLE:','vsFTPd version 2.3.4 backdoor','  State: VULNERABLE (Exploitable)','  IDs:  CVE:CVE-2011-2523  BID:48539','    vsFTPd version 2.3.4 backdoor, this was reported on 2011-07-04.','  Disclosure date: 2011-07-03','  References:','    https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2011-2523','    https://www.securityfocus.com/bid/48539')}),
+  P(22,'tcp','ssh','OpenSSH 7.4p1 Debian 10+deb9u7 (protocol 2.0)',{'ssh-hostkey':HK('e7:31:0c:5a:9f:22:6b:d4:81:3e:7c:b0:59:fa:12:6d','0c:44:d1:8e:27:b3:9a:61:f5:08:cc:7d:32:e9:41:b6','91:5f:a7:2c:e3:08:6d:14:bb:70:c9:3e:52:af:16:d8')}),
+ ]},
+{ip:'10.10.10.30',name:'files01.lab.local',mac:'00:15:5D:0A:0A:30 (Microsoft)',ttl:128,hops:1,ping:true,win:true,
+ tcpDefault:'closed',udpDefault:'closed',
+ os:{type:'general purpose',running:'Microsoft Windows 7|2008|8.1',cpe:'cpe:/o:microsoft:windows_7::- cpe:/o:microsoft:windows_7::sp1 cpe:/o:microsoft:windows_server_2008::sp1',details:'Microsoft Windows 7 SP0 - SP1, Windows Server 2008 SP1, Windows Server 2008 R2, Windows 8, or Windows 8.1 Update 1'},
+ svcInfo:'Host: FILES01; OS: Windows; CPE: cpe:/o:microsoft:windows',
+ ports:[
+  P(135,'tcp','msrpc','Microsoft Windows RPC'),
+  P(139,'tcp','netbios-ssn','Microsoft Windows netbios-ssn'),
+  P(445,'tcp','microsoft-ds','Windows 7 Professional 7601 Service Pack 1 microsoft-ds (workgroup: LAB)'),
+  P(3389,'tcp','ms-wbt-server','Microsoft Terminal Service',{'ssl-cert':S(DEF,'Subject: commonName=FILES01','Not valid before: 2026-05-04T09:12:33','Not valid after:  2026-11-03T09:12:33')}),
+  P(49152,'tcp','msrpc','Microsoft Windows RPC'),
+  P(49153,'tcp','msrpc','Microsoft Windows RPC'),
+  P(49154,'tcp','msrpc','Microsoft Windows RPC'),
+  P(49155,'tcp','msrpc','Microsoft Windows RPC'),
+  P(137,'udp','netbios-ns','Microsoft Windows netbios-ns (workgroup: LAB)'),
+  P(138,'udp','netbios-dgm','',null,{state:'open|filtered'}),
+ ],
+ hostScripts:{
+  'smb-os-discovery':S(DEF,'','OS: Windows 7 Professional 7601 Service Pack 1 (Windows 7 Professional 6.1)','OS CPE: cpe:/o:microsoft:windows_7::sp1:professional','Computer name: FILES01','NetBIOS computer name: FILES01\\x00','Workgroup: LAB\\x00','System time: 2026-11-03T08:41:18-05:00'),
+  'smb-security-mode':S(DEF,'','account_used: guest','authentication_level: user','challenge_response: supported','message_signing: disabled (dangerous, but default)'),
+  'smb2-security-mode':S(DEF,'','2:1:0: ','  Message signing enabled but not required'),
+  'nbstat':S('default,discovery,safe','NetBIOS name: FILES01, NetBIOS user: <unknown>, NetBIOS MAC: 00:15:5d:0a:0a:30 (Microsoft)'),
+  'smb-vuln-ms17-010':S('vuln,safe','','VULNERABLE:','Remote Code Execution vulnerability in Microsoft SMBv1 servers (ms17-010)','  State: VULNERABLE','  IDs:  CVE:CVE-2017-0143','  Risk factor: HIGH','    A critical remote code execution vulnerability exists in Microsoft SMBv1','     servers (ms17-010).','          ','  Disclosure date: 2017-03-14','  References:','    https://technet.microsoft.com/en-us/library/security/ms17-010.aspx','    https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-0143'),
+ }},
+{ip:'10.10.10.40',name:'printer.lab.local',mac:'3C:D9:2B:40:40:40 (Hewlett Packard)',ttl:64,hops:1,ping:true,win:false,
+ tcpDefault:'closed',udpDefault:'closed',
+ os:{type:'printer',running:'HP embedded',cpe:'cpe:/h:hp:laserjet_pro_m404',details:'HP LaserJet Pro M404dn printer'},
+ svcInfo:'Device: printer',
+ ports:[
+  P(80,'tcp','http','HP LaserJet Pro M404dn printer http config',{'http-title':S(DEF,'HP LaserJet Pro M404dn')}),
+  P(443,'tcp','ssl/http','HP LaserJet Pro M404dn printer http config',{'http-title':S(DEF,'HP LaserJet Pro M404dn'),'ssl-cert':S(DEF,'Subject: commonName=HPA1B2C3/organizationName=HP','Not valid before: 2024-02-10T00:00:00','Not valid after:  2034-02-10T00:00:00')}),
+  P(515,'tcp','printer',''),
+  P(631,'tcp','ipp','HP LaserJet Pro M404dn printer ipp',{'http-title':S(DEF,'HP LaserJet Pro M404dn')}),
+  P(9100,'tcp','jetdirect?',''),
+  P(161,'udp','snmp','SNMPv1 server (public)',{
+     'snmp-sysdescr':S(DEF,'HP ETHERNET MULTI-ENVIRONMENT,ROM none,JETDIRECT,JD153,EEPROM JSI24090012,CIDATE 06/14/2024'),
+     'snmp-info':S(DEF,'','enterprise: Hewlett-Packard','engineIDFormat: mac','engineIDData: 3c:d9:2b:40:40:40','snmpEngineBoots: 52','snmpEngineTime: 11d04h33m51s'),
+     'snmp-brute':S('brute,intrusive','','public - Valid credentials','internal - Valid credentials')}),
+ ]},
+{ip:'10.10.10.60',name:'cam01.lab.local',mac:'B4:A3:82:60:60:60 (Hangzhou Hikvision Digital Technology)',ttl:64,hops:1,ping:true,win:false,
+ tcpDefault:'closed',udpDefault:'closed',
+ os:{type:'webcam',running:'Linux 3.X',cpe:'cpe:/o:linux:linux_kernel:3',details:'Linux 3.0 - 3.10 (embedded)'},
+ svcInfo:'Device: webcam; Host: cam01',
+ ports:[
+  P(23,'tcp','telnet','BusyBox telnetd',{'banner':S('discovery,safe','\\xFF\\xFD\\x01\\xFF\\xFD\\x1F\\xFF\\xFB\\x01\\xFF\\xFB\\x03cam01 login: ')}),
+  P(80,'tcp','http','Hikvision IP camera httpd',{'http-title':S(DEF,'Network Camera'),'http-server-header':S(DEF,'App-webs/')}),
+  P(554,'tcp','rtsp','Hikvision 7513 POE IP camera rtspd',{'rtsp-methods':S('default,safe','OPTIONS, DESCRIBE, PLAY, PAUSE, SETUP, TEARDOWN, SET_PARAMETER, GET_PARAMETER')}),
+ ]},
+{ip:'10.10.10.70',name:'dev01.lab.local',mac:'00:50:56:A1:70:70 (VMware)',ttl:64,hops:1,ping:true,win:false,
+ tcpDefault:'closed',udpDefault:'closed',
+ os:{type:'general purpose',running:'Linux 5.X|6.X',cpe:'cpe:/o:linux:linux_kernel:5 cpe:/o:linux:linux_kernel:6',details:'Linux 5.0 - 6.2'},
+ svcInfo:'OS: Linux; CPE: cpe:/o:linux:linux_kernel',
+ ports:[
+  P(22,'tcp','ssh','OpenSSH 9.6p1 Ubuntu 3ubuntu13.5 (Ubuntu Linux; protocol 2.0)',{'ssh-hostkey':S('default,safe','','256 7d:21:9a:e0:4b:c3:58:16:f2:0e:b9:63:aa:d7:41:2c (ECDSA)','256 c2:08:5e:f9:37:a1:6d:40:bb:e4:1c:92:75:0f:d3:68 (ED25519)')}),
+  P(5432,'tcp','postgresql','PostgreSQL DB 9.6.0 or later'),
+  P(6379,'tcp','redis','Redis key-value store 7.0.15',{'redis-info':S('discovery,safe','','Version: 7.0.15','Operating System: Linux 6.8.0-45-generic x86_64','Architecture: 64 bits','Process ID: 1123','Used CPU (sys): 41.22','Used CPU (user): 63.10','Connected clients: 1','Connected slaves: 0','Used memory: 1.02M','Role: master')}),
+  P(8080,'tcp','http','Jetty 10.0.18',{'http-title':S(DEF,'Dashboard [Jenkins]'),'http-server-header':S(DEF,'Jetty(10.0.18)'),'http-robots.txt':S(DEF,'1 disallowed entry ','/')}),
+  P(9200,'tcp','http','Elasticsearch REST API 7.17.9 (name: dev01; cluster: dev-cluster; Lucene 8.11.1)',{'http-title':S(DEF,"Site doesn't have a title (application/json; charset=UTF-8).")}),
+ ]},
+{ip:'10.10.20.50',name:'vault.lab.local',ttl:63,hops:2,ping:false,win:false,
+ tcpDefault:'filtered',udpDefault:'open|filtered',
+ os:null,osGuess:['Linux 5.0 - 5.14 (95%)','Linux 4.15 - 5.8 (93%)','Linux 5.4 (92%)','Linux 2.6.32 - 3.13 (89%)','Linux 3.10 - 4.11 (88%)'],
+ svcInfo:'OS: Linux; CPE: cpe:/o:linux:linux_kernel',
+ ports:[
+  P(2222,'tcp','ssh','OpenSSH 9.2p1 Debian 2+deb12u3 (protocol 2.0)',{'ssh-hostkey':S('default,safe','','256 4e:aa:91:0d:c6:23:7f:58:b2:e1:9c:44:0a:36:fd:72 (ECDSA)','256 13:bd:68:f0:2a:c5:97:e4:5b:0c:81:3d:7a:e6:29:44 (ED25519)')}),
+  P(8443,'tcp','ssl/http','nginx 1.22.1',{'http-title':S(DEF,'Secure Vault Portal'),'http-server-header':S(DEF,'nginx/1.22.1'),'ssl-cert':S(DEF,'Subject: commonName=vault.lab.local/organizationName=Acme Corp','Not valid before: 2026-06-01T00:00:00','Not valid after:  2027-06-01T23:59:59')}),
+ ]},
+{ip:'10.10.20.80',name:'www.lab.local',ttl:63,hops:2,ping:true,win:false,
+ tcpDefault:'filtered',udpDefault:'open|filtered',
+ os:{type:'general purpose',running:'Linux 5.X',cpe:'cpe:/o:linux:linux_kernel:5',details:'Linux 5.0 - 5.14'},
+ ports:[
+  P(80,'tcp','http','nginx 1.24.0',{'http-title':S(DEF,'Did not follow redirect to https://www.lab.local/'),'http-server-header':S(DEF,'nginx/1.24.0')}),
+  P(443,'tcp','ssl/http','nginx 1.24.0',{'http-title':S(DEF,'Acme Corp - Home'),'http-server-header':S(DEF,'nginx/1.24.0'),'ssl-cert':S(DEF,'Subject: commonName=www.lab.local/organizationName=Acme Corp','Not valid before: 2026-04-10T00:00:00','Not valid after:  2027-04-10T23:59:59')}),
+ ]},
+];
+
+/* nmap-services style names (subset) */
+const SVC={7:'echo',9:'discard',19:'chargen',20:'ftp-data',21:'ftp',22:'ssh',23:'telnet',25:'smtp',37:'time',53:'domain',67:'dhcps',68:'dhcpc',69:'tftp',79:'finger',80:'http',81:'hosts2-ns',88:'kerberos-sec',106:'pop3pw',110:'pop3',111:'rpcbind',113:'ident',119:'nntp',123:'ntp',135:'msrpc',137:'netbios-ns',138:'netbios-dgm',139:'netbios-ssn',143:'imap',161:'snmp',162:'snmptrap',179:'bgp',199:'smux',389:'ldap',427:'svrloc',443:'https',444:'snpp',445:'microsoft-ds',464:'kpasswd5',465:'smtps',500:'isakmp',513:'login',514:'shell',515:'printer',520:'route',543:'klogin',544:'kshell',548:'afp',554:'rtsp',587:'submission',593:'http-rpc-epmap',631:'ipp',636:'ldapssl',646:'ldp',873:'rsync',990:'ftps',993:'imaps',995:'pop3s',1025:'NFS-or-IIS',1026:'LSA-or-nterm',1027:'IIS',1433:'ms-sql-s',1434:'ms-sql-m',1521:'oracle',1720:'h323q931',1723:'pptp',1900:'upnp',2000:'cisco-sccp',2049:'nfs',2121:'ccproxy-ftp',2222:'EtherNetIP-1',3128:'squid-http',3268:'globalcatLDAP',3269:'globalcatLDAPssl',3306:'mysql',3389:'ms-wbt-server',4444:'krb524',4500:'nat-t-ike',5000:'upnp',5060:'sip',5353:'zeroconf',5432:'postgresql',5666:'nrpe',5800:'vnc-http',5900:'vnc',5985:'wsman',6000:'X11',6001:'X11:1',6379:'redis',8000:'http-alt',8008:'http',8009:'ajp13',8080:'http-proxy',8081:'blackice-icecap',8443:'https-alt',8888:'sun-answerbook',9100:'jetdirect',9200:'wap-wsp',10000:'snet-sensor-mgmt',27017:'mongod',32768:'filenet-tms',49152:'unknown',49153:'unknown',49154:'unknown',49155:'unknown',49156:'unknown'};
+
+/* Port frequency ordering (approximation of nmap-services ranking). 6379 and 9200 are deliberately NOT in the top 1000 for teaching purposes. */
+const TOP_TCP=(()=>{
+  const head=[80,23,443,21,22,25,3389,110,445,139,143,53,135,3306,8080,1723,111,995,993,5900,1025,587,8888,199,1720,465,548,113,81,6001,10000,514,5060,179,1026,2000,8443,8000,32768,554,26,1433,49152,2001,515,8008,49154,1027,5666,646,5000,5631,631,49153,8081,2049,88,79,5800,106,2121,1110,49155,6000,513,990,5357,427,49156,543,544,5101,144,7,389,8009,3128,444,9999,5009,7070,5190,3000,5432,1900,3986,13,1029,9,5051,6646,49157,1028,873,1755,2717,4899,9100,119,37,
+    464,593,636,3268,3269,5985,2222,1521,27017];
+  const excl=new Set([6379,9200]);const seen=new Set();const out=[];
+  const add=p=>{if(!seen.has(p)&&!excl.has(p)){seen.add(p);out.push(p);}};
+  head.forEach(add);for(let p=1;p<=1024;p++)add(p);
+  for(let p=1025;p<=65535;p++)add(p);
+  [6379,9200].forEach(p=>{seen.add(p);out.splice(1400,0,p);});
+  return out;})();
+const TOP_UDP=(()=>{
+  const head=[631,161,137,123,138,1434,445,135,67,53,139,500,68,520,1900,4500,514,49152,162,69,5353,111,49154,1701,998,996,997,999,3283,49153,1812,136,2222,2049,3278,5060,1025,1433,3456,80,20031,1026,7,1646,1645,593,518,2048,626,1027,177,1719,427,497,4444,1023,65024,19,9,49193,1029,49,88,389];
+  const seen=new Set();const out=[];const add=p=>{if(!seen.has(p)){seen.add(p);out.push(p);}};
+  head.forEach(add);for(let p=1;p<=65535;p++)add(p);return out;})();
+
+const NSE_CATS=['all','auth','broadcast','brute','default','discovery','dos','exploit','external','fuzzer','intrusive','malware','safe','version','vuln'];
+const EXTRA_SCRIPTS=['http-vuln-cve2017-5638','ssl-enum-ciphers','smb-enum-shares','smb-enum-users','dns-brute','http-methods','ssh2-enum-algos','ftp-brute','ssh-brute','http-sql-injection','smb-vuln-ms08-067','broadcast-dhcp-discover','vulners'];
+/* ===================== NMAP SIMULATION ENGINE ===================== */
+const HOSTS={};HOSTS_LIST.forEach(h=>HOSTS[h.ip]=h);
+HOSTS['127.0.0.1']=Object.assign({},HOSTS['10.10.10.5'],{ip:'127.0.0.1',name:'localhost'});
+const NAME2IP={};HOSTS_LIST.forEach(h=>{if(h.name){NAME2IP[h.name]=h.ip;NAME2IP[h.name.split('.')[0]]=h.ip;}});
+NAME2IP['localhost']='127.0.0.1';NAME2IP['intranet.lab.local']='10.10.10.20';NAME2IP['kali']='10.10.10.5';
+const KNOWN_SCRIPTS=new Set(EXTRA_SCRIPTS);
+HOSTS_LIST.forEach(h=>{h.ports.forEach(p=>Object.keys(p.scripts||{}).forEach(s=>KNOWN_SCRIPTS.add(s)));Object.keys(h.hostScripts||{}).forEach(s=>KNOWN_SCRIPTS.add(s));});
+const SCAN_NAME={S:'SYN Stealth Scan',T:'Connect Scan',A:'ACK Scan',N:'NULL Scan',F:'FIN Scan',X:'XMAS Scan',M:'Maimon Scan',W:'Window Scan',U:'UDP Scan'};
+
+const inLab=ip=>ip.startsWith('10.10.10.')||ip.startsWith('10.10.20.')||ip==='127.0.0.1';
+const isLocal=ip=>ip.startsWith('10.10.10.')||ip==='127.0.0.1';
+const hashf=s=>{let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return h;};
+const fmtLat=ip=>{const h=hashf(ip)%900;const v=ip==='127.0.0.1'||ip==='10.10.10.5'?0.0000040:(isLocal(ip)?0.00018+h/1e6*0.8:0.0011+h/1e6);return String(Number(v.toPrecision(2)));};
+const pad2=n=>String(n).padStart(2,'0');
+function nmapDate(d){const tz=(d.toLocaleTimeString('en-US',{timeZoneName:'short'}).split(' ').pop());return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())} ${tz}`;}
+function ctime(d){const D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${D[d.getDay()]} ${M[d.getMonth()]} ${String(d.getDate()).padStart(2,' ')} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())} ${d.getFullYear()}`;}
+const hhmm=d=>`${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+function ipToInt(s){const p=s.split('.');if(p.length!==4)return null;const n=p.map(x=>/^\d{1,3}$/.test(x)?+x:NaN);if(n.some(x=>isNaN(x)||x>255))return null;return ((n[0]*16777216)+(n[1]<<16)+(n[2]<<8)+n[3])>>>0;}
+const intToIp=n=>[n>>>24&255,n>>>16&255,n>>>8&255,n&255].join('.');
+const range=(a,b)=>{const r=[];for(let i=a;i<=b;i++)r.push(i);return r;};
+
+function expandTarget(t){
+  if(/[a-z_]/i.test(t)&&!/^[\d.\-*,\/]+$/.test(t)){const ip=NAME2IP[t.toLowerCase()];if(!ip)return{err:`Failed to resolve "${t}".`,ext:/\./.test(t)};return{ips:[ip],name:t};}
+  let m=t.match(/^(.+)\/(\d{1,2})$/);
+  if(m){const b=ipToInt(m[1]);const pre=+m[2];if(b===null||pre>32)return{err:`Failed to resolve "${t}".`};
+    if(pre<16)return{err:`[lab] /${pre} is too large for this sandbox (minimum /16).`};
+    const mask=pre===0?0:(0xFFFFFFFF<<(32-pre))>>>0;const net=(b&mask)>>>0;const n=2**(32-pre);const ips=[];for(let i=0;i<n;i++)ips.push(intToIp(net+i));return{ips};}
+  const parts=t.split('.');if(parts.length!==4)return{err:`Failed to resolve "${t}".`};
+  try{const lists=parts.map(p=>{if(p==='*')return range(0,255);return p.split(',').flatMap(x=>{if(x.includes('-')){let[a,b]=x.split('-');a=a===''?0:+a;b=b===''?255:+b;if(isNaN(a)||isNaN(b)||a>b||b>255)throw 1;return range(a,b);}if(!/^\d{1,3}$/.test(x)||+x>255)throw 1;return[+x];});});
+    let total=lists.reduce((a,l)=>a*l.length,1);if(total>65536)return{err:`[lab] Target ${t} expands to too many addresses for this sandbox.`};
+    const ips=[];for(const a of lists[0])for(const b of lists[1])for(const c of lists[2])for(const d of lists[3])ips.push(`${a}.${b}.${c}.${d}`);return{ips};
+  }catch(e){return{err:`Failed to resolve "${t}".`};}
+}
+
+function parsePorts(spec){
+  const tcp=new Set(),udp=new Set();let mode='both';
+  for(let tok of spec.split(',')){
+    tok=tok.trim();if(!tok)continue;
+    const m=tok.match(/^([TUS]):(.*)$/i);if(m){const k=m[1].toUpperCase();mode=k==='U'?'udp':k==='T'?'tcp':'sctp';tok=m[2];if(!tok)continue;}
+    let list=[];
+    if(/^\d*-\d*$/.test(tok)){let[a,b]=tok.split('-');a=a===''?1:+a;b=b===''?65535:+b;if(a>b||b>65535)throw 'Your port range '+tok+' is backwards. Did you mean '+b+'-'+a+'?';list=range(a,b);}
+    else if(/^\d+$/.test(tok)){const n=+tok;if(n>65535)throw 'Ports specified must be between 0 and 65535 inclusive';list=[n];}
+    else{const re=new RegExp('^'+tok.replace(/[.+?^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*')+'$','i');list=Object.entries(SVC).filter(([,n])=>re.test(n)).map(([p])=>+p);
+      if(!list.length)throw 'Error #487: Your port specifications are illegal.  Example of proper form: "-100,200-1024,T:3000-4000,U:60000-"';}
+    for(const p of list){if(mode!=='udp'&&mode!=='sctp')tcp.add(p);if(mode!=='tcp'&&mode!=='sctp')udp.add(p);}
+  }
+  return{tcp:[...tcp].sort((a,b)=>a-b),udp:[...udp].sort((a,b)=>a-b)};
+}
+
+const NEEDARG=new Set(['-p','-oN','-oX','-oG','-oA','-oS','-iL','--script','--top-ports','-D','--mtu','-g','--source-port','--max-retries','--min-rate','--max-rate','--host-timeout','--exclude','--script-args','-e','-S','--data-length','--ttl','--min-parallelism','--max-parallelism','--scan-delay','--max-scan-delay','--spoof-mac','--min-hostgroup','--max-hostgroup','--version-intensity','--stats-every','--min-rtt-timeout','--max-rtt-timeout','--initial-rtt-timeout','--excludefile','--dns-servers','--max-os-tries','--port-ratio','-iR']);
+const IGNORE_FLAGS=new Set(['-f','--badsum','--version-all','--version-light','--version-trace','--osscan-guess','--osscan-limit','--fuzzy','--privileged','--unprivileged','--send-ip','--send-eth','--system-dns','--packet-trace','--resolve-all','--append-output','--noninteractive','--defeat-rst-ratelimit','--defeat-icmp-ratelimit','--randomize-hosts','--no-stylesheet','--webxml','-r','--allports','--script-trace','--script-updatedb','--iflist','--max-retries']);
+
+function parseNmap(args){
+  const o={tcp:null,udp:false,sn:false,sL:false,sV:false,sC:false,O:false,A:false,Pn:false,n:false,R:false,ports:null,fast:false,top:null,T:3,scripts:[],open:false,reason:false,v:0,d:0,out:{},iL:null,targets:[],traceroute:false,disableArp:false,help:false,version:false,exclude:[],notes:[],minRate:null,evasion:[]};
+  const TN={paranoid:0,sneaky:1,polite:2,normal:3,aggressive:4,insane:5};
+  for(let i=0;i<args.length;i++){
+    let a=args[i],val=null;
+    if(a.startsWith('--')&&a.includes('=')){val=a.slice(a.indexOf('=')+1);a=a.slice(0,a.indexOf('='));}
+    const getv=()=>{if(val!==null)return val;if(i+1>=args.length)throw `nmap: option '${a}' requires an argument`;return args[++i];};
+    if(a==='-h'||a==='--help')o.help=true;
+    else if(a==='-V'||a==='--version')o.version=true;
+    else if(/^-s[A-Za-z]+$/.test(a)){
+      const s=a.slice(2);
+      if(s==='n'||s==='P')o.sn=true;else if(s==='L')o.sL=true;
+      else for(const c of s){
+        if('STANFXMW'.includes(c)){if(o.tcp&&o.tcp!==c)throw 'You specified more than one type of TCP scan.  Please choose only one of -sA, -b, -sT, -sF, -sI, -sM, -sN, -sS, -sW, and -sX';o.tcp=c;}
+        else if(c==='U')o.udp=true;else if(c==='V')o.sV=true;else if(c==='C')o.sC=true;
+        else if('IYZO'.includes(c))throw `[lab] Scan type -s${c} is not simulated in this lab.`;
+        else throw `Scantype ${c} not supported`;
+      }}
+    else if(a==='-p'){o.ports=getv();}
+    else if(/^-p.+/.test(a)){o.ports=a.slice(2);}
+    else if(/^-P[nN0]$/.test(a)||a==='--skip-host-discovery')o.Pn=true;
+    else if(/^-P[EPMSAUYOR]/.test(a))o.notes.push(`[lab] Discovery probe ${a} accepted.`);
+    else if(/^-T/.test(a)){let t=a.length>2?a.slice(2):getv();if(t in TN)t=TN[t];t=+t;if(isNaN(t)||t<0||t>5)throw 'Unknown timing mode (-T argument).  Use either "paranoid", "sneaky", "polite", "normal", "aggressive", "insane" or a number from 0 (slowest) to 5 (fastest)';o.T=t;}
+    else if(/^-v+$/.test(a))o.v+=a.length-1;else if(/^-v\d$/.test(a))o.v=+a[2];
+    else if(/^-d+$/.test(a))o.d+=a.length-1;else if(/^-d\d$/.test(a))o.d=+a[2];
+    else if(/^-o[NXGAS]$/.test(a))o.out[a[2]]=getv();
+    else if(a==='-O')o.O=true;else if(a==='-A')o.A=true;else if(a==='-n')o.n=true;else if(a==='-R')o.R=true;
+    else if(a==='-6')throw '[lab] IPv6 is not configured in this lab network.';
+    else if(a==='-F')o.fast=true;
+    else if(a==='--top-ports'){const n=+getv();if(!(n>0))throw '--top-ports should be an integer 1 or greater';o.top=n;}
+    else if(a==='--open')o.open=true;else if(a==='--reason')o.reason=true;else if(a==='--traceroute')o.traceroute=true;
+    else if(a==='--disable-arp-ping')o.disableArp=true;
+    else if(a==='--script'){o.scripts.push(...getv().split(/,(?![^()]*\))/));}
+    else if(a==='-sC')o.sC=true;
+    else if(a==='-iL')o.iL=getv();
+    else if(a==='--exclude')o.exclude.push(...getv().split(','));
+    else if(a==='--min-rate'){o.minRate=+getv();}
+    else if(['-D','-g','--source-port','--mtu','--data-length','--ttl','--spoof-mac','-S'].includes(a)){o.evasion.push(`${a} ${getv()}`);}
+    else if(a==='-f'||a==='--badsum'){o.evasion.push(a);}
+    else if(NEEDARG.has(a))getv();
+    else if(IGNORE_FLAGS.has(a)){}
+    else if(a.startsWith('-'))throw `nmap: unrecognized option '${a}'`;
+    else o.targets.push(a);
+  }
+  if(o.A){o.sV=o.O=o.sC=o.traceroute=true;}
+  if(o.sC)o.scripts.unshift('default');
+  return o;
+}
+
+/* --- NSE selection: supports names, categories, wildcards, and/or/not --- */
+function termMatch(t,name,cats){t=t.trim().toLowerCase().replace(/\.nse$/,'');if(t==='all')return true;if(cats.includes(t))return true;
+  if(t.includes('*')){const re=new RegExp('^'+t.replace(/[.+?^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*')+'$');return re.test(name);}return t===name;}
+function exprMatch(expr,name,cats){expr=expr.replace(/[()]/g,' ').trim();
+  return expr.split(/\s+or\s+/i).some(orp=>orp.split(/\s+and\s+/i).every(t=>{t=t.trim();if(/^not\s+/i.test(t))return !termMatch(t.replace(/^not\s+/i,''),name,cats);return termMatch(t,name,cats);}));}
+function validateScripts(sel){for(const e of sel){for(const w of e.replace(/[()]/g,' ').split(/\s+/)){const x=w.trim().toLowerCase().replace(/\.nse$/,'');if(!x||['and','or','not'].includes(x))continue;
+  if(x==='all'||NSE_CATS.includes(x)||x.includes('*')||KNOWN_SCRIPTS.has(x))continue;
+  return `NSE: failed to initialize the script engine:\n/usr/share/nmap/nse_main.lua:829: '${x}' did not match a category, filename, or directory\nstack traceback:\n\t[C]: in function 'error'\n\t/usr/share/nmap/nse_main.lua:829: in local 'get_chosen_scripts'\n\nQUITTING!`;}}return null;}
+const selScripts=(obj,sel)=>Object.entries(obj||{}).filter(([n,s])=>sel.some(e=>exprMatch(e,n,s.cats)));
+function fmtScript(name,s,prefixFirst){
+  const L=s.lines;if(L.length===1)return[`|_${name}: ${L[0]}`];
+  const out=[`| ${name}: ${L[0]}`];for(let i=1;i<L.length;i++)out.push((i===L.length-1?'|_  ':'|   ')+L[i]);return out;}
+
+function phantom(ip){return{ip,name:null,phantom:true,ttl:isLocal(ip)?64:63,hops:isLocal(ip)?1:2,tcpDefault:'filtered',udpDefault:'open|filtered',ports:[],os:null};}
+
+function discover(ip,o){
+  if(!inLab(ip))return null;const h=HOSTS[ip];
+  if(o.Pn)return{h:h||phantom(ip),how:'user-set'};
+  if(h&&h.self)return{h,how:'localhost-response'};
+  if(isLocal(ip)&&!o.disableArp)return h?{h,how:'arp-response'}:null;
+  if(h&&h.ping)return{h,how:`echo-reply ttl ${h.ttl}`};
+  return null;
+}
+
+function probe(h,port,proto,type){
+  const d=h.ports.find(x=>x.p===port&&x.proto===proto);
+  const st=d?(d.state||'open'):(proto==='tcp'?h.tcpDefault:h.udpDefault);
+  const ttl=h.ttl;
+  if(proto==='udp'){if(st==='open')return{st:'open',r:`udp-response ttl ${ttl}`,d};if(st==='closed')return{st:'closed',r:`port-unreach ttl ${ttl}`,d};return{st:'open|filtered',r:'no-response',d};}
+  switch(type){
+    case 'T':return st==='open'?{st,r:'syn-ack',d}:st==='closed'?{st,r:'conn-refused',d}:{st:'filtered',r:'no-response',d};
+    case 'A':case 'W':return st==='filtered'?{st:'filtered',r:'no-response',d}:{st:'unfiltered',r:`reset ttl ${ttl}`,d};
+    case 'N':case 'F':case 'X':case 'M':
+      if(st==='filtered')return{st:'open|filtered',r:'no-response',d};
+      if(h.win)return{st:'closed',r:`reset ttl ${ttl}`,d};
+      return st==='open'?{st:'open|filtered',r:'no-response',d}:{st:'closed',r:`reset ttl ${ttl}`,d};
+    default:return st==='open'?{st,r:`syn-ack ttl ${ttl}`,d}:st==='closed'?{st,r:`reset ttl ${ttl}`,d}:{st:'filtered',r:'no-response',d};
+  }
+}
+const ignReason=(st,proto,type)=>st==='closed'?(proto==='udp'?'port-unreach':type==='T'?'conn-refused':'reset'):st==='unfiltered'?'reset':'no-response';
+
+function scanProto(h,ports,proto,type){
+  const set=new Set(ports);const rows=[];let nDef=0;
+  const defined=h.ports.filter(d=>d.proto===proto&&set.has(d.p)).map(d=>d.p);
+  const dset=new Set(defined);const rest=ports.length-defined.length;
+  defined.forEach(p=>rows.push(Object.assign({p,proto},probe(h,p,proto,type))));
+  if(rest<=25){ports.forEach(p=>{if(!dset.has(p))rows.push(Object.assign({p,proto},probe(h,p,proto,type)));});}
+  else{const r=probe(h,-1,proto,type);rows.push({bulk:rest,proto,st:r.st,r:r.r});}
+  return rows;
+}
+
+function runNmap(args,ctx){
+  const now=new Date();const res={pre:[],lines:[],sim:0,assets:[],o:null,ips:[],files:{}};
+  let o;
+  try{o=parseNmap(args);}catch(e){res.lines=[String(e),'See the output of nmap -h for a summary of options.'];res.error=true;return res;}
+  res.o=o;
+  if(o.help||args.length===0){res.lines=HELP.split('\n');return res;}
+  if(o.version){res.lines=['Nmap version 7.95 ( https://nmap.org )','Platform: x86_64-pc-linux-gnu','Compiled with: liblua-5.4.6 openssl-3.0.13 libssh2-1.11.0 libz-1.3 libpcre2-10.42 libpcap-1.10.4 nmap-libdnet-1.12 ipv6','Compiled without:','Available nsock engines: epoll poll select'];return res;}
+  const sErr=validateScripts(o.scripts);
+  const start=`Starting Nmap 7.95 ( https://nmap.org ) at ${nmapDate(now)}`;
+  if(sErr){res.lines=[start,...sErr.split('\n')];res.error=true;return res;}
+  res.pre.push(start);
+  o.notes.forEach(n=>res.pre.push(n));
+  if(o.evasion.length)res.pre.push(`[lab] Evasion options noted (${o.evasion.join(', ')}). They change packet shape on the wire; results here are unchanged.`);
+  if(o.T<=1)res.pre.push(`[lab] -T${o.T} (${o.T?'sneaky':'paranoid'}) serializes probes with ${o.T?'15 s':'5 min'} gaps for IDS evasion. The lab fast-forwards; see the reported duration.`);
+  // targets
+  let tg=[...o.targets];
+  if(o.iL){const f=ctx.fs[o.iL];if(f==null){res.lines=[`Failed to open input file ${o.iL} for reading`,'QUITTING!'];res.pre=[];return res;}tg.push(...f.split(/\s+/).filter(x=>x&&!x.startsWith('#')));}
+  const ips=[],names={},seen=new Set();let outside=false;
+  for(const t of tg){const r=expandTarget(t);if(r.err){res.pre.push(r.err);if(r.ext)outside=true;continue;}
+    for(const ip of r.ips){if(seen.has(ip))continue;seen.add(ip);ips.push(ip);if(r.name)names[ip]=r.name;if(!inLab(ip))outside=true;}}
+  const ex=new Set();o.exclude.forEach(t=>{const r=expandTarget(t);(r.ips||[]).forEach(i=>ex.add(i));});
+  const targets=ips.filter(i=>!ex.has(i));res.ips=targets;
+  if(outside)res.pre.push('[lab] This sandbox is isolated: only 10.10.10.0/24 and 10.10.20.0/24 are reachable. Never scan systems you are not authorized to test.');
+  const doneLine=(n,up,t)=>`Nmap done: ${n} IP address${n===1?'':'es'} (${up} host${up===1?'':'s'} up) scanned in ${t.toFixed(2)} seconds`;
+  if(!targets.length){res.lines.push('WARNING: No targets were specified, so 0 hosts scanned.',doneLine(0,0,0.04));return res;}
+
+  const disp=(ip,h)=>{const nm=names[ip]||(!o.n&&h&&h.name?h.name:null);return nm?`${nm} (${ip})`:ip;};
+  const L=res.lines;const V=[];let sim=0.05;
+
+  // ---------- List scan ----------
+  if(o.sL){targets.forEach(ip=>{const h=HOSTS[ip];L.push(`Nmap scan report for ${disp(ip,h)}`);});
+    L.push(doneLine(targets.length,0,0.02+targets.length*0.0004));res.sim=0.1;return res;}
+
+  // ---------- Host discovery ----------
+  const up=[];
+  for(const ip of targets){const r=discover(ip,o);if(r)up.push({ip,...r});}
+  const localCount=targets.filter(isLocal).length,remoteDown=targets.filter(i=>!isLocal(i)).length-up.filter(u=>!isLocal(u.ip)).length;
+  sim+=localCount?0.6+localCount*0.004:0;sim+=o.Pn?0:remoteDown*0.03+(remoteDown?1.5:0);
+  if(o.v){V.push(`Initiating ${localCount&&!o.disableArp?'ARP':'Ping'} Scan at ${hhmm(now)}`,`Scanning ${targets.length} host${targets.length>1?'s':''} [${localCount&&!o.disableArp?'1 port':'4 ports'}/host]`,`Completed ${localCount&&!o.disableArp?'ARP':'Ping'} Scan at ${hhmm(now)}, ${sim.toFixed(2)}s elapsed (${targets.length} total hosts)`);if(!o.n)V.push(`Initiating Parallel DNS resolution of ${up.length} host${up.length===1?'':'s'}. at ${hhmm(now)}`);}
+
+  const hostHeader=(u)=>{const h=u.h;const out=[`Nmap scan report for ${disp(u.ip,h.phantom?null:h)}`];
+    const lat=(h.phantom||(o.Pn&&!h.ports.length&&!h.self))?'':` (${fmtLat(u.ip)}s latency)`;
+    out.push(o.reason&&!o.Pn?`Host is up, received ${u.how}${lat}.`:`Host is up${lat}.`);return out;};
+
+  if(o.sn){
+    up.forEach(u=>{L.push(...hostHeader(u));if(u.h.mac&&!o.Pn)L.push(`MAC Address: ${u.h.mac}`);});
+    if(targets.length===1&&!up.length)L.push('Note: Host seems down. If it is really up, but blocking our ping probes, try -Pn');
+    up.forEach(u=>res.assets.push({ip:u.ip,name:u.h.name,ports:[]}));
+    sim=applyTiming(sim,o,targets.length);res.sim=sim;L.push(doneLine(targets.length,up.length,sim));
+    res.lines=[...V,...L];writeOutputs(res,o,args,ctx,up,now);return res;}
+
+  // ---------- Port scanning ----------
+  const tcpType=o.tcp||(o.udp?null:'S');
+  let tcpPorts=[],udpPorts=[];
+  try{if(o.ports){const pp=parsePorts(o.ports);tcpPorts=pp.tcp;udpPorts=pp.udp;}
+      else{const n=o.fast?100:(o.top||1000);tcpPorts=TOP_TCP.slice(0,n);udpPorts=TOP_UDP.slice(0,n);}}
+  catch(e){res.pre=[];res.lines=[String(e),'QUITTING!'];res.error=true;return res;}
+  if(!tcpType)tcpPorts=[];if(!o.udp)udpPorts=[];
+  if(!tcpPorts.length&&!udpPorts.length){res.lines.push('WARNING: a TCP scan type was requested, but no tcp ports were specified.  Skipping this scan type.');}
+  const sel=o.scripts;const anySV=o.sV;
+  let probes=0;
+  up.forEach(u=>{
+    const h=u.h;const rows=[...scanProto(h,tcpPorts,'tcp',tcpType),...scanProto(h,udpPorts,'udp','U')];
+    probes+=tcpPorts.length+udpPorts.length;
+    // timing
+    const filt=rows.reduce((a,r)=>a+((r.st==='filtered'||r.st==='open|filtered')?(r.bulk||1):0),0);
+    sim+=tcpPorts.length*(tcpType==='T'?0.0004:0.00016)+filt*0.0016*(tcpPorts.length?1:0);
+    const udpClosed=rows.filter(r=>r.proto==='udp').reduce((a,r)=>a+(r.bulk||1),0);
+    sim+=udpClosed*1.02;
+    const openRows=rows.filter(r=>!r.bulk&&r.st==='open');
+    if(o.sV)sim+=openRows.length?5.5+openRows.length*1.1:0.3;
+    if(o.O)sim+=2.1;
+    // verbose
+    if(o.v){if(tcpType){V.push(`Initiating ${SCAN_NAME[tcpType]} at ${hhmm(now)}`,`Scanning ${disp(u.ip,h.phantom?null:h)} [${tcpPorts.length} port${tcpPorts.length>1?'s':''}]`);
+        rows.filter(r=>r.proto==='tcp'&&!r.bulk&&r.st==='open').forEach(r=>V.push(`Discovered open port ${r.p}/tcp on ${u.ip}`));
+        V.push(`Completed ${SCAN_NAME[tcpType]} at ${hhmm(now)}, ${(tcpPorts.length*0.0011+0.05).toFixed(2)}s elapsed (${tcpPorts.length} total ports)`);}
+      if(udpPorts.length){V.push(`Initiating UDP Scan at ${hhmm(now)}`,`Scanning ${disp(u.ip,h.phantom?null:h)} [${udpPorts.length} port${udpPorts.length>1?'s':''}]`);
+        rows.filter(r=>r.proto==='udp'&&!r.bulk&&r.st==='open').forEach(r=>V.push(`Discovered open port ${r.p}/udp on ${u.ip}`));
+        V.push(`Completed UDP Scan at ${hhmm(now)}, ${(udpClosed*1.02).toFixed(2)}s elapsed (${udpPorts.length} total ports)`);}}
+    // header
+    L.push(...hostHeader(u));
+    // classify ignored states
+    const byState={};rows.forEach(r=>{const k=r.st+'/'+r.proto;byState[k]=(byState[k]||0)+(r.bulk||1);});
+    const ignored=new Set(Object.entries(byState).filter(([k,c])=>c>25&&!k.startsWith('open/')).map(([k])=>k));
+    let shown=rows.filter(r=>!r.bulk&&!ignored.has(r.st+'/'+r.proto));
+    const notShown=[];Object.keys(byState).forEach(k=>{if(ignored.has(k)){const[st,pr]=k.split('/');notShown.push(`${byState[k]} ${st} ${pr} port${byState[k]>1?'s':''} (${ignReason(st,pr,tcpType)})`);}});
+    if(o.open){const hid=shown.filter(r=>!['open','open|filtered','unfiltered'].includes(r.st));shown=shown.filter(r=>['open','open|filtered','unfiltered'].includes(r.st));
+      const extra={};hid.forEach(r=>{const k=r.st+' '+r.proto;extra[k]=(extra[k]||0)+1;});Object.entries(extra).forEach(([k,c])=>{const[st,pr]=k.split(' ');notShown.push(`${c} ${st} ${pr} port${c>1?'s':''} (${ignReason(st,pr,tcpType)})`);});}
+    shown.sort((a,b)=>(a.proto===b.proto?a.p-b.p:a.proto==='tcp'?-1:1));
+    const total=tcpPorts.length+udpPorts.length;
+    if(!shown.length){L.push(`All ${total} scanned ports on ${disp(u.ip,h.phantom?null:h)} are in ignored states.`);}
+    if(notShown.length)L.push(`Not shown: ${notShown.join(', ')}`);
+    const asset={ip:u.ip,name:h.name,ports:[]};
+    if(shown.length){
+      const svcName=r=>{if(anySV&&r.d&&r.st==='open')return r.d.svc;const n=SVC[r.p];return n||'unknown';};
+      const verOf=r=>anySV&&r.d&&r.st==='open'?r.d.ver:'';
+      const cols=[['PORT',r=>`${r.p}/${r.proto}`],['STATE',r=>r.st],['SERVICE',svcName]];
+      if(o.reason)cols.push(['REASON',r=>r.r]);
+      const showVer=anySV&&shown.some(r=>verOf(r));if(showVer)cols.push(['VERSION',verOf]);
+      const w=cols.map(([hd,f])=>Math.max(hd.length,...shown.map(r=>String(f(r)).length))+1);
+      const fmtRow=vals=>vals.map((v,i)=>i===vals.length-1?v:String(v).padEnd(w[i])).join('').replace(/\s+$/,'');
+      L.push(fmtRow(cols.map(c=>c[0])));
+      shown.forEach(r=>{L.push(fmtRow(cols.map(c=>c[1](r))));
+        if(r.st==='open'&&r.d&&sel.length){const sc=selScripts(r.d.scripts,sel);sim+=sc.length*0.7;sc.forEach(([n,s])=>L.push(...fmtScript(n,s)));}
+        if(r.st==='open')asset.ports.push({p:r.p,proto:r.proto,svc:svcName(r),ver:verOf(r)});});
+    }
+    if(h.mac&&!h.phantom)L.push(`MAC Address: ${h.mac}`);
+    // OS detection
+    if(o.O&&!h.phantom){
+      const tcpRows=rows.filter(r=>r.proto==='tcp');const hasOpen=tcpRows.some(r=>r.st==='open'),hasClosed=tcpRows.some(r=>r.st==='closed');
+      if(!hasOpen||!hasClosed)L.push('Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port');
+      if(h.os&&hasOpen){L.push(`Device type: ${h.os.type}`,`Running: ${h.os.running}`,`OS CPE: ${h.os.cpe}`,`OS details: ${h.os.details}`);}
+      else if(h.osGuess&&hasOpen){L.push(`Aggressive OS guesses: ${h.osGuess.join(', ')}`,'No exact OS matches for host (test conditions non-ideal).');}
+      else L.push('Too many fingerprints match this host to give specific OS details');
+      L.push(`Network Distance: ${h.hops} hop${h.hops===1?'':'s'}`);
+    } else if(o.O&&h.phantom){L.push('Too many fingerprints match this host to give specific OS details');}
+    if(anySV&&h.svcInfo&&shown.some(r=>r.st==='open'))L.push(`Service Info: ${h.svcInfo}`);
+    // host scripts
+    if(sel.length&&h.hostScripts){const smbOpen=rows.some(r=>!r.bulk&&r.proto==='tcp'&&(r.p===445||r.p===139)&&r.st==='open');
+      if(smbOpen){const hs=selScripts(h.hostScripts,sel);if(hs.length){sim+=hs.length*0.9;L.push('','Host script results:');hs.forEach(([n,s])=>L.push(...fmtScript(n,s)));}}}
+    // traceroute
+    if(o.traceroute&&!h.self){const tp=(rows.find(r=>r.st==='open'&&r.proto==='tcp')||{p:80}).p;L.push('',`TRACEROUTE (using port ${tp}/tcp)`,'HOP RTT     ADDRESS');
+      const ms=ip=>(parseFloat(fmtLat(ip))*1000).toFixed(2)+' ms';
+      if(h.hops===2){L.push(`1   ${ms('10.10.10.1').padEnd(7)} ${o.n?'10.10.10.1':'gw.lab.local (10.10.10.1)'}`);L.push(h.phantom?'2   ... 30':`2   ${ms(u.ip).padEnd(7)} ${disp(u.ip,h)}`);}
+      else L.push(h.phantom?'1   ... 30':`1   ${ms(u.ip).padEnd(7)} ${disp(u.ip,h)}`);}
+    L.push('');
+    res.assets.push(asset);u.rows=rows;u.asset=asset;
+  });
+  if(o.v&&sel.length)V.splice(V.length,0,`NSE: Script scanning ${up.length} host${up.length===1?'':'s'}.`);
+  if(targets.length===1&&!up.length)L.push('Note: Host seems down. If it is really up, but blocking our ping probes, try -Pn');
+  if(L[L.length-1]==='')L.pop();
+  if(o.sV||o.O)L.push('OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .');
+  sim=applyTiming(sim,o,probes);
+  if(o.minRate&&o.T>1)sim=Math.min(sim,Math.max(0.5,probes/o.minRate+0.4));
+  res.sim=sim;L.push(doneLine(targets.length,up.length,sim));
+  if(o.T<=1){const days=sim/86400;res.lines_note=`[lab] Real-world duration at -T${o.T}: ~${days>=1?days.toFixed(1)+' days':sim>=3600?(sim/3600).toFixed(1)+' hours':Math.round(sim/60)+' minutes'}.`;L.push(res.lines_note);}
+  res.lines=[...V,...L];
+  writeOutputs(res,o,args,ctx,up,now);
+  return res;
+}
+function applyTiming(sim,o,probes){if(o.T===0)return Math.max(sim,probes*300);if(o.T===1)return Math.max(sim,probes*15);return sim*({2:3.5,3:1,4:0.65,5:0.45})[o.T];}
+
+function writeOutputs(res,o,args,ctx,up,now){
+  const cmd='nmap '+args.join(' ');const outs=Object.assign({},o.out);
+  if(outs.A){outs.N=outs.A+'.nmap';outs.G=outs.A+'.gnmap';outs.X=outs.A+'.xml';}
+  if(!outs.N&&!outs.G&&!outs.X)return;
+  const end=`# Nmap done at ${ctime(now)} -- ${res.ips.length} IP address${res.ips.length===1?'':'es'} (${up.length} host${up.length===1?'':'s'} up) scanned in ${res.sim.toFixed(2)} seconds`;
+  if(outs.N){res.files[outs.N]=[`# Nmap 7.95 scan initiated ${ctime(now)} as: ${cmd}`,...res.lines.filter(l=>!l.startsWith('Nmap done')&&!l.startsWith('[lab]')),end].join('\n')+'\n';}
+  if(outs.G){const g=[`# Nmap 7.95 scan initiated ${ctime(now)} as: ${cmd}`];
+    up.forEach(u=>{const id=`Host: ${u.ip} (${o.n||!u.h.name?'':u.h.name})`;g.push(`${id}\tStatus: Up`);
+      if(u.rows){const pr=u.rows.filter(r=>!r.bulk).map(r=>`${r.p}/${r.st}/${r.proto}//${(o.sV&&r.d&&r.st==='open'?r.d.svc:(SVC[r.p]||'unknown'))}//${o.sV&&r.d&&r.st==='open'?r.d.ver:''}/`);
+        const ign=u.rows.filter(r=>r.bulk).map(r=>`${r.st} (${r.bulk})`).join(', ');g.push(`${id}\tPorts: ${pr.join(', ')}${ign?'\tIgnored State: '+ign:''}`);}});
+    g.push(end);res.files[outs.G]=g.join('\n')+'\n';}
+  if(outs.X){const x=['<?xml version="1.0" encoding="UTF-8"?>','<!DOCTYPE nmaprun>',`<nmaprun scanner="nmap" args="${cmd.replace(/"/g,'&quot;')}" start="${Math.floor(now/1000)}" version="7.95" xmloutputversion="1.05">`];
+    up.forEach(u=>{x.push(`<host><status state="up" reason="${u.how.split(' ')[0]}"/>`,`<address addr="${u.ip}" addrtype="ipv4"/>`);if(u.h.mac)x.push(`<address addr="${u.h.mac.split(' ')[0]}" addrtype="mac"/>`);
+      if(u.h.name&&!o.n)x.push(`<hostnames><hostname name="${u.h.name}" type="PTR"/></hostnames>`);
+      if(u.rows){x.push('<ports>');u.rows.filter(r=>r.bulk).forEach(r=>x.push(`<extraports state="${r.st}" count="${r.bulk}"/>`));
+        u.rows.filter(r=>!r.bulk).forEach(r=>x.push(`<port protocol="${r.proto}" portid="${r.p}"><state state="${r.st}" reason="${r.r.split(' ')[0]}"/><service name="${(o.sV&&r.d&&r.st==='open'?r.d.svc:(SVC[r.p]||'unknown')).replace('ssl/','')}"${o.sV&&r.d&&r.st==='open'&&r.d.ver?` product="${r.d.ver.replace(/"/g,'&quot;').replace(/</g,'&lt;')}"`:''}/></port>`));x.push('</ports>');}
+      x.push('</host>');});
+    x.push(`<runstats><finished time="${Math.floor(now/1000)}" elapsed="${res.sim.toFixed(2)}" exit="success"/><hosts up="${up.length}" down="${res.ips.length-up.length}" total="${res.ips.length}"/></runstats>`,'</nmaprun>');
+    res.files[outs.X]=x.join('\n')+'\n';}
+}
+
+const HELP=`Nmap 7.95 ( https://nmap.org )
+Usage: nmap [Scan Type(s)] [Options] {target specification}
+TARGET SPECIFICATION:
+  Can pass hostnames, IP addresses, networks, etc.
+  Ex: web01.lab.local, 10.10.10.0/24, 10.10.10.1-100, 10.10.10.*
+  -iL <inputfilename>: Input from list of hosts/networks
+  --exclude <host1[,host2][,host3],...>: Exclude hosts/networks
+HOST DISCOVERY:
+  -sL: List Scan - simply list targets to scan
+  -sn: Ping Scan - disable port scan
+  -Pn: Treat all hosts as online -- skip host discovery
+  -PS/PA/PU/PY[portlist]: TCP SYN/ACK, UDP or SCTP discovery to given ports
+  -PE/PP/PM: ICMP echo, timestamp, and netmask request discovery probes
+  -n/-R: Never do DNS resolution/Always resolve [default: sometimes]
+  --disable-arp-ping: Do not use ARP on the local Ethernet segment
+  --traceroute: Trace hop path to each host
+SCAN TECHNIQUES:
+  -sS/sT/sA/sW/sM: TCP SYN/Connect()/ACK/Window/Maimon scans
+  -sU: UDP Scan
+  -sN/sF/sX: TCP Null, FIN, and Xmas scans
+PORT SPECIFICATION AND SCAN ORDER:
+  -p <port ranges>: Only scan specified ports
+    Ex: -p22; -p1-65535; -p U:53,111,137,T:21-25,80,139,8080
+  -p-: Scan all 65535 ports
+  -F: Fast mode - Scan fewer ports than the default scan
+  --top-ports <number>: Scan <number> most common ports
+SERVICE/VERSION DETECTION:
+  -sV: Probe open ports to determine service/version info
+SCRIPT SCAN:
+  -sC: equivalent to --script=default
+  --script=<Lua scripts>: <Lua scripts> is a comma separated list of
+           directories, script-files or script-categories
+OS DETECTION:
+  -O: Enable OS detection
+TIMING AND PERFORMANCE:
+  -T<0-5>: Set timing template (higher is faster)
+  --min-rate <number>: Send packets no slower than <number> per second
+FIREWALL/IDS EVASION AND SPOOFING:
+  -f; --mtu <val>: fragment packets (optionally w/given MTU)
+  -D <decoy1,decoy2[,ME],...>: Cloak a scan with decoys
+  -g/--source-port <portnum>: Use given port number
+OUTPUT:
+  -oN/-oX/-oG <file>: Output scan in normal, XML, and Grepable format
+  -oA <basename>: Output in the three major formats at once
+  -v: Increase verbosity level (use -vv or more for greater effect)
+  --reason: Display the reason a port is in a particular state
+  --open: Only show open (or possibly open) ports
+MISC:
+  -A: Enable OS detection, version detection, script scanning, and traceroute
+  -V: Print version number
+  -h: Print this help summary page.
+EXAMPLES:
+  nmap -sn 10.10.10.0/24
+  nmap -sV -p 21,22,80 10.10.10.25
+  nmap -v -A web01.lab.local
+SEE THE MAN PAGE (https://nmap.org/book/man.html) FOR MORE OPTIONS AND EXAMPLES`;
+/* ===================== LESSONS ===================== */
+const T=s=>`<code class="try">${s}</code>`;
+const ipsIn=(c,pfx)=>c.ips.filter(i=>i.startsWith(pfx)).length;
+const N=c=>c.o&&!c.o.help&&!c.o.version&&!c.err;
+const portScan=c=>N(c)&&!c.o.sn&&!c.o.sL;
+const LESSONS=[
+{title:'1. Welcome & Rules of Engagement',html:`
+<h2>Welcome to the Nmap Lab</h2>
+<p><b>Nmap</b> ("Network Mapper") is the industry-standard tool for discovering hosts and services on a network. Defenders use it to inventory assets and validate firewall rules; attackers use it for reconnaissance. Knowing it well makes you better at both.</p>
+<div class="callout"><b>⚖️ Rules of engagement:</b> Only scan systems you own or have <i>written</i> authorization to test. Unauthorized scanning can violate law and corporate policy. This lab is a fully simulated, isolated sandbox, so nothing here touches a real network.</div>
+<h3>Your lab environment</h3>
+<p>You're <code>root</code> on a Kali box at <b>10.10.10.5</b>. Two networks are in scope:</p>
+<ul><li><b>10.10.10.0/24</b>: the internal LAN (same Layer-2 segment as you)</li><li><b>10.10.20.0/24</b>: a DMZ behind the firewall (routed, 2 hops away)</li></ul>
+<p>The terminal on the right behaves like a real shell. Click any green command to paste it, then press Enter.</p>
+<h3>Get oriented</h3>
+<p>Check your own interface first, so you know your address and subnet: ${T('ip a')}</p>
+<p>Then confirm Nmap is installed: ${T('nmap --version')}</p>
+<p>Built-in help: ${T('nmap -h')}. Type <code>help</code> to see all lab shell commands and <code>hint</code> for help with the current lesson.</p>`,
+tasks:[{t:'Check your IP configuration (ip a or ifconfig)',c:c=>/^(ip\s+(a|addr)|ifconfig)/.test(c.raw)},{t:'Display the Nmap version',c:c=>c.o&&c.o.version}]},
+
+{title:'2. Host Discovery (Ping Sweeps)',html:`
+<h2>Host Discovery</h2>
+<p>Before scanning ports, find out <i>which hosts are alive</i>. The <code>-sn</code> flag ("no port scan") runs host discovery only:</p>
+<p>${T('nmap -sn 10.10.10.0/24')}</p>
+<h3>How Nmap decides a host is "up"</h3>
+<table><tr><th>Situation</th><th>Probe used (as root)</th></tr>
+<tr><td>Target on your local Ethernet segment</td><td><b>ARP request.</b> Nearly impossible to block, because hosts must answer ARP to communicate.</td></tr>
+<tr><td>Target on a remote/routed network</td><td>ICMP echo, TCP SYN to 443, TCP ACK to 80, and ICMP timestamp</td></tr></table>
+<p>Add <code>--reason</code> to see <i>why</i> each host was marked up: ${T('nmap -sn --reason 10.10.10.0/24')}</p>
+<h3>List scan: zero packets to targets</h3>
+<p><code>-sL</code> just lists targets and performs reverse DNS. It's handy for sanity-checking a range before you send a single probe: ${T('nmap -sL 10.10.10.0/28')}</p>
+<h3>Target syntax</h3>
+<ul><li>CIDR: <code>10.10.10.0/24</code></li><li>Range: <code>10.10.10.1-50</code></li><li>Wildcard: <code>10.10.10.*</code></li><li>List: <code>10.10.10.20,25,30</code></li><li>Hostname: <code>web01.lab.local</code></li><li>File: <code>-iL targets.txt</code></li></ul>`,
+tasks:[{t:'Ping sweep the entire 10.10.10.0/24 LAN',c:c=>N(c)&&c.o.sn&&ipsIn(c,'10.10.10.')>=254},{t:'Run a list scan (-sL)',c:c=>N(c)&&c.o.sL},{t:'Run a ping sweep with --reason',c:c=>N(c)&&c.o.sn&&c.o.reason}]},
+
+{title:'3. Your First Port Scan',html:`
+<h2>Your First Port Scan</h2>
+<p>With no options, Nmap (as root) runs a <b>TCP SYN scan</b> of the <b>1,000 most common ports</b>:</p>
+<p>${T('nmap 10.10.10.20')}</p>
+<h3>The six port states</h3>
+<table><tr><th>State</th><th>Meaning</th></tr>
+<tr><td><span class="tag">open</span></td><td>An application is accepting connections (SYN → SYN/ACK)</td></tr>
+<tr><td>closed</td><td>Host reachable, nothing listening (SYN → RST)</td></tr>
+<tr><td>filtered</td><td>No reply, or ICMP unreachable. A firewall is likely dropping probes.</td></tr>
+<tr><td>unfiltered</td><td>Reachable, but open/closed can't be determined (ACK scan only)</td></tr>
+<tr><td>open|filtered</td><td>No response; could be either (UDP, NULL/FIN/Xmas)</td></tr>
+<tr><td>closed|filtered</td><td>Rare; idle scan only</td></tr></table>
+<p>Note the <code>Not shown: 996 closed tcp ports</code> line. Nmap collapses the most common state so the output stays readable.</p>
+<p>You can also scan by name: ${T('nmap web01.lab.local')}</p>
+<div class="callout info">💡 <b>Without <code>-sV</code>, the SERVICE column is only a guess</b> based on the port number (from <code>nmap-services</code>). Port 2222 shows as <i>EtherNetIP-1</i> even if it's actually SSH. You'll fix that in Lesson 6.</div>`,
+tasks:[{t:'Run a default scan against 10.10.10.20',c:c=>portScan(c)&&c.ips.includes('10.10.10.20')},{t:'Scan a host using its hostname',c:c=>portScan(c)&&c.o.targets.some(t=>/[a-z]/i.test(t))}]},
+
+{title:'4. Choosing Ports',html:`
+<h2>Choosing Which Ports to Scan</h2>
+<table><tr><th>Option</th><th>Scans</th></tr>
+<tr><td><code>-p 22</code></td><td>One port</td></tr>
+<tr><td><code>-p 21,22,80</code></td><td>A list</td></tr>
+<tr><td><code>-p 1-1024</code></td><td>A range</td></tr>
+<tr><td><code>-p-</code></td><td>All 65,535 TCP ports</td></tr>
+<tr><td><code>-p http,ssh</code></td><td>By service name</td></tr>
+<tr><td><code>-p U:53,161,T:22,80</code></td><td>Mixed protocols (with <code>-sU</code> plus a TCP scan)</td></tr>
+<tr><td><code>-F</code></td><td>Top 100 ports (fast)</td></tr>
+<tr><td><code>--top-ports 20</code></td><td>Top N most common ports</td></tr></table>
+<p>Try a targeted scan: ${T('nmap -p 21,22,80 10.10.10.25')}</p>
+<h3>⚠️ The top-1000 blind spot</h3>
+<p>Default scans miss anything on uncommon ports. Compare these two scans of the dev server:</p>
+<p>${T('nmap 10.10.10.70')}<br>${T('nmap -p- 10.10.10.70')}</p>
+<p>Services like databases and search clusters often live outside the top 1,000. A full <code>-p-</code> sweep is standard practice on important targets.</p>
+<p>Quick triage: ${T('nmap -F 10.10.10.0/24')}</p>`,
+tasks:[{t:'Scan specific ports 21,22,80 on ftp01 (10.10.10.25)',c:c=>portScan(c)&&c.o.ports&&c.ips.includes('10.10.10.25')},{t:'Scan ALL 65535 ports on dev01 (10.10.10.70)',c:c=>portScan(c)&&c.ips.includes('10.10.10.70')&&c.o.ports&&(()=>{try{return parsePorts(c.o.ports).tcp.length>=65535}catch(e){return false}})()},{t:'Use -F or --top-ports',c:c=>portScan(c)&&(c.o.fast||c.o.top)}]},
+
+{title:'5. Scan Techniques (TCP & UDP)',html:`
+<h2>Scan Techniques</h2>
+<h3>-sS: TCP SYN ("half-open") scan</h3>
+<p>Sends SYN; on SYN/ACK it immediately sends RST instead of completing the handshake. It's fast and quiet, and it's the default when running as root.</p>
+<pre>You → SYN        →  Target
+You ← SYN/ACK    ←  Target   (open)
+You → RST        →  Target   (never completes)</pre>
+<p>${T('nmap -sS -p 22,80,443 10.10.10.20')}</p>
+<h3>-sT: TCP Connect scan</h3>
+<p>Uses the OS <code>connect()</code> call to complete the full 3-way handshake. It's the default for non-root users, slower, and much more likely to be logged by the application.</p>
+<p>${T('nmap -sT -p 22,80,443 10.10.10.20')}</p>
+<h3>-sU: UDP scan</h3>
+<p>UDP has no handshake. Nmap sends a datagram and waits:</p>
+<ul><li>UDP response → <b>open</b></li><li>ICMP port unreachable → <b>closed</b></li><li>Silence → <b>open|filtered</b></li></ul>
+<p>Linux rate-limits ICMP unreachables (≈1/sec), so UDP scans are <b>slow</b>. Limit the port count:</p>
+<p>${T('nmap -sU --top-ports 20 10.10.10.1')}</p>
+<p>Combine TCP & UDP: ${T('nmap -sS -sU -p T:22,80,U:161 10.10.10.40')}</p>
+<div class="callout info">💡 Never skip UDP. SNMP (161), DNS (53), NTP (123), and TFTP (69) are some of the juiciest services on a network.</div>`,
+tasks:[{t:'Run a TCP Connect scan (-sT)',c:c=>portScan(c)&&c.o.tcp==='T'},{t:'Run an explicit SYN scan (-sS)',c:c=>portScan(c)&&c.o.tcp==='S'},{t:'UDP-scan the gateway (10.10.10.1) or printer (10.10.10.40)',c:c=>portScan(c)&&c.o.udp&&(c.ips.includes('10.10.10.1')||c.ips.includes('10.10.10.40'))}]},
+
+{title:'6. Service & Version Detection',html:`
+<h2>Service & Version Detection (-sV)</h2>
+<p><code>-sV</code> connects to each open port, grabs banners, and sends probes from the <code>nmap-service-probes</code> database to identify the <i>real</i> service and version.</p>
+<p>${T('nmap -sV 10.10.10.25')}</p>
+<p>Version strings are what you correlate with CVEs. A version like <code>vsftpd 2.3.4</code> should set off alarm bells.</p>
+<p>See how -sV reveals the truth on a non-standard port: ${T('nmap -Pn -sV -p 2222,8443 10.10.20.50')}</p>
+<p>Scan the domain controller: ${T('nmap -sV 10.10.10.10')}</p>
+<h3>Tuning</h3>
+<ul><li><code>--version-intensity 0-9</code>: probe aggressiveness (default 7)</li><li><code>--version-light</code> (=2), <code>--version-all</code> (=9)</li></ul>
+<div class="callout info">💡 A trailing <code>?</code> (e.g. <code>microsoft-ds?</code>) means Nmap is guessing based on the port, not a confirmed match.</div>`,
+tasks:[{t:'Version-scan ftp01 (10.10.10.25)',c:c=>portScan(c)&&c.o.sV&&c.ips.includes('10.10.10.25')},{t:'Version-scan the domain controller (10.10.10.10)',c:c=>portScan(c)&&c.o.sV&&c.ips.includes('10.10.10.10')}]},
+
+{title:'7. OS Detection',html:`
+<h2>OS Detection (-O)</h2>
+<p>Nmap sends ~16 crafted TCP/UDP/ICMP probes and compares subtle behaviors (TCP options, window size, IP ID sequence, TTL) against 5,000+ fingerprints in <code>nmap-os-db</code>.</p>
+<p>${T('nmap -O 10.10.10.20')}</p>
+<p>For best accuracy Nmap needs <b>at least one open and one closed TCP port</b>. Watch what happens against a firewalled Windows host:</p>
+<p>${T('nmap -O 10.10.10.10')}</p>
+<h3>Quick TTL heuristic</h3>
+<table><tr><th>Initial TTL</th><th>Typical OS</th></tr><tr><td>64</td><td>Linux / Unix / macOS / most embedded</td></tr><tr><td>128</td><td>Windows</td></tr><tr><td>255</td><td>Network gear (Cisco IOS, etc.)</td></tr></table>
+<p>Use <code>--reason</code> to see the TTL in replies: ${T('nmap --reason -p 445 10.10.10.30')}</p>
+<p>Try fingerprinting the IoT gear too: ${T('nmap -O 10.10.10.60')}</p>`,
+tasks:[{t:'OS-detect any host with -O',c:c=>portScan(c)&&c.o.O},{t:'OS-detect the domain controller (10.10.10.10)',c:c=>portScan(c)&&c.o.O&&c.ips.includes('10.10.10.10')}]},
+
+{title:'8. Firewalls & Skipping Discovery (-Pn)',html:`
+<h2>When Hosts "Don't Exist": -Pn</h2>
+<p>The DMZ (10.10.20.0/24) is <b>routed</b>, so ARP can't be used and Nmap falls back to ICMP/TCP ping probes. Sweep it:</p>
+<p>${T('nmap -sn 10.10.20.0/24')}</p>
+<p>Only one host appears. But the firewall team says <b>vault.lab.local (10.10.20.50)</b> is live. Try scanning it normally:</p>
+<p>${T('nmap 10.10.20.50')}</p>
+<p>"Host seems down." Its firewall drops ping probes, so Nmap never scans the ports. <code>-Pn</code> skips host discovery and treats the target as up:</p>
+<p>${T('nmap -Pn 10.10.20.50')}</p>
+<div class="callout">⚠️ <b>Tradeoff:</b> with <code>-Pn</code>, Nmap fully port-scans <i>every</i> address, even empty ones. On a /24 that's slow and noisy. Try it on a small range: ${T('nmap -Pn -p 80 10.10.20.48-52')}</div>
+<p>Note the <code>filtered</code> state everywhere except the open ports: a classic default-deny firewall.</p>`,
+tasks:[{t:'Ping sweep the DMZ 10.10.20.0/24',c:c=>N(c)&&c.o.sn&&ipsIn(c,'10.10.20.')>=254},{t:'Port-scan vault (10.10.20.50) using -Pn',c:c=>portScan(c)&&c.o.Pn&&c.ips.includes('10.10.20.50')}]},
+
+{title:'9. Nmap Scripting Engine (NSE)',html:`
+<h2>Nmap Scripting Engine (NSE)</h2>
+<p>NSE runs Lua scripts against discovered services. There are 600+ scripts, organized into categories:</p>
+<table><tr><th>Category</th><th>Purpose</th></tr>
+<tr><td><code>default</code></td><td>Safe, useful, fast (same as <code>-sC</code>)</td></tr>
+<tr><td><code>safe</code> / <code>discovery</code></td><td>Non-intrusive info gathering</td></tr>
+<tr><td><code>vuln</code></td><td>Check for known vulnerabilities</td></tr>
+<tr><td><code>auth</code> / <code>brute</code></td><td>Authentication checks / credential guessing</td></tr>
+<tr><td><code>intrusive</code> / <code>exploit</code> / <code>dos</code></td><td>Risky. Use only with explicit approval.</td></tr></table>
+<h3>Default scripts</h3><p>${T('nmap -sC -sV 10.10.10.25')}</p>
+<h3>A specific script</h3><p>${T('nmap --script smb-vuln-ms17-010 -p 445 10.10.10.30')}</p>
+<h3>A whole category</h3><p>${T('nmap --script vuln 10.10.10.25')}</p>
+<h3>Wildcards & boolean expressions</h3>
+<p>${T('nmap --script "http-* and not intrusive" -p 80 10.10.10.20')}</p>
+<p>${T('nmap -sU -p 161 --script snmp-info,snmp-sysdescr 10.10.10.40')}</p>
+<div class="callout">⚠️ <code>vuln</code>, <code>brute</code>, and <code>intrusive</code> scripts can crash fragile services and lock accounts. In production, get change approval and test in a maintenance window.</div>`,
+tasks:[{t:'Run default scripts (-sC) against ftp01',c:c=>portScan(c)&&c.o.scripts.includes('default')&&c.ips.includes('10.10.10.25')},{t:'Check files01 (10.10.10.30) for MS17-010',c:c=>portScan(c)&&c.ips.includes('10.10.10.30')&&c.o.scripts.some(s=>/ms17|vuln|smb-vuln/.test(s))},{t:'Use a wildcard script selection (e.g. "http-*")',c:c=>portScan(c)&&c.o.scripts.some(s=>s.includes('*'))}]},
+
+{title:'10. Timing & Performance',html:`
+<h2>Timing Templates (-T0 to -T5)</h2>
+<table><tr><th>Template</th><th>Name</th><th>Use</th></tr>
+<tr><td>-T0</td><td>paranoid</td><td>IDS evasion; 5 min between probes</td></tr>
+<tr><td>-T1</td><td>sneaky</td><td>IDS evasion; 15 s between probes</td></tr>
+<tr><td>-T2</td><td>polite</td><td>Low bandwidth, fragile targets</td></tr>
+<tr><td>-T3</td><td>normal</td><td>Default</td></tr>
+<tr><td>-T4</td><td>aggressive</td><td>Recommended on fast, reliable LANs</td></tr>
+<tr><td>-T5</td><td>insane</td><td>Very fast; may sacrifice accuracy</td></tr></table>
+<p>Compare durations in the <code>Nmap done</code> line:</p>
+<p>${T('nmap -T4 -p- 10.10.10.70')}<br>${T('nmap -T2 -p- 10.10.10.70')}<br>${T('nmap -T1 -p 22,80 10.10.10.20')}</p>
+<h3>Fine-grained controls</h3>
+<ul><li><code>--min-rate 1000</code>: send at least 1,000 packets/sec</li><li><code>--max-retries 1</code>: fewer retransmissions</li><li><code>--host-timeout 5m</code>: give up on slow hosts</li></ul>
+<p>${T('nmap --min-rate 5000 -p- 10.10.10.70')}</p>
+<div class="callout info">💡 Faster isn't always better: on lossy links, aggressive timing produces false "filtered" results. When results look odd, slow down.</div>`,
+tasks:[{t:'Scan using -T4',c:c=>portScan(c)&&c.o.T===4},{t:'Use --min-rate',c:c=>portScan(c)&&c.o.minRate>0}]},
+
+{title:'11. Aggressive Scan (-A) & Verbosity',html:`
+<h2>-A: The "Everything" Switch</h2>
+<p><code>-A</code> = <code>-O</code> + <code>-sV</code> + <code>-sC</code> + <code>--traceroute</code>. Great for single targets, but noisy.</p>
+<p>${T('nmap -A -T4 10.10.10.10')}</p>
+<p>Look at what the default scripts leaked from the domain controller: domain name, hostname, OS build, and SMB signing configuration.</p>
+<h3>Verbosity</h3>
+<p><code>-v</code> / <code>-vv</code> prints results as they're discovered, so you don't wait for the scan to finish:</p>
+<p>${T('nmap -v -A 10.10.20.80')}</p>
+<p>Traceroute through the firewall to the DMZ: ${T('nmap -Pn --traceroute -p 2222 10.10.20.50')}</p>`,
+tasks:[{t:'Run an aggressive (-A) scan',c:c=>portScan(c)&&c.o.A},{t:'Use verbose mode (-v)',c:c=>portScan(c)&&c.o.v>0}]},
+
+{title:'12. Saving & Parsing Output',html:`
+<h2>Output Formats</h2>
+<table><tr><th>Flag</th><th>Format</th><th>Best for</th></tr>
+<tr><td><code>-oN file</code></td><td>Normal</td><td>Humans / reports</td></tr>
+<tr><td><code>-oX file</code></td><td>XML</td><td>Tools (Splunk, Metasploit, ndiff, xsltproc)</td></tr>
+<tr><td><code>-oG file</code></td><td>Grepable</td><td>grep / awk / cut one-liners</td></tr>
+<tr><td><code>-oA base</code></td><td>All three</td><td>Always do this on real engagements</td></tr></table>
+<p>${T('nmap -sV -oA lanscan 10.10.10.0/24')}</p>
+<p>${T('ls')}</p>
+<p>Find every host with an open port: ${T('grep open lanscan.gnmap')}</p>
+<p>Find every host with port 22 open: ${T('cat lanscan.gnmap | grep 22/open')}</p>
+<p>Read the XML: ${T('cat lanscan.xml')}</p>
+<h3>Input from a file</h3>
+<p>A target list is provided: ${T('cat targets.txt')} then ${T('nmap -sV -iL targets.txt')}</p>
+<div class="callout info">💡 Pro tip: feed <code>-oX</code> output into <code>ndiff</code> between weekly scans to detect new services. Cheap, effective change monitoring.</div>`,
+tasks:[{t:'Save a scan with -oA (or -oN/-oX/-oG)',c:c=>portScan(c)&&Object.keys(c.o.out).length>0},{t:'grep a saved .gnmap file for open ports',c:c=>/grep/.test(c.raw)&&/\.gnmap/.test(c.raw)},{t:'Scan targets from a file with -iL',c:c=>N(c)&&c.o.iL}]},
+
+{title:'13. Firewall Mapping & Exotic Scans',html:`
+<h2>Mapping Firewall Rules</h2>
+<h3>-sA: ACK scan</h3>
+<p>An ACK scan never determines open vs. closed. It reveals whether a <b>stateful firewall</b> is in the path. Unfiltered = the packet reached the host; filtered = it was dropped.</p>
+<p>${T('nmap -sA -p 22,80,443,3306 10.10.10.20')}<br>${T('nmap -sA -p 53,88,445,8080 10.10.10.10')}</p>
+<h3>-sN / -sF / -sX: NULL, FIN, Xmas</h3>
+<p>Per RFC 793, a closed port should answer these odd packets with RST and an open port should stay silent. They can sneak past some stateless filters.</p>
+<p>${T('nmap -sX -p 22,80,135,445 10.10.10.20')}</p>
+<p>Now the same against Windows:</p>
+<p>${T('nmap -sX -p 22,80,135,445 10.10.10.30')}</p>
+<p>Windows ignores the RFC and sends RST for everything, so every port looks "closed." This quirk is itself an OS fingerprint.</p>
+<h3>Evasion flags (awareness)</h3>
+<p><code>-f</code> (fragment), <code>-D RND:5</code> (decoys), <code>-g 53</code> (source port), and <code>--data-length</code>. Modern IDS/EDR detect most of these. As a defender, know what they look like in your logs.</p>`,
+tasks:[{t:'Run an ACK scan (-sA)',c:c=>portScan(c)&&c.o.tcp==='A'},{t:'Run a NULL, FIN, or Xmas scan',c:c=>portScan(c)&&'NFX'.includes(c.o.tcp||'?')}]},
+
+{title:'14. Methodology & Capstone',html:`
+<h2>A Repeatable Methodology</h2>
+<ol>
+<li><b>Scope:</b> confirm authorization and the target list (<code>-sL</code>).</li>
+<li><b>Discover:</b> <code>nmap -sn</code> (plus <code>-Pn</code> on known-live but silent hosts).</li>
+<li><b>Fast TCP sweep:</b> <code>nmap -T4 --top-ports 1000 -oA quick</code></li>
+<li><b>Full TCP:</b> <code>nmap -T4 -p- --min-rate 1000 -oA full</code> on key hosts.</li>
+<li><b>Enumerate:</b> <code>nmap -sV -sC -p &lt;open ports&gt; -oA enum</code></li>
+<li><b>UDP:</b> <code>nmap -sU --top-ports 50</code></li>
+<li><b>Vuln check (approved only):</b> <code>--script vuln</code></li>
+<li><b>Report:</b> parse the XML and track deltas over time.</li></ol>
+<h3>Capstone</h3>
+<p>Head to the <b>🏁 Challenges</b> tab. Answer questions by investigating the lab. Solve <b>at least 8</b> to finish the course.</p>
+<p>Starter: ${T('nmap -T4 -sV -sC -oA capstone 10.10.10.0/24')}</p>`,
+tasks:[{t:'Solve at least 8 challenges',c:(c,st)=>Object.keys(st.solved).length>=8}]},
+];
+
+/* ===================== CHALLENGES ===================== */
+const CHALLENGES=[
+{q:'How many hosts are up on 10.10.10.0/24 (include your own Kali box)?',a:['9'],pts:10,h:'nmap -sn 10.10.10.0/24, then read the "Nmap done" line.'},
+{q:'Which IP on the DMZ (10.10.20.0/24) ignores ping but is actually alive?',a:['10.10.20.50'],pts:10,h:'Compare -sn results with what the firewall team says exists... Lesson 8.'},
+{q:'What TCP port does SSH listen on for that DMZ host?',a:['2222'],pts:10,h:'-Pn -sV against the host.'},
+{q:'What version of vsftpd is running on ftp01?',a:['2.3.4','vsftpd 2.3.4'],pts:10,h:'-sV on 10.10.10.25.'},
+{q:'That vsftpd version contains a famous backdoor. What is its CVE ID?',a:['cve-2011-2523','2011-2523'],pts:15,h:'Try the vuln script category against port 21.'},
+{q:'Which IP address is vulnerable to MS17-010 (EternalBlue)?',a:['10.10.10.30'],pts:15,h:'--script smb-vuln-ms17-010 -p445 across the LAN.'},
+{q:'What is the HTTP title of the site on web01 port 80?',a:['acme corp intranet'],pts:10,h:'-sC or --script http-title.'},
+{q:'web01\'s robots.txt disallows /admin/ and one other directory. Which one?',a:['/backup/','backup','/backup'],pts:10,h:'Default scripts include http-robots.txt.'},
+{q:'dev01 runs Redis, but a default scan misses it. What port is it on?',a:['6379'],pts:10,h:'Scan all ports with -p-.'},
+{q:'What version of Elasticsearch is exposed on dev01?',a:['7.17.9'],pts:15,h:'-sV against the uncommon ports you found with -p-.'},
+{q:'What exact OS does dc01 run?',a:['windows server 2019','microsoft windows server 2019','server 2019'],pts:10,h:'-O or -A on 10.10.10.10.'},
+{q:'What is the Active Directory DNS domain name?',a:['lab.local'],pts:10,h:'Look at LDAP version info or rdp-ntlm-info on the DC.'},
+{q:'Which SNMP community string (other than "public") works on the printer?',a:['internal'],pts:15,h:'UDP 161 + the snmp-brute script (brute category, lab only!).'},
+{q:'What product (vendor) makes the device at 10.10.10.60?',a:['hikvision','hangzhou hikvision','hangzhou hikvision digital technology'],pts:10,h:'MAC OUI or -sV output.'},
+{q:'Which CI/CD application runs on dev01 port 8080?',a:['jenkins'],pts:10,h:'http-title via -sC.'},
+];
+/* ===================== UI / TERMINAL ===================== */
+const $=s=>document.querySelector(s);
+const KEY='nmaplab_v1';
+const DEFAULT_FS={'targets.txt':'10.10.10.20\n10.10.10.25\n10.10.10.30\n','README.txt':'Welcome to the Nmap Lab.\n\nIn scope:\n  10.10.10.0/24  - Internal LAN (you are 10.10.10.5)\n  10.10.20.0/24  - DMZ (behind gw.lab.local)\n\nEverything here is simulated. Happy scanning!\n','scope.txt':'# Authorized scope - Rules of Engagement signed 2026-11-01\n10.10.10.0/24\n10.10.20.0/24\n'};
+let st=JSON.parse(localStorage.getItem(KEY)||'{}');
+st.tasks=st.tasks||{};st.solved=st.solved||{};st.lesson=st.lesson||0;st.assets=st.assets||{};st.fs=st.fs||Object.assign({},DEFAULT_FS);st.hist=st.hist||[];
+const save=()=>localStorage.setItem(KEY,JSON.stringify(st));
+let tab='lessons',busy=false,abortFlag=false,hIdx=st.hist.length;
+const out=$('#out'),input=$('#cmd'),term=$('#term');
+$('#prompt').innerHTML='<span class="pu">root@kali</span>:<span class="ph">~</span># ';
+
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function colorize(line){
+  let s=esc(line);
+  if(/^\[lab\]/.test(line))return `<span class="c-lab">${s}</span>`;
+  if(/^(Starting Nmap|Nmap done|OS and Service detection|Initiating|Completed|Scanning|NSE:)/.test(line))return `<span class="c-dim">${s}</span>`;
+  if(/^Nmap scan report for/.test(line))return `<span class="c-rep">${s}</span>`;
+  if(/^Host is up/.test(line))return `<span class="c-up">${s}</span>`;
+  if(/^(Warning|WARNING|Note:)/.test(line))return `<span class="c-warn">${s}</span>`;
+  if(/^(Failed to|nmap: |QUITTING|You specified|Error|See the output|.*: command not found|.*No such file)/.test(line))return `<span class="c-err">${s}</span>`;
+  if(/^Discovered open port/.test(line))return `<span class="c-open">${s}</span>`;
+  if(/^\|/.test(line)){s=`<span class="c-nse">${s}</span>`;return s.replace(/\bVULNERABLE\b/g,'<span class="c-vuln">VULNERABLE</span>');}
+  return s.replace(/^(\d+\/(?:tcp|udp)\s+)(open\|filtered|open|closed|filtered|unfiltered)/,(m,a,b)=>a+`<span class="${b==='open'?'c-open':b==='closed'?'c-closed':b==='unfiltered'?'c-unf':'c-filt'}">${b}</span>`);
+}
+function println(text,raw){const d=document.createElement('div');d.className='ln';d.innerHTML=raw?text:(text===''?'':colorize(text));out.appendChild(d);term.scrollTop=term.scrollHeight;return d;}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600);}
+
+function tokenize(s){const t=[];let cur='',q=null,has=false;
+  for(let i=0;i<s.length;i++){const c=s[i];if(q){if(c===q)q=null;else cur+=c;continue;}
+    if(c==='"'||c==="'"){q=c;has=true;continue;}
+    if(c===' '||c==='\t'){if(cur||has){t.push(cur);cur='';has=false;}continue;}
+    if(c==='|'||c==='>'){if(cur||has){t.push(cur);cur='';has=false;}if(c==='>'&&s[i+1]==='>'){t.push({op:'>>'});i++;}else t.push({op:c});continue;}
+    cur+=c;}
+  if(q)throw 'bash: unexpected EOF while looking for matching `'+q+"'";if(cur||has)t.push(cur);return t;}
+
+/* ---------- shell commands ---------- */
+function cmdSimple(argv){
+  const [c,...a]=argv;const fs=st.fs;
+  switch(c){
+    case 'help':return[ 'Lab shell commands:','  nmap [options] <targets>   the star of the show (nmap -h for options)','  ls, cat <file>, rm <file>  manage saved scan output','  grep [-i|-v|-c] <pat> [file], head, tail, wc -l, sort, uniq   (pipe-able with |)','  ip a | ifconfig            show your interface','  ping [-c N] <host>         ICMP echo','  whoami, id, hostname, pwd, date, history, echo, clear','  hint                       hint for the current lesson','  lesson <n>                 jump to lesson n','  reset-lab                  wipe progress and files',''];
+    case 'clear':out.innerHTML='';return[];
+    case 'ls':{const f=Object.keys(fs).sort();if(a.includes('-l')||a.includes('-la')||a.includes('-al'))return f.map(n=>`-rw-r--r-- 1 root root ${String(fs[n].length).padStart(7)} Nov  3 08:41 ${n}`);return f.length?[f.join('  ')]:[];}
+    case 'cat':{if(!a.length)return[];const r=[];for(const f of a){if(fs[f]==null)r.push(`cat: ${f}: No such file or directory`);else r.push(...fs[f].replace(/\n$/,'').split('\n'));}return r;}
+    case 'rm':{const r=[];a.filter(x=>!x.startsWith('-')).forEach(f=>{if(fs[f]==null)r.push(`rm: cannot remove '${f}': No such file or directory`);else delete fs[f];});save();return r;}
+    case 'ip':if(!a.length)return['Usage: ip [ OPTIONS ] OBJECT { COMMAND | help }'];
+      if(/^r/.test(a[0]))return['default via 10.10.10.1 dev eth0 proto static','10.10.10.0/24 dev eth0 proto kernel scope link src 10.10.10.5'];
+      return['1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000','    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00','    inet 127.0.0.1/8 scope host lo','2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000','    link/ether 00:0c:29:5a:10:05 brd ff:ff:ff:ff:ff:ff','    inet 10.10.10.5/24 brd 10.10.10.255 scope global eth0','       valid_lft forever preferred_lft forever'];
+    case 'ifconfig':return['eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500','        inet 10.10.10.5  netmask 255.255.255.0  broadcast 10.10.10.255','        ether 00:0c:29:5a:10:05  txqueuelen 1000  (Ethernet)','','lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536','        inet 127.0.0.1  netmask 255.0.0.0'];
+    case 'route':return['Kernel IP routing table','Destination     Gateway         Genmask         Flags Metric Ref    Use Iface','0.0.0.0         10.10.10.1      0.0.0.0         UG    0      0        0 eth0','10.10.10.0      0.0.0.0         255.255.255.0   U     0      0        0 eth0'];
+    case 'whoami':return['root'];case 'id':return['uid=0(root) gid=0(root) groups=0(root)'];case 'hostname':return['kali'];case 'pwd':return['/root'];
+    case 'date':return[new Date().toString()];case 'uname':return[a.includes('-a')?'Linux kali 6.8.11-amd64 #1 SMP PREEMPT_DYNAMIC Kali 6.8.11-1kali2 x86_64 GNU/Linux':'Linux'];
+    case 'echo':return[a.join(' ')];
+    case 'history':return st.hist.map((h,i)=>`${String(i+1).padStart(5)}  ${h}`);
+    case 'man':return a[0]==='nmap'?HELP.split('\n'):[`No manual entry for ${a[0]||''}`];
+    case 'hint':{const l=LESSONS[st.lesson];const nx=l.tasks.findIndex((t,i)=>!st.tasks[`${st.lesson}-${i}`]);return nx<0?['[lab] All tasks in this lesson are done. Click Next ▶ in the lesson panel.']:[`[lab] Lesson ${st.lesson+1} next task: ${l.tasks[nx].t}`,'[lab] Click the green example commands in the lesson panel to paste them.'];}
+    case 'lesson':{const n=parseInt(a[0])-1;if(n>=0&&n<LESSONS.length){st.lesson=n;save();setTab('lessons');return[`[lab] Opened lesson ${n+1}.`];}return['usage: lesson <1-'+LESSONS.length+'>'];}
+    case 'reset-lab':localStorage.removeItem(KEY);location.reload();return[];
+    case 'exit':case 'logout':return['[lab] Nice try. There is no escape from learning. 🙂'];
+    case 'nc':case 'ncat':case 'telnet':case 'ssh':case 'ftp':case 'curl':case 'wget':case 'msfconsole':case 'hydra':
+      return[`[lab] '${c}' is not simulated. This lab focuses on reconnaissance with nmap.`];
+    default:return[`${c}: command not found`];
+  }
+}
+async function cmdPing(a){
+  let n=4;const i=a.indexOf('-c');if(i>=0){n=Math.min(parseInt(a[i+1])||4,10);a.splice(i,2);}
+  const t=a.find(x=>!x.startsWith('-'));if(!t)return['ping: usage error: Destination address required'];
+  const r=expandTarget(t);if(r.err||!r.ips||r.ips.length!==1)return[`ping: ${t}: Name or service not known`];
+  const ip=r.ips[0];const h=HOSTS[ip];const L=[`PING ${t} (${ip}) 56(84) bytes of data.`];println(L[0]);
+  const ok=h&&h.ping;let rx=0;
+  for(let k=1;k<=n;k++){if(abortFlag)break;await sleep(450);if(ok){rx++;println(`64 bytes from ${h.name&&!/^\d/.test(t)?h.name+' ('+ip+')':ip}: icmp_seq=${k} ttl=${h.self?64:h.ttl} time=${(parseFloat(fmtLat(ip))*1000*(0.8+Math.random()*0.5)).toFixed(3)} ms`);}
+    else if(isLocal(ip)&&!h){println(`From 10.10.10.5 icmp_seq=${k} Destination Host Unreachable`);}}
+  return['',`--- ${t} ping statistics ---`,`${n} packets transmitted, ${rx} received, ${Math.round((n-rx)/n*100)}% packet loss, time ${n*1000-1000}ms`];
+}
+function applyFilter(lines,argv){
+  const [c,...a]=argv;
+  if(c==='grep'||c==='egrep'){let i=false,v=false,cnt=false;const rest=[];a.forEach(x=>{if(/^-[ivcE]+$/.test(x)){i=i||x.includes('i');v=v||x.includes('v');cnt=cnt||x.includes('c');}else rest.push(x);});
+    let re;try{re=new RegExp(rest[0]||'',i?'i':'');}catch(e){re=new RegExp((rest[0]||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),i?'i':'');}
+    const m=lines.filter(l=>re.test(l)!==v);return cnt?[String(m.length)]:m;}
+  if(c==='head'||c==='tail'){let n=10;a.forEach((x,k)=>{if(x==='-n')n=+a[k+1];else if(/^-\d+$/.test(x))n=+x.slice(1);});return c==='head'?lines.slice(0,n):lines.slice(-n);}
+  if(c==='wc')return[a.includes('-l')?String(lines.length):`${lines.length} ${lines.join(' ').split(/\s+/).filter(Boolean).length} ${lines.join('\n').length+1}`];
+  if(c==='sort')return[...lines].sort();if(c==='uniq')return lines.filter((l,k)=>l!==lines[k-1]);
+  if(c==='cut'||c==='awk')return[...lines,`[lab] '${c}' isn't simulated; try grep.`];
+  return[`${c}: command not found`];
+}
+
+async function execute(line){
+  const trimmed=line.trim();
+  println(`<span class="pu">root@kali</span>:<span class="ph">~</span># ${esc(line)}`,true);
+  if(!trimmed)return;
+  st.hist.push(trimmed);if(st.hist.length>300)st.hist.shift();hIdx=st.hist.length;save();
+  let toks;try{toks=tokenize(trimmed);}catch(e){println(String(e));return;}
+  // split pipeline + redirect
+  let redirect=null;const ri=toks.findIndex(t=>t.op==='>'||t.op==='>>');
+  if(ri>=0){redirect={file:toks[ri+1],append:toks[ri].op==='>>'};toks=toks.slice(0,ri);}
+  const segs=[[]];toks.forEach(t=>{if(t.op==='|')segs.push([]);else segs[segs.length-1].push(t);});
+  if(segs[0][0]==='sudo')segs[0].shift();
+  const argv=segs[0];if(!argv.length)return;
+  const ctx={raw:trimmed,o:null,ips:[],err:false};
+  busy=true;abortFlag=false;let lines=[];
+  try{
+    if(argv[0]==='nmap'){
+      const r=runNmap(argv.slice(1),{fs:st.fs});ctx.o=r.o;ctx.ips=r.ips||[];ctx.err=!!r.error;
+      const piped=segs.length>1||redirect;
+      if(!piped&&r.pre.length){r.pre.forEach(l=>println(l));}
+      const delay=r.sim?Math.min(250+r.sim*35,3200):60;
+      if(r.sim){const sp=println('<span class="spin">⠋ scanning… (Ctrl+C to abort)</span>',true);const fr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏';let k=0;const t0=Date.now();
+        while(Date.now()-t0<delay&&!abortFlag){await sleep(80);sp.innerHTML=`<span class="spin">${fr[k++%10]} scanning… (Ctrl+C to abort)</span>`;}sp.remove();}
+      if(abortFlag){busy=false;return;}
+      lines=piped?[...r.pre,...r.lines]:r.lines;
+      Object.entries(r.files).forEach(([f,c])=>st.fs[f]=c);
+      (r.assets||[]).forEach(a=>{const e=st.assets[a.ip]||{name:a.name,ports:{}};e.name=a.name||e.name;a.ports.forEach(p=>{const k=p.p+'/'+p.proto;const old=e.ports[k]||{};e.ports[k]={svc:p.svc,ver:p.ver||old.ver||''};});st.assets[a.ip]=e;});
+      if(!piped){for(let i=0;i<lines.length;i++){if(abortFlag)break;println(lines[i]);if(lines.length>40&&i%6===0)await sleep(8);else if(lines.length<=40)await sleep(12);}lines=null;}
+    } else if(argv[0]==='ping'){lines=await cmdPing(argv.slice(1));}
+    else if(argv[0]==='grep'&&argv.length>2&&segs.length===1){const f=argv[argv.length-1];if(st.fs[f]==null)lines=[`grep: ${f}: No such file or directory`];else lines=applyFilter(st.fs[f].split('\n'),argv.slice(0,-1));}
+    else lines=cmdSimple(argv);
+    if(lines){for(let s=1;s<segs.length;s++)lines=applyFilter(lines,segs[s]);
+      if(redirect&&redirect.file){st.fs[redirect.file]=(redirect.append&&st.fs[redirect.file]||'')+lines.join('\n')+'\n';}
+      else for(const l of lines)println(l);}
+  }catch(e){println('[lab] internal error: '+e);console.error(e);}
+  busy=false;save();
+  checkTasks(ctx);renderHeader();if(tab==='assets')render();
+}
+
+function checkTasks(ctx){
+  let newly=[];
+  LESSONS.forEach((l,li)=>l.tasks.forEach((t,ti)=>{const k=`${li}-${ti}`;if(st.tasks[k])return;let ok=false;try{ok=t.c(ctx,st);}catch(e){}if(ok){st.tasks[k]=1;newly.push(t.t);}}));
+  if(newly.length){save();toast('✓ '+newly[0]+(newly.length>1?` (+${newly.length-1} more)`:''));if(tab==='lessons')render();}
+}
+
+/* ---------- side panel ---------- */
+const totalTasks=()=>LESSONS.reduce((a,l)=>a+l.tasks.length,0);
+function renderHeader(){const d=Object.keys(st.tasks).length,tt=totalTasks(),cs=Object.keys(st.solved).length;
+  const pts=CHALLENGES.reduce((a,c,i)=>a+(st.solved[i]?c.pts:0),0);
+  $('#ptext').textContent=`Tasks ${d}/${tt} · Flags ${cs}/${CHALLENGES.length} · ${pts} pts`;
+  $('#pfill').style.width=Math.round((d+cs)/(tt+CHALLENGES.length)*100)+'%';}
+function setTab(t){tab=t;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));render();}
+function render(){
+  const P=$('#panel');
+  if(tab==='lessons'){const L=LESSONS[st.lesson];
+    const opts=LESSONS.map((l,i)=>{const done=l.tasks.every((t,j)=>st.tasks[`${i}-${j}`]);return `<option value="${i}" ${i===st.lesson?'selected':''}>${done?'✅ ':''}${l.title}</option>`;}).join('');
+    P.innerHTML=`<div class="lessonbar"><select id="lsel">${opts}</select></div>${L.html}
+      <div class="tasks"><h4>Tasks</h4>${L.tasks.map((t,j)=>{const d=st.tasks[`${st.lesson}-${j}`];return `<div class="task ${d?'done':''}"><div class="box">${d?'✓':''}</div><span class="t">${t.t}</span></div>`;}).join('')}</div>
+      <div class="navbtns"><button id="prev" ${st.lesson===0?'disabled':''}>◀ Previous</button><button id="next" class="primary" ${st.lesson===LESSONS.length-1?'disabled':''}>Next ▶</button></div>`;
+    $('#lsel').onchange=e=>{st.lesson=+e.target.value;save();render();P.scrollTop=0;};
+    $('#prev').onclick=()=>{st.lesson--;save();render();P.scrollTop=0;};$('#next').onclick=()=>{st.lesson++;save();render();P.scrollTop=0;};
+    P.querySelectorAll('code.try').forEach(c=>c.onclick=()=>{input.value=c.textContent;input.focus();});
+  }
+  else if(tab==='challenges'){
+    P.innerHTML=`<h2>🏁 Challenges</h2><p>Investigate the lab with nmap and submit answers. Answers are case-insensitive.</p>`+
+    CHALLENGES.map((c,i)=>`<div class="chal ${st.solved[i]?'solved':''}"><span class="pts">${c.pts} pts</span><div class="q"><b>#${i+1}</b> ${c.q}</div>
+      ${st.solved[i]?`<div style="color:var(--acc);font-size:13px">✓ Solved: <code>${esc(st.solved[i])}</code></div>`:`<div class="row"><input data-i="${i}" placeholder="answer"><button data-s="${i}">Submit</button><button data-h="${i}">Hint</button></div><div class="hint" id="h${i}">💡 ${c.h}</div>`}</div>`).join('');
+    const submit=i=>{const inp=P.querySelector(`input[data-i="${i}"]`);const v=inp.value.trim().toLowerCase().replace(/\s+/g,' ');if(!v)return;
+      if(CHALLENGES[i].a.includes(v)){st.solved[i]=inp.value.trim();save();toast(`🏁 Correct! +${CHALLENGES[i].pts} pts`);checkTasks({raw:'',o:null,ips:[]});renderHeader();render();}
+      else{inp.style.borderColor='var(--bad)';setTimeout(()=>inp.style.borderColor='',900);}};
+    P.querySelectorAll('button[data-s]').forEach(b=>b.onclick=()=>submit(+b.dataset.s));
+    P.querySelectorAll('input[data-i]').forEach(x=>x.onkeydown=e=>{if(e.key==='Enter')submit(+x.dataset.i);});
+    P.querySelectorAll('button[data-h]').forEach(b=>b.onclick=()=>{$('#h'+b.dataset.h).style.display='block';});
+  }
+  else if(tab==='assets'){const ips=Object.keys(st.assets).sort((a,b)=>ipToInt(a)-ipToInt(b));
+    P.innerHTML=`<h2>🗺️ Discovered Assets</h2><p>Builds automatically from your scan results: your living asset inventory.</p>`+
+      (ips.length?`<table class="assets"><tr><th>Host</th><th>Open ports / services</th></tr>${ips.map(ip=>{const e=st.assets[ip];const ps=Object.entries(e.ports).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
+      return `<tr><td><b>${ip}</b><br><span style="color:var(--dim)">${e.name||''}</span></td><td>${ps.length?ps.map(([k,v])=>`<span class="tag ${k.endsWith('udp')?'u':''}" title="${esc(v.ver||'')}">${k} ${esc(v.svc)}${v.ver?' · '+esc(v.ver.split(' (')[0]):''}</span>`).join(' '):'<span style="color:var(--dim)">host up (no ports scanned yet)</span>'}</td></tr>`;}).join('')}</table>`
+      :'<div class="callout info">Nothing yet. Start with <code>nmap -sn 10.10.10.0/24</code>.</div>');}
+  else if(tab==='cheat'){P.innerHTML=CHEAT;P.querySelectorAll('code.try').forEach(c=>c.onclick=()=>{input.value=c.textContent;input.focus();});}
+}
+const CHEAT=`<h2>📋 Nmap Cheat Sheet</h2>
+<h3>Discovery</h3><table><tr><td><code>-sn</code></td><td>Ping sweep only</td></tr><tr><td><code>-sL</code></td><td>List targets, no packets</td></tr><tr><td><code>-Pn</code></td><td>Skip discovery, assume up</td></tr><tr><td><code>-n</code> / <code>-R</code></td><td>Never / always reverse-DNS</td></tr><tr><td><code>--disable-arp-ping</code></td><td>Don't use ARP on the local LAN</td></tr></table>
+<h3>Scan types</h3><table><tr><td><code>-sS</code></td><td>SYN (default as root)</td></tr><tr><td><code>-sT</code></td><td>Full connect</td></tr><tr><td><code>-sU</code></td><td>UDP</td></tr><tr><td><code>-sA</code></td><td>ACK: firewall mapping</td></tr><tr><td><code>-sN -sF -sX</code></td><td>NULL / FIN / Xmas</td></tr></table>
+<h3>Ports</h3><table><tr><td><code>-p 22,80</code> <code>-p 1-1024</code> <code>-p-</code></td><td>Specific / range / all</td></tr><tr><td><code>-F</code> / <code>--top-ports N</code></td><td>Top 100 / top N</td></tr><tr><td><code>-p U:53,T:80</code></td><td>Per-protocol</td></tr><tr><td><code>--open</code></td><td>Only show open ports</td></tr></table>
+<h3>Enumeration</h3><table><tr><td><code>-sV</code></td><td>Service versions</td></tr><tr><td><code>-O</code></td><td>OS detection</td></tr><tr><td><code>-sC</code></td><td>Default scripts</td></tr><tr><td><code>--script &lt;name|cat|expr&gt;</code></td><td>NSE scripts</td></tr><tr><td><code>-A</code></td><td>-O -sV -sC --traceroute</td></tr></table>
+<h3>Timing & output</h3><table><tr><td><code>-T0..-T5</code></td><td>Timing templates</td></tr><tr><td><code>--min-rate N</code></td><td>Packets/sec floor</td></tr><tr><td><code>-oN -oX -oG -oA</code></td><td>Normal / XML / grepable / all</td></tr><tr><td><code>-v --reason</code></td><td>Verbose / why a state was chosen</td></tr><tr><td><code>-iL file</code></td><td>Targets from a file</td></tr></table>
+<h3>Go-to recipes</h3>
+<p>${T('nmap -sn 10.10.10.0/24')}<br>${T('nmap -T4 -p- --min-rate 1000 10.10.10.70')}<br>${T('nmap -sV -sC -p 21,22 10.10.10.25')}<br>${T('nmap -sU --top-ports 25 10.10.10.40')}<br>${T('nmap -Pn -A 10.10.20.50')}<br>${T('nmap --script vuln -p 445 10.10.10.0/24')}<br>${T('nmap -sV -oA full 10.10.10.0/24')}</p>
+<h3>Lab hosts (once discovered)</h3><p style="color:var(--dim);font-size:13px">See the 🗺️ Discovered tab. No spoilers here!</p>`;
+
+/* ---------- events ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+$('#resetBtn').onclick=()=>{if(confirm('Reset all lesson progress, challenge answers and saved files?')){localStorage.removeItem(KEY);location.reload();}};
+term.addEventListener('mouseup',()=>{if(!window.getSelection().toString())input.focus();});
+input.addEventListener('keydown',async e=>{
+  if(e.ctrlKey&&(e.key==='c'||e.key==='C')){if(busy){abortFlag=true;println('^C');}else{println(`<span class="pu">root@kali</span>:<span class="ph">~</span># ${esc(input.value)}^C`,true);input.value='';}e.preventDefault();return;}
+  if(e.ctrlKey&&(e.key==='l'||e.key==='L')){out.innerHTML='';e.preventDefault();return;}
+  if(busy){if(e.key==='Enter')e.preventDefault();return;}
+  if(e.key==='Enter'){const v=input.value;input.value='';await execute(v);input.focus();}
+  else if(e.key==='ArrowUp'){if(hIdx>0){hIdx--;input.value=st.hist[hIdx];}e.preventDefault();}
+  else if(e.key==='ArrowDown'){if(hIdx<st.hist.length-1){hIdx++;input.value=st.hist[hIdx];}else{hIdx=st.hist.length;input.value='';}e.preventDefault();}
+  else if(e.key==='Tab'){e.preventDefault();const parts=input.value.split(' ');const last=parts[parts.length-1];
+    const pool=parts.length===1?['nmap','ping','cat','ls','grep','clear','help','hint','history','ip','ifconfig','lesson','rm']:[...Object.keys(st.fs),...Object.keys(NAME2IP).filter(n=>n.includes('.')),'--script','--top-ports','--open','--reason','--traceroute','--min-rate','--version','-oA'];
+    const m=pool.filter(p=>p.startsWith(last));if(m.length===1){parts[parts.length-1]=m[0];input.value=parts.join(' ')+(parts.length===1||!m[0].startsWith('-')?' ':' ');}
+    else if(m.length>1){println(`<span class="pu">root@kali</span>:<span class="ph">~</span># ${esc(input.value)}`,true);println(m.join('   '));}}
+});
+
+/* ---------- boot ---------- */
+[ '┌───────────────────────────────────────────────────────────┐',
+  '│  nmap::lab | Interactive Nmap Training Range              │',
+  '│  Simulated network. Safe to scan everything in scope.     │',
+  '└───────────────────────────────────────────────────────────┘',
+  '[lab] Type "help" for commands, or click a green command in the lesson panel.',
+  '[lab] Start here →  ip a   then   nmap -sn 10.10.10.0/24',''].forEach(l=>println(l));
+render();renderHeader();input.focus();
+
+</script>
+</body>
+</html>
