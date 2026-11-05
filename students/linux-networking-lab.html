@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NETLAB - Linux &amp; Networking Fundamentals Lab</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--panel2:#1c232c;--border:#30363d;--text:#c9d1d9;--muted:#8b949e;--accent:#3fb950;--blue:#58a6ff;--yellow:#d29922;--red:#f85149;--term:#0b0e14;--mag:#d2a8ff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,-apple-system,sans-serif;font-size:14px}
+header{height:54px;display:flex;align-items:center;gap:16px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--border)}
+header .logo{font-weight:700;font-size:17px;letter-spacing:.3px}
+header .logo span{color:var(--accent)}
+header .sub{color:var(--muted);font-size:12.5px}
+header .grow{flex:1}
+.pbar{width:200px;height:8px;background:#21262d;border-radius:4px;overflow:hidden}
+.pbar>div{height:100%;background:linear-gradient(90deg,#238636,#3fb950);width:0;transition:width .4s}
+.score{font-weight:600;font-variant-numeric:tabular-nums;min-width:120px;text-align:right}
+button{background:#21262d;color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px}
+button:hover{background:#30363d}
+button.primary{background:#238636;border-color:#2ea043;color:#fff}
+button.primary:hover{background:#2ea043}
+button.danger{color:var(--red)}
+main{display:flex;height:calc(100% - 54px)}
+#left{width:46%;min-width:360px;display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--panel)}
+#right{flex:1;display:flex;flex-direction:column;min-width:0}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--panel)}
+.tabs button{border:none;border-radius:0;background:none;padding:11px 18px;color:var(--muted);border-bottom:2px solid transparent;font-weight:600}
+.tabs button.on{color:var(--text);border-bottom-color:#f78166}
+.pane{flex:1;overflow:auto;padding:16px 20px;display:none}
+.pane.on{display:block}
+.lnav{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.lnav select{flex:1;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px;font-size:13.5px}
+h2{margin:6px 0 4px;font-size:20px}
+h4{margin:16px 0 6px;color:var(--blue);font-size:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chip{background:#1f6feb22;color:var(--blue);border:1px solid #1f6feb55;border-radius:12px;padding:2px 9px;font-size:12px;font-family:monospace;cursor:pointer}
+p,li{line-height:1.55}
+code{font-family:"Cascadia Code","Fira Code",Consolas,monospace;background:#6e768133;padding:1px 5px;border-radius:4px;font-size:12.5px}
+code.run{cursor:pointer;background:#30363d;color:#e6edf3;border:1px solid #484f58}
+code.run:hover{background:#238636;border-color:#2ea043}
+pre.ex{background:var(--term);border:1px solid var(--border);border-radius:6px;padding:10px 12px;overflow:auto;font-size:12.3px;line-height:1.45;font-family:"Cascadia Code","Fira Code",Consolas,monospace}
+.tip{background:#d2992215;border-left:3px solid var(--yellow);padding:8px 12px;border-radius:4px;margin:12px 0;line-height:1.5}
+.scenario{background:#1f6feb15;border-left:3px solid var(--blue);padding:10px 14px;border-radius:4px;line-height:1.6}
+table.mini{border-collapse:collapse;margin:8px 0}
+table.mini td,table.mini th{border:1px solid var(--border);padding:4px 10px;text-align:left}
+.section{margin-top:18px;border-top:1px solid var(--border);padding-top:12px}
+.section h3{margin:0 0 8px;font-size:15px;display:flex;justify-content:space-between}
+.section h3 small{color:var(--muted);font-weight:400}
+.task{display:flex;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;background:var(--panel2);align-items:flex-start}
+.task .box{width:18px;height:18px;border-radius:50%;border:2px solid #484f58;flex:none;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px}
+.task.done{border-color:#2ea04366;background:#2386361a}
+.task.done .box{background:var(--accent);border-color:var(--accent);color:#000}
+.task .t{flex:1}
+.task .hint{display:none;margin-top:6px;color:var(--muted);font-size:13px}
+.task.showhint .hint{display:block}
+.task .hbtn{font-size:11.5px;padding:2px 8px}
+.q{padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;background:var(--panel2)}
+.q .qt{margin-bottom:7px}
+.q input[type=text]{background:var(--term);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:6px 8px;width:62%;font-family:monospace}
+.q.ok{border-color:#2ea04366;background:#2386361a}
+.q .fb{margin-left:8px;font-size:13px}
+.q .fb.good{color:var(--accent)}.q .fb.bad{color:var(--red)}
+.q label{display:block;padding:3px 0;cursor:pointer}
+.navbtns{display:flex;justify-content:space-between;margin:18px 0 8px}
+/* Docs */
+.doclist{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.doclist button{font-family:monospace;padding:4px 10px}
+.doclist button.on{background:#1f6feb;border-color:#1f6feb;color:#fff}
+.doc dt{font-family:monospace;color:var(--accent);margin-top:6px}
+.doc dd{margin:2px 0 4px 18px;color:var(--text)}
+.doc .syn{white-space:pre;overflow:auto;font-family:monospace;background:var(--term);padding:8px 10px;border-radius:6px;border:1px solid var(--border)}
+.doc .pkg{color:var(--muted);font-size:12px}
+/* Progress */
+table.prog{width:100%;border-collapse:collapse;font-size:13px}
+table.prog th,table.prog td{border-bottom:1px solid var(--border);padding:6px 6px;text-align:left}
+table.prog td.n{text-align:right;font-variant-numeric:tabular-nums}
+.big{font-size:34px;font-weight:700}
+.card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row input{background:var(--term);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:6px 8px}
+/* Terminal */
+.tbar{height:36px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#161b22;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--muted)}
+.tbar .dot{width:11px;height:11px;border-radius:50%}
+.tbar .grow{flex:1;text-align:center}
+#term{flex:1;overflow-y:auto;background:var(--term);padding:10px 14px;font-family:"Cascadia Code","Fira Code","JetBrains Mono",Consolas,"DejaVu Sans Mono",monospace;font-size:13.5px;line-height:1.38;white-space:pre-wrap;word-break:break-all;cursor:text}
+#term .err{color:#ff7b72}
+#term .dir{color:#58a6ff;font-weight:600}
+#term .match{color:#ff5555;font-weight:700}
+#term .magenta{color:#bc8cff}
+#term .p1{color:#3fb950}
+#term .pu{color:#58a6ff;font-weight:700}
+#term .pr{color:#ff5555;font-weight:700}
+#term .pd{color:#e6edf3;font-weight:700}
+#term .sys{color:#8b949e}
+#inline{display:inline}
+#cmd{background:transparent;border:none;outline:none;color:#e6edf3;font:inherit;padding:0;margin:0;width:60%;caret-color:#3fb950}
+.toast{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:20}
+.toast div{background:#238636;color:#fff;padding:9px 14px;border-radius:6px;box-shadow:0 4px 16px #0008;font-size:13px;animation:pop .25s ease-out;max-width:380px}
+@keyframes pop{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.legend{color:var(--muted);font-size:12px;margin-top:4px}
+@media (max-width:900px){main{flex-direction:column}#left{width:100%;height:50%;min-width:0}#right{height:50%}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">NET<span>LAB</span></div>
+  <div class="sub">Linux &amp; Networking Fundamentals</div>
+  <div class="grow"></div>
+  <div class="pbar" title="Overall progress"><div id="pbar"></div></div>
+  <div class="score" id="score">0 / 0 pts</div>
+</header>
+<main>
+  <section id="left">
+    <div class="tabs">
+      <button data-tab="lessons" class="on">Lessons</button>
+      <button data-tab="docs">Docs</button>
+      <button data-tab="progress">Progress &amp; Grade</button>
+    </div>
+    <div class="pane on" id="pane-lessons"></div>
+    <div class="pane" id="pane-docs"></div>
+    <div class="pane" id="pane-progress"></div>
+  </section>
+  <section id="right">
+    <div class="tbar"><span class="dot" style="background:#ff5f56"></span><span class="dot" style="background:#ffbd2e"></span><span class="dot" style="background:#27c93f"></span>
+      <div class="grow">student@netlab: ~ — simulated Kali Linux</div>
+      <button id="btnStop" title="Send Ctrl+C">Ctrl+C</button>
+      <button id="btnClear" title="Clear screen">Clear</button>
+    </div>
+    <div id="term"></div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+// ===== Hash functions (real MD5 / SHA-256 over UTF-8 bytes) =====
+function utf8Bytes(s){return new TextEncoder().encode(s);}
+function md5(str){
+  const b=utf8Bytes(str);const n=b.length;const words=new Uint32Array((((n+8)>>>6)+1)*16);
+  for(let i=0;i<n;i++)words[i>>2]|=b[i]<<((i%4)*8);
+  words[n>>2]|=0x80<<((n%4)*8);words[words.length-2]=(n*8)>>>0;words[words.length-1]=Math.floor(n/0x20000000);
+  const S=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+  const K=[];for(let i=0;i<64;i++)K[i]=Math.floor(Math.abs(Math.sin(i+1))*4294967296)>>>0;
+  let a0=0x67452301,b0=0xefcdab89,c0=0x98badcfe,d0=0x10325476;
+  for(let o=0;o<words.length;o+=16){
+    let A=a0,B=b0,C=c0,D=d0;
+    for(let i=0;i<64;i++){
+      let F,g;
+      if(i<16){F=(B&C)|(~B&D);g=i;}else if(i<32){F=(D&B)|(~D&C);g=(5*i+1)%16;}
+      else if(i<48){F=B^C^D;g=(3*i+5)%16;}else{F=C^(B|~D);g=(7*i)%16;}
+      F=(F+A+K[i]+words[o+g])>>>0;A=D;D=C;C=B;B=(B+((F<<S[i])|(F>>>(32-S[i]))))>>>0;
+    }
+    a0=(a0+A)>>>0;b0=(b0+B)>>>0;c0=(c0+C)>>>0;d0=(d0+D)>>>0;
+  }
+  return [a0,b0,c0,d0].map(x=>{let h='';for(let i=0;i<4;i++)h+=((x>>>(i*8))&255).toString(16).padStart(2,'0');return h;}).join('');
+}
+const SHA_K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+function sha256(str){
+  const b=utf8Bytes(str);const n=b.length;const total=(((n+8)>>>6)+1)*64;const m=new Uint8Array(total);m.set(b);m[n]=0x80;
+  const bits=n*8;const dv=new DataView(m.buffer);dv.setUint32(total-4,bits>>>0);dv.setUint32(total-8,Math.floor(bits/4294967296));
+  let H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const W=new Uint32Array(64);const r=(x,k)=>(x>>>k)|(x<<(32-k));
+  for(let o=0;o<total;o+=64){
+    for(let i=0;i<16;i++)W[i]=dv.getUint32(o+i*4);
+    for(let i=16;i<64;i++){const s0=r(W[i-15],7)^r(W[i-15],18)^(W[i-15]>>>3);const s1=r(W[i-2],17)^r(W[i-2],19)^(W[i-2]>>>10);W[i]=(W[i-16]+s0+W[i-7]+s1)>>>0;}
+    let [a,bb,c,d,e,f,g,h]=H;
+    for(let i=0;i<64;i++){const S1=r(e,6)^r(e,11)^r(e,25);const ch=(e&f)^(~e&g);const t1=(h+S1+ch+SHA_K[i]+W[i])>>>0;const S0=r(a,2)^r(a,13)^r(a,22);const mj=(a&bb)^(a&c)^(bb&c);const t2=(S0+mj)>>>0;h=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=bb;bb=a;a=(t1+t2)>>>0;}
+    H=[H[0]+a,H[1]+bb,H[2]+c,H[3]+d,H[4]+e,H[5]+f,H[6]+g,H[7]+h].map(x=>x>>>0);
+  }
+  return H.map(x=>x.toString(16).padStart(8,'0')).join('');
+}
+// ===== Simulated environment: filesystem + network =====
+const HOME='/home/student';
+const ME={ip:'10.10.10.50',mac:'00:50:56:a1:3c:50',host:'netlab',fqdn:'netlab.lab.local',gw:'10.10.10.1',dns:'10.10.10.10',pub:'198.51.100.77'};
+const TOOL_TGZ='\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\x03netlab-tool-1.4.2/\x00install.sh\x00README\x00bin/netlab-tool\x00\u00ed\u00bd\u0007`\u001cI\u0096%&/m\u00ca{\u007fJ\u00f5J\u00d7\u00e0t\u00a1\b\u0080`\u0013$\u00d8\u0090@\u0010\u00ec\u00c1\u0088\u00cd\u00e6\u0092\u00ec\u001diG#)\u00ab*\u0081\u00caeVe]f\u0016@\u00cc\u00ed\u009d\u00bc\u00f7\u00de{\u00ef\u00bd\u00f7\u00de{\u00ef\u00bd\u00f7\u00ba;\u009dN\'\u00f7\u00df\u00ff?\\fd\u0001l\u00f6\u00ceJ\u00da\u00c9\u009e!\u0080\u00aa\u00c8\u001f?~|\u001f?"\u001e\u00ff\u001f\u0000end-of-archive\n';
+const FLAG_TXT='NETLAB{capstone_complete}\n';
+const EVIDENCE={
+  'invoice-0423.pdf':'%PDF-1.7\nInvoice #0423\nVendor: Contoso Supply\nAmount due: $4,250.00\nRemit to account ending 7781\n%%EOF\n',
+  'invoice-0423-copy.pdf':'%PDF-1.7\nInvoice #0423\nVendor: Contoso Supply\nAmount due: $4,250.00\nRemit to account ending 7781\n%%EOF\n',
+  'invoice-0424.pdf':'%PDF-1.7\nInvoice #0424\nVendor: Contoso Supply\nAmount due: $4,250.00\nRemit to account ending 9902\n%%EOF\n',
+  'meeting-notes.txt':'Ops sync - Nov 3\n- Patch window moved to Saturday\n- Rotate service account passwords\n- Review firewall rule FW-1187\n',
+  'firewall-rules.conf':'# fw01 export\nallow tcp any -> 10.10.10.20 80,443\nallow tcp 10.10.10.0/24 -> 10.10.20.5 443\ndeny  ip  any -> 10.10.20.0/24\n'
+};
+// The "published" hashes use the ORIGINAL content. invoice-0424.pdf was tampered after hashing.
+const EVIDENCE_ORIG=Object.assign({},EVIDENCE,{'invoice-0424.pdf':'%PDF-1.7\nInvoice #0424\nVendor: Contoso Supply\nAmount due: $4,250.00\nRemit to account ending 7781\n%%EOF\n'});
+
+function buildFS(){
+  const F={};
+  const dir=(p,o)=>F[p]=Object.assign({type:'dir'},o||{});
+  const file=(p,c,o)=>F[p]=Object.assign({type:'file',content:c},o||{});
+  ['/','/etc','/home',HOME,HOME+'/evidence',HOME+'/downloads','/tmp','/root','/usr','/usr/bin','/var','/var/log','/proc','/proc/net'].forEach(p=>dir(p));
+  F['/root'].root=true;
+  file(HOME+'/README.txt',
+`Welcome to NETLAB, student!
+
+This machine (netlab / 10.10.10.50) is connected to a small simulated
+company network called lab.local. Nothing you do here touches a real
+network, so experiment freely.
+
+  * Follow the lessons in the left-hand panel.
+  * Tasks are checked automatically as you run commands.
+  * Type  man <command>  for documentation, or  help  for a command list.
+  * Your sudo password is anything non-empty (try: student).
+
+Your first flag: NETLAB{welcome_aboard}
+`);
+  file(HOME+'/.bash_history','');
+  file(HOME+'/network-diagram.txt',
+`                         lab.local network
+  Internet
+     |
+  [fw01 10.10.10.1]-------------------------- LAN 10.10.10.0/24 ----------------
+     |            |            |             |            |            |
+  dc01 .10     web01 .20    mail .25     files01 .30   ws77 .77    netlab .50 (you)
+  (DNS)        (HTTP/S)     (SMTP)       (FTP/SMB)                    
+                                                       
+  [fw-dmz 10.10.10.254] ---- DMZ 10.10.20.0/24 ---- hardened .5 (HTTPS only)
+`);
+  Object.entries(EVIDENCE).forEach(([n,c])=>file(HOME+'/evidence/'+n,c));
+  file(HOME+'/evidence/SHA256SUMS',Object.keys(EVIDENCE).sort().map(n=>sha256(EVIDENCE_ORIG[n])+'  '+n).join('\n')+'\n');
+  file('/etc/hostname','netlab\n');
+  file('/etc/hosts','127.0.0.1\tlocalhost\n127.0.1.1\tnetlab.lab.local netlab\n10.10.10.30\tfiles01.lab.local files01\n\n# The following lines are desirable for IPv6 capable hosts\n::1     localhost ip6-localhost ip6-loopback\nff02::1 ip6-allnodes\nff02::2 ip6-allrouters\n');
+  file('/etc/resolv.conf','# Generated by NetworkManager\nsearch lab.local\nnameserver 10.10.10.10\n');
+  file('/etc/os-release','PRETTY_NAME="Kali GNU/Linux Rolling"\nNAME="Kali GNU/Linux"\nVERSION_ID="2026.3"\nVERSION="2026.3"\nVERSION_CODENAME=kali-rolling\nID=kali\nID_LIKE=debian\nHOME_URL="https://www.kali.org/"\n');
+  file('/etc/passwd','root:x:0:0:root:/root:/usr/bin/zsh\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nsshd:x:100:65534::/run/sshd:/usr/sbin/nologin\npostgres:x:118:126:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash\nstudent:x:1000:1000:Student,,,:/home/student:/bin/bash\n');
+  file('/etc/shadow','root:$y$j9T$Qm1f8o0z$Xc0uYk3:20390:0:99999:7:::\nstudent:$y$j9T$7aP2kz$4bV1nLq:20390:0:99999:7:::\n',{root:true});
+  file('/etc/services','ftp\t\t21/tcp\nssh\t\t22/tcp\ntelnet\t\t23/tcp\nsmtp\t\t25/tcp\t\tmail\ndomain\t\t53/tcp\ndomain\t\t53/udp\nhttp\t\t80/tcp\t\twww\nkerberos\t88/tcp\nntp\t\t123/udp\nmsrpc\t\t135/tcp\nimap2\t\t143/tcp\t\timap\nldap\t\t389/tcp\nhttps\t\t443/tcp\nmicrosoft-ds\t445/tcp\nipp\t\t631/tcp\npostgresql\t5432/tcp\nhttp-alt\t8080/tcp\n');
+  file('/root/secret.txt','root only\n',{root:true});
+  file('/var/log/syslog','Nov  5 08:00:01 netlab systemd[1]: Started session.\nNov  5 08:02:11 netlab NetworkManager[600]: <info> dhcp4 (eth0): address 10.10.10.50\n',{root:true});
+  return F;
+}
+
+// ---------- Network model ----------
+const SVC={20:'ftp-data',21:'ftp',22:'ssh',23:'telnet',25:'smtp',53:'domain',67:'bootps',68:'bootpc',80:'http',88:'kerberos',110:'pop3',123:'ntp',135:'msrpc',139:'netbios-ssn',143:'imap2',389:'ldap',443:'https',445:'microsoft-ds',631:'ipp',3389:'ms-wbt-server',5353:'mdns',5432:'postgresql',8000:'irdmi',8080:'http-alt'};
+const PORTNAME_TO_NUM=Object.fromEntries(Object.entries(SVC).map(([k,v])=>[v,+k]));Object.assign(PORTNAME_TO_NUM,{www:80,imap:143,dns:53});
+const HOSTS={
+  '127.0.0.1':{fqdn:'localhost',ttl:64,rtt:0.03,icmp:true,tcp:{22:1,631:1,5432:1,8080:1,31337:1},local:true},
+  '10.10.10.50':{fqdn:'netlab.lab.local',ttl:64,rtt:0.03,icmp:true,tcp:{22:1,8080:1,31337:1},local:true,mac:ME.mac},
+  '10.10.10.1':{fqdn:'fw01.lab.local',mac:'00:1c:7f:3a:10:01',ttl:64,rtt:0.55,icmp:true,tcp:{22:1,443:1}},
+  '10.10.10.5':{fqdn:'admin-ws05.lab.local',mac:'00:50:56:a1:22:05',ttl:64,rtt:0.48,icmp:true,tcp:{22:1}},
+  '10.10.10.10':{fqdn:'dc01.lab.local',mac:'00:50:56:a1:9e:10',ttl:128,rtt:0.62,icmp:true,tcp:{53:1,88:1,135:1,389:1,445:1},udp:{53:1}},
+  '10.10.10.20':{fqdn:'web01.lab.local',mac:'00:50:56:a1:5b:20',ttl:64,rtt:0.51,icmp:true,tcp:{22:1,80:1,443:1}},
+  '10.10.10.25':{fqdn:'mail.lab.local',mac:'00:50:56:a1:6c:25',ttl:64,rtt:0.58,icmp:true,tcp:{25:1,143:1}},
+  '10.10.10.30':{fqdn:'files01.lab.local',mac:'00:50:56:a1:7d:30',ttl:64,rtt:0.49,icmp:true,tcp:{21:1,22:1,445:1,8042:1}},
+  '10.10.10.77':{fqdn:'ws77.lab.local',mac:'00:50:56:a1:88:77',ttl:128,rtt:0.71,icmp:true,tcp:{135:1,445:1}},
+  '10.10.10.254':{fqdn:'fw-dmz.lab.local',mac:'00:1c:7f:3a:10:fe',ttl:64,rtt:0.6,icmp:true,tcp:{22:1}},
+  '10.10.20.5':{fqdn:'hardened.lab.local',ttl:63,rtt:1.2,icmp:false,tcp:{443:1},filtered:true,via:'10.10.10.254'},
+  '8.8.8.8':{fqdn:'dns.google',ttl:117,rtt:12.4,icmp:true,tcp:{53:1,443:1},udp:{53:1},ext:'goog'},
+  '1.1.1.1':{fqdn:'one.one.one.one',ttl:57,rtt:9.1,icmp:true,tcp:{53:1,80:1,443:1},udp:{53:1},ext:'cf'},
+  '93.184.215.14':{fqdn:null,ttl:52,rtt:21.7,icmp:true,tcp:{80:1,443:1},ext:'edge'},
+  '142.250.80.46':{fqdn:'lga25s71-in-f14.1e100.net',ttl:116,rtt:14.2,icmp:true,tcp:{80:1,443:1},ext:'goog'},
+  '142.250.80.68':{fqdn:'lga25s71-in-f4.1e100.net',ttl:116,rtt:14.0,icmp:true,tcp:{80:1,443:1},ext:'goog'},
+  '140.82.112.4':{fqdn:'lb-140-82-112-4-iad.github.com',ttl:50,rtt:24.8,icmp:false,tcp:{22:1,80:1,443:1},ext:'edge'},
+  '34.160.111.145':{fqdn:'145.111.160.34.bc.googleusercontent.com',ttl:115,rtt:15.3,icmp:true,tcp:{80:1,443:1},ext:'goog'},
+};
+const ARP_INIT=['10.10.10.1','10.10.10.10','10.10.10.5'];
+// DNS zone data. Internal names only resolvable through dc01 (split-horizon DNS).
+const DNS={
+  'lab.local':{internal:true,NS:['dc01.lab.local.'],MX:['10 mail.lab.local.'],TXT:['"v=spf1 mx -all"','"lab-flag=NETLAB{txt_records_tell_tales}"'],SOA:'dc01.lab.local. hostmaster.lab.local. 2026110501 900 600 86400 3600'},
+  'fw01.lab.local':{internal:true,A:['10.10.10.1']},
+  'fw-dmz.lab.local':{internal:true,A:['10.10.10.254']},
+  'admin-ws05.lab.local':{internal:true,A:['10.10.10.5']},
+  'dc01.lab.local':{internal:true,A:['10.10.10.10']},
+  'web01.lab.local':{internal:true,A:['10.10.10.20']},
+  'intranet.lab.local':{internal:true,CNAME:'web01.lab.local.'},
+  'mail.lab.local':{internal:true,A:['10.10.10.25']},
+  'files01.lab.local':{internal:true,A:['10.10.10.30']},
+  'ws77.lab.local':{internal:true,A:['10.10.10.77']},
+  'netlab.lab.local':{internal:true,A:['10.10.10.50']},
+  'hardened.lab.local':{internal:true,A:['10.10.20.5']},
+  'updates.lab.local':{internal:true,CNAME:'web01.lab.local.'},
+  'example.com':{A:['93.184.215.14'],AAAA:['2606:2800:21f:cb07:6820:80da:af6b:8b2c'],NS:['a.iana-servers.net.','b.iana-servers.net.'],MX:['0 .'],TXT:['"v=spf1 -all"']},
+  'www.example.com':{CNAME:'example.com.'},
+  'google.com':{A:['142.250.80.46'],AAAA:['2607:f8b0:4006:81f::200e'],MX:['10 smtp.google.com.'],NS:['ns1.google.com.','ns2.google.com.']},
+  'www.google.com':{A:['142.250.80.68']},
+  'dns.google':{A:['8.8.8.8','8.8.4.4']},
+  'one.one.one.one':{A:['1.1.1.1','1.0.0.1']},
+  'github.com':{A:['140.82.112.4']},
+  'ifconfig.me':{A:['34.160.111.145']},
+};
+const PTR={};
+Object.entries(HOSTS).forEach(([ip,h])=>{if(h.fqdn&&ip!=='127.0.0.1')PTR[ip]=h.fqdn;});
+PTR['127.0.0.1']='localhost';
+function revName(ip){return ip.split('.').reverse().join('.')+'.in-addr.arpa';}
+const isIP=s=>/^\d{1,3}(\.\d{1,3}){3}$/.test(s);
+const inLan=ip=>ip.startsWith('10.10.10.');
+const rnd=(base,j)=>Math.max(0.01,base*(1+(Math.random()-0.5)*(j||0.3)));
+const fmtMs=v=>v<1?v.toFixed(3):v<10?v.toFixed(2):v.toFixed(1);
+// ===== Shell core =====
+class Interrupt extends Error{constructor(){super('INT');}}
+const SH={fs:null,cwd:HOME,root:false,sudoCached:false,history:[],arp:{},env:{},running:null,lastExit:0};
+function resetEnv(){
+  SH.fs=buildFS();SH.cwd=HOME;SH.root=false;SH.sudoCached=false;SH.arp={};
+  ARP_INIT.forEach(ip=>SH.arp[ip]={mac:HOSTS[ip].mac,state:'REACHABLE'});
+  SH.env={HOME,USER:'student',SHELL:'/bin/bash',PATH:'/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin',HOSTNAME:'netlab',PWD:HOME,LANG:'en_US.UTF-8'};
+}
+function normPath(p,cwd){
+  if(p==='~'||p.startsWith('~/'))p=HOME+p.slice(1);
+  if(!p.startsWith('/'))p=(cwd||SH.cwd)+'/'+p;
+  const out=[];for(const s of p.split('/')){if(!s||s==='.')continue;if(s==='..')out.pop();else out.push(s);}
+  return '/'+out.join('/');
+}
+function fsGet(p){return SH.fs[normPath(p)];}
+function fsList(d){const pre=d==='/'?'/':d+'/';return Object.keys(SH.fs).filter(k=>k!==d&&k.startsWith(pre)&&!k.slice(pre.length).includes('/')).map(k=>k.slice(pre.length)).sort();}
+function fsWrite(p,content,append){
+  const np=normPath(p);const parent=np.slice(0,np.lastIndexOf('/'))||'/';
+  if(np==='/dev/null')return null;
+  if(!SH.fs[parent]||SH.fs[parent].type!=='dir')return `${p}: No such file or directory`;
+  if(!SH.root&&(np.startsWith('/etc')||np.startsWith('/root')||np.startsWith('/usr')||np.startsWith('/var')))return `${p}: Permission denied`;
+  const ex=SH.fs[np];if(ex&&ex.type==='dir')return `${p}: Is a directory`;
+  if(append&&ex&&typeof ex.content==='string')ex.content+=content;else SH.fs[np]={type:'file',content};
+  return null;
+}
+function readFile(p,cmd){
+  const n=fsGet(p);
+  if(!n)return {err:`${cmd}: ${p}: No such file or directory`};
+  if(n.type==='dir')return {err:`${cmd}: ${p}: Is a directory`};
+  if(n.root&&!SH.root&&!SH._sudo)return {err:`${cmd}: ${p}: Permission denied`};
+  return {data:typeof n.content==='string'?n.content:n.content.raw};
+}
+const shortPath=p=>{const h=SH.root?'/root':HOME;return p===h?'~':p.startsWith(h+'/')?'~'+p.slice(h.length):p;};
+
+// --- tokenizer: handles quotes, escapes, operators | ; && || > >> 2> 2>&1 ---
+function tokenize(line){
+  const toks=[];let cur='',q=null,has=false,quoted=false;
+  const push=()=>{if(has)toks.push({v:cur,q:quoted});cur='';has=false;quoted=false;};
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(q){if(c===q)q=null;else if(c==='\\'&&q==='"'&&/["\\$`]/.test(line[i+1]||'')){cur+=line[++i];}else cur+=c;continue;}
+    if(c==='"'||c==="'"){q=c;has=true;quoted=true;continue;}
+    if(c==='\\'){cur+=line[++i]||'';has=true;continue;}
+    if(c==='#'&&!has){break;}
+    if(/\s/.test(c)){push();continue;}
+    const two=line.substr(i,2),four=line.substr(i,4);
+    if(four==='2>&1'){push();toks.push({op:'2>&1'});i+=3;continue;}
+    if(two==='&&'||two==='||'||two==='>>'||two==='2>'){push();toks.push({op:two});i++;continue;}
+    if(c==='|'||c===';'||c==='>'||c==='<'||c==='&'){push();toks.push({op:c});continue;}
+    cur+=c;has=true;
+  }
+  if(q)return {error:'unexpected EOF while looking for matching `'+q+"'"};
+  push();return {toks};
+}
+function expandWord(t){
+  if(t.q&&t.v.indexOf('$')<0)return [t.v];
+  let v=t.v.replace(/\$\{?(\w+|\?)\}?/g,(m,n)=>n==='?'?String(SH.lastExit):(SH.env[n]!==undefined?SH.env[n]:''));
+  if(t.q)return [v];
+  if(v==='~'||v.startsWith('~/'))v=HOME+v.slice(1);
+  if(/[*?]/.test(v)){
+    const abs=v.startsWith('/');const full=normPath(v.replace(/[^/]*[*?][^/]*$/,'')||'.');
+    const pat=v.split('/').pop();const re=new RegExp('^'+pat.replace(/[.+^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$');
+    const prefix=v.slice(0,v.length-pat.length);
+    const hits=fsList(full).filter(n=>re.test(n)&&(!n.startsWith('.')||pat.startsWith('.'))).map(n=>prefix+n);
+    if(hits.length)return hits;
+  }
+  return [v];
+}
+function parseLine(line){
+  const t=tokenize(line);if(t.error)return {error:t.error};
+  // split into list of {pipeline, op}
+  const seq=[];let pipe=[],cmd={words:[],redir:[]};
+  const endCmd=()=>{pipe.push(cmd);cmd={words:[],redir:[]};};
+  const toks=t.toks;
+  for(let i=0;i<toks.length;i++){
+    const k=toks[i];
+    if(k.op==='|'){if(!cmd.words.length)return {error:"syntax error near unexpected token `|'"};endCmd();continue;}
+    if(k.op===';'||k.op==='&&'||k.op==='||'||k.op==='&'){if(cmd.words.length)endCmd();if(pipe.length)seq.push({pipe,op:k.op});pipe=[];continue;}
+    if(k.op==='>'||k.op==='>>'||k.op==='2>'||k.op==='<'){const f=toks[++i];if(!f||f.op)return {error:"syntax error near unexpected token `newline'"};cmd.redir.push({op:k.op,file:expandWord(f)[0]});continue;}
+    if(k.op==='2>&1'){cmd.redir.push({op:'2>&1'});continue;}
+    cmd.words.push(...expandWord(k));
+  }
+  if(cmd.words.length)endCmd();if(pipe.length)seq.push({pipe,op:null});
+  return {seq};
+}
+
+// --- name resolution used by ping/curl/nc/etc. (hosts file first, then DNS with search domain) ---
+function hostsFile(){const out={};const n=SH.fs['/etc/hosts'];if(!n)return out;n.content.split('\n').forEach(l=>{l=l.replace(/#.*/,'').trim();if(!l)return;const p=l.split(/\s+/);if(!isIP(p[0]))return;p.slice(1).forEach(h=>{if(!out[h.toLowerCase()])out[h.toLowerCase()]=p[0];});});return out;}
+function dnsQuery(name,type,server){
+  // returns {status, answers:[{name,type,data,ttl}], aa}
+  server=server||ME.dns;name=name.toLowerCase().replace(/\.$/,'');
+  const internalOK=server===ME.dns;const ans=[];let cur=name,guard=0;
+  if(type==='PTR'){
+    const m=name.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.in-addr\.arpa$/);if(!m)return {status:'NXDOMAIN',answers:[]};
+    const ip=[m[4],m[3],m[2],m[1]].join('.');const h=PTR[ip];
+    const internal=ip.startsWith('10.');
+    if(!h||(internal&&!internalOK))return {status:'NXDOMAIN',answers:[],aa:internal};
+    return {status:'NOERROR',answers:[{name:name+'.',type:'PTR',data:h+'.',ttl:internal?3600:300}],aa:internal};
+  }
+  while(guard++<5){
+    const z=DNS[cur];
+    if(!z||(z.internal&&!internalOK)){return {status:ans.length?'NOERROR':'NXDOMAIN',answers:ans,aa:cur.endsWith('lab.local'),soaZone:cur.endsWith('lab.local')?'lab.local':cur.split('.').slice(-2).join('.')};}
+    const ttl=z.internal?3600:(type==='A'?300:3600);
+    if(z.CNAME&&type!=='CNAME'){ans.push({name:cur+'.',type:'CNAME',data:z.CNAME,ttl});cur=z.CNAME.replace(/\.$/,'');continue;}
+    (z[type]||[]).concat(type==='CNAME'&&z.CNAME?[z.CNAME]:[]).forEach(d=>ans.push({name:cur+'.',type,data:d,ttl}));
+    if(type==='ANY'){['A','AAAA','NS','MX','TXT'].forEach(t=>(z[t]||[]).forEach(d=>ans.push({name:cur+'.',type:t,data:d,ttl})));}
+    return {status:'NOERROR',answers:ans,aa:!!z.internal,soaZone:z.internal?'lab.local':name.split('.').slice(-2).join('.')};
+  }
+  return {status:'SERVFAIL',answers:ans};
+}
+function resolve(name){
+  // returns {ip, name(display)} or null
+  if(isIP(name))return {ip:name,name};
+  const n=name.toLowerCase().replace(/\.$/,'');
+  const hf=hostsFile();if(hf[n])return {ip:hf[n]==='127.0.1.1'?ME.ip:hf[n],name:n};
+  const tries=n.includes('.')?[n,n+'.lab.local']:[n+'.lab.local',n];
+  for(const t of tries){const r=dnsQuery(t,'A');const a=r.answers.filter(x=>x.type==='A');if(a.length)return {ip:a[0].data,name:t,canon:r.answers[r.answers.length-1].name.replace(/\.$/,'')};}
+  return null;
+}
+function hostInfo(ip){return HOSTS[ip]||null;}
+function touchArp(ip){
+  if(!inLan(ip)||ip===ME.ip)return;
+  const h=HOSTS[ip];SH.arp[ip]=h?{mac:h.mac,state:'REACHABLE'}:{mac:null,state:'FAILED'};
+}
+function nextHopArp(ip){if(inLan(ip))touchArp(ip);else if(ip.startsWith('10.10.20.'))touchArp('10.10.10.254');else if(!ip.startsWith('127.'))touchArp(ME.gw);}
+// TCP reachability: open | closed | filtered | noroute
+function tcpState(ip,port){
+  if(ip.startsWith('127.')||ip===ME.ip){return HOSTS['127.0.0.1'].tcp[port]&&(ip.startsWith('127.')||port!==631&&port!==5432)?'open':'closed';}
+  nextHopArp(ip);
+  const h=HOSTS[ip];
+  if(!h)return inLan(ip)?'noroute':'filtered';
+  if(h.tcp&&h.tcp[port])return 'open';
+  return h.filtered||(h.ext&&port!==80&&port!==443&&port!==53)?'filtered':'closed';
+}
+function serviceName(p,proto){return SVC[p]||'';}
+// ===== Executor =====
+const CMDS={};
+const sleepFactory=()=>ms=>new Promise((res,rej)=>{
+  if(SH.intr)return rej(new Interrupt());
+  const t=setTimeout(()=>{SH.sleepers.delete(o);res();},ms);const o={t,rej};SH.sleepers.add(o);
+});
+SH.sleepers=new Set();SH.intr=false;
+function interruptAll(){SH.intr=true;for(const o of SH.sleepers){clearTimeout(o.t);o.rej(new Interrupt());}SH.sleepers.clear();TERM.cancelRead();}
+
+async function execLine(line){
+  const raw=line;line=line.trim();if(!line)return;
+  // history expansion
+  if(line==='!!'){const last=SH.history[SH.history.length-2];if(!last){TERM.write('bash: !!: event not found\n');return;}line=last;TERM.write(line+'\n');SH.history[SH.history.length-1]=line;}
+  const p=parseLine(line);
+  if(p.error){TERM.write('bash: '+p.error+'\n','err');SH.lastExit=2;return;}
+  SH.intr=false;
+  let code=0;
+  for(let i=0;i<p.seq.length;i++){
+    const prev=i?p.seq[i-1].op:null;
+    if(prev==='&&'&&code!==0)continue;
+    if(prev==='||'&&code===0)continue;
+    try{code=await runPipeline(p.seq[i].pipe,line);}
+    catch(e){if(e instanceof Interrupt){TERM.write('^C\n');code=130;SH.lastExit=130;break;}console.error(e);TERM.write('bash: internal error: '+e.message+'\n','err');code=1;}
+    SH.lastExit=code;
+  }
+  SH.intr=false;
+}
+async function runPipeline(pipe,line){
+  let stdin=null,code=0;
+  for(let i=0;i<pipe.length;i++){
+    const c=pipe[i];let words=c.words.slice();let sudo=false;
+    // env assignment like VAR=x
+    if(words.length===1&&/^\w+=/.test(words[0])){const [k,...v]=words[0].split('=');SH.env[k]=v.join('=');code=0;continue;}
+    if(words[0]==='sudo'){
+      words.shift();
+      if(words[0]==='-k'){SH.sudoCached=false;code=0;continue;}
+      if(!words.length||words[0]==='-h'){TERM.write('usage: sudo [-k] [-l] [-i] command\n');code=1;continue;}
+      if(!SH.root&&!SH.sudoCached){
+        let ok=false;
+        for(let t=0;t<3&&!ok;t++){const pw=await TERM.readLine('[sudo] password for student: ',true);if(pw.length)ok=true;else TERM.write('Sorry, try again.\n');}
+        if(!ok){TERM.write('sudo: 3 incorrect password attempts\n');code=1;continue;}
+        SH.sudoCached=true;
+      }
+      if(words[0]==='-l'){TERM.write('Matching Defaults entries for student on netlab:\n    env_reset, mail_badpass, secure_path=/usr/local/sbin\\:/usr/local/bin\\:/usr/sbin\\:/usr/bin\\:/sbin\\:/bin\n\nUser student may run the following commands on netlab:\n    (ALL : ALL) ALL\n');code=0;continue;}
+      if(words[0]==='-i'||words[0]==='-s'||(words[0]==='su'&&words.length<=2)){SH.root=true;SH.env.USER='root';SH.cwd=words[0]==='-s'?SH.cwd:'/root';TERM.updatePrompt();code=0;continue;}
+      sudo=true;
+    }
+    const name=words[0];const args=words.slice(1);
+    const isLast=i===pipe.length-1;
+    const outR=c.redir.find(r=>r.op==='>'||r.op==='>>');const errR=c.redir.find(r=>r.op==='2>');const merge=c.redir.some(r=>r.op==='2>&1');const inR=c.redir.find(r=>r.op==='<');
+    if(inR){const r=readFile(inR.file,'bash');if(r.err){TERM.write('bash: '+inR.file+': No such file or directory\n','err');code=1;stdin='';continue;}stdin=r.data;}
+    const stream=isLast&&!outR;let buf='';let errbuf='';
+    const ctx={name,args,stdin,sudo,root:SH.root||sudo,tty:stream,raw:words.join(' '),line,
+      out:(s,cls)=>{s=String(s);buf+=s;if(stream)TERM.write(s,cls);},
+      err:(s)=>{s=String(s);if(merge){buf+=s;if(stream)TERM.write(s);}else if(errR){errbuf+=s;}else TERM.write(s,'err');},
+      sleep:sleepFactory(),readLine:(p,m)=>TERM.readLine(p,m)};
+    let fn=CMDS[name];
+    const dk=DOC_ALIAS[name]||name;
+    if(fn&&c.words.includes('--help')&&DOCS[dk]&&['whoami','cat','arp','route','ifconfig','netstat','ss','nslookup'].includes(name)){const d=DOCS[dk];fn=async cx=>{cx.out(`Usage: ${d.synopsis.split('\n').join('\n       ')}\n${d.summary}\n\n`+d.options.map(([o,x])=>`  ${o.padEnd(14)} ${x}`).join('\n')+`\n\nFull documentation: man ${dk}\n`);};}
+    SH._sudo=ctx.root;
+    if(!fn){ctx.err(`${name.startsWith('./')||name.startsWith('/')?'bash: '+name+': No such file or directory':name+': command not found'}\n`);code=127;}
+    else{
+      try{code=await fn(ctx);if(code===undefined)code=0;}
+      catch(e){
+        if(e instanceof Interrupt){if(outR)flushRedirect();SH._sudo=false;try{GRADER.onCommand({cmd:name,args,sudo:ctx.root,raw:ctx.raw,line,output:buf,code:130,pipeIndex:i,pipeLen:pipe.length,interrupted:true});}catch(x){}throw e;}
+        throw e;
+      }
+    }
+    SH._sudo=false;
+    function flushRedirect(){if(outR){const er=fsWrite(outR.file,buf,outR.op==='>>');if(er)TERM.write('bash: '+er+'\n','err');}}
+    flushRedirect();
+    if(errR&&errR.file!=='/dev/null')fsWrite(errR.file,errbuf,false);
+    GRADER.onCommand({cmd:name,args,sudo:ctx.root,raw:ctx.raw,line,output:buf,code,pipeIndex:i,pipeLen:pipe.length,redirect:outR?outR.file:null});
+    stdin=buf;
+  }
+  return code;
+}
+// ----- option parsing helper -----
+function getopt(args,spec){ // spec: string of single-letter flags; letters followed by ':' take values. long: array of names (with = for values)
+  const o={_:[]};const takes={};spec.replace(/(\w)(:?)/g,(m,l,c)=>{takes[l]=!!c;});
+  for(let i=0;i<args.length;i++){
+    const a=args[i];
+    if(a==='--'){o._.push(...args.slice(i+1));break;}
+    if(a.startsWith('--')){const [k,v]=a.slice(2).split('=');o[k]=v===undefined?true:v;continue;}
+    if(a.startsWith('-')&&a.length>1&&!/^-\d/.test(a)){
+      for(let j=1;j<a.length;j++){const l=a[j];if(takes[l]){const v=a.slice(j+1)||args[++i];o[l]=v;break;}o[l]=(o[l]===true?2:o[l]>=2?o[l]+1:true);}
+      continue;
+    }
+    o._.push(a);
+  }
+  return o;
+}
+function needRoot(ctx,msg){if(!ctx.root){ctx.err(msg+'\n');return true;}return false;}
+// ===== Basic commands =====
+CMDS.whoami=async c=>{c.out((c.root?'root':'student')+'\n');};
+CMDS.id=async c=>{c.out(c.root?'uid=0(root) gid=0(root) groups=0(root)\n':'uid=1000(student) gid=1000(student) groups=1000(student),4(adm),20(dialout),27(sudo),46(plugdev),100(users),142(wireshark)\n');};
+CMDS.hostname=async c=>{const o=getopt(c.args,'fIi');c.out((o.I||o.i?ME.ip:o.f?ME.fqdn:ME.host)+'\n');};
+CMDS.uname=async c=>{const o=getopt(c.args,'asrnmo');if(o.a)c.out('Linux netlab 6.16.8-amd64 #1 SMP PREEMPT_DYNAMIC Kali 6.16.8-1kali1 (2026-09-30) x86_64 GNU/Linux\n');else if(o.r)c.out('6.16.8-amd64\n');else if(o.n)c.out('netlab\n');else if(o.m)c.out('x86_64\n');else c.out('Linux\n');};
+CMDS.pwd=async c=>{c.out(SH.cwd+'\n');};
+CMDS.date=async c=>{c.out(new Date().toString().replace(/ GMT.*$/,'')+'\n');};
+CMDS.clear=async c=>{TERM.clear();};
+CMDS.exit=async c=>{if(SH.root){SH.root=false;SH.env.USER='student';SH.cwd=HOME;TERM.updatePrompt();c.out('logout\n');}else c.out('This is the lab terminal - there is nowhere to exit to. Use the Reset button to start over.\n');};
+CMDS.logout=CMDS.exit;
+CMDS.cd=async c=>{let t=c.args[0]||HOME;if(t==='-')t=SH.oldpwd||HOME;const p=normPath(t);const n=SH.fs[p];
+  if(!n){c.err(`bash: cd: ${t}: No such file or directory\n`);return 1;}if(n.type!=='dir'){c.err(`bash: cd: ${t}: Not a directory\n`);return 1;}
+  if(n.root&&!SH.root){c.err(`bash: cd: ${t}: Permission denied\n`);return 1;}SH.oldpwd=SH.cwd;SH.cwd=p;SH.env.PWD=p;TERM.updatePrompt();};
+const fileSize=n=>n.type==='dir'?4096:utf8Bytes(typeof n.content==='string'?n.content:n.content.raw).length;
+CMDS.ls=async c=>{
+  const o=getopt(c.args,'lahd1R');const targets=o._.length?o._:['.'];let code=0;
+  const fmt=(name,n)=>{
+    if(!o.l)return null;
+    const perm=n.type==='dir'?(n.root?'drwx------':'drwxr-xr-x'):(n.root?'-rw-r-----':'-rw-r--r--');
+    const own=n.root?'root     root    ':'student  student ';let sz=fileSize(n);let s=String(sz);
+    if(o.h&&sz>=1024)s=(sz/1024).toFixed(1)+'K';
+    return `${perm} 1 ${own}${s.padStart(5)} Nov  5 09:14 `;
+  };
+  for(const t of targets){
+    const p=normPath(t);const n=SH.fs[p];
+    if(!n){c.err(`ls: cannot access '${t}': No such file or directory\n`);code=2;continue;}
+    if(n.type==='file'){const f=fmt(t,n);c.out((f||'')+t+'\n');continue;}
+    if(n.root&&!c.root){c.err(`ls: cannot open directory '${t}': Permission denied\n`);code=2;continue;}
+    if(targets.length>1)c.out(t+':\n');
+    let names=fsList(p);if(o.a)names=['.','..'].concat(names);else names=names.filter(x=>!x.startsWith('.'));
+    if(o.l){c.out(`total ${names.length*4}\n`);}
+    const items=names.map(nm=>{const nn=nm==='.'||nm==='..'?{type:'dir'}:SH.fs[p==='/'?'/'+nm:p+'/'+nm];return {nm,nn};});
+    if(o.l||!c.tty||o['1']){items.forEach(({nm,nn})=>{c.out((fmt(nm,nn)||''));c.out(nm,nn.type==='dir'&&c.tty?'dir':undefined);c.out('\n');});}
+    else{items.forEach(({nm,nn},k)=>{c.out(nm,nn.type==='dir'?'dir':undefined);c.out(k<items.length-1?'  ':'\n');});}
+    if(targets.length>1)c.out('\n');
+  }
+  return code;
+};
+CMDS.ll=async c=>CMDS.ls(Object.assign(c,{args:['-l'].concat(c.args)}));
+CMDS.cat=async c=>{
+  const o=getopt(c.args,'nbAE');let files=o._;let code=0;let ln=1;
+  const emit=d=>{if(o.n||o.b){const lines=d.split('\n');const last=lines.pop();lines.forEach(l=>{if(o.b&&!l)c.out('\n');else c.out(String(ln++).padStart(6)+'\t'+l+(o.E?'$':'')+'\n');});if(last)c.out(String(ln++).padStart(6)+'\t'+last);}else c.out(o.E?d.replace(/\n/g,'$\n'):d);};
+  if(!files.length||files[0]==='-'){emit(c.stdin||'');return 0;}
+  for(const f of files){const r=readFile(f,'cat');if(r.err){c.err(r.err+'\n');code=1;continue;}emit(r.data);}
+  return code;
+};
+CMDS.echo=async c=>{let a=c.args.slice();let nl=true,esc=false;while(a[0]&&/^-[neE]+$/.test(a[0])){if(a[0].includes('n'))nl=false;if(a[0].includes('e'))esc=true;a.shift();}
+  let s=a.join(' ');if(esc)s=s.replace(/\\r/g,'\r').replace(/\\n/g,'\n').replace(/\\t/g,'\t');c.out(s+(nl?'\n':''));};
+CMDS.printf=async c=>{const [f,...rest]=c.args;if(f===undefined){c.err('printf: usage: printf format [arguments]\n');return 1;}let i=0;
+  let s=f.replace(/%[sd]/g,()=>rest[i++]||'').replace(/\\r/g,'\r').replace(/\\n/g,'\n').replace(/\\t/g,'\t');c.out(s);};
+CMDS.touch=async c=>{for(const f of c.args){if(!fsGet(f)){const e=fsWrite(f,'');if(e){c.err('touch: cannot touch '+e+'\n');return 1;}}}};
+CMDS.mkdir=async c=>{for(const f of c.args.filter(a=>!a.startsWith('-'))){const p=normPath(f);if(SH.fs[p]){c.err(`mkdir: cannot create directory '${f}': File exists\n`);return 1;}SH.fs[p]={type:'dir'};}};
+CMDS.rm=async c=>{const o=getopt(c.args,'rfi');for(const f of o._){const p=normPath(f);const n=SH.fs[p];if(!n){if(!o.f)c.err(`rm: cannot remove '${f}': No such file or directory\n`);continue;}
+  if(!p.startsWith(HOME+'/')&&!p.startsWith('/tmp/')&&!c.root){c.err(`rm: cannot remove '${f}': Permission denied\n`);return 1;}
+  if(n.type==='dir'&&!o.r){c.err(`rm: cannot remove '${f}': Is a directory\n`);return 1;}
+  Object.keys(SH.fs).forEach(k=>{if(k===p||k.startsWith(p+'/'))delete SH.fs[k];});}};
+CMDS.cp=async c=>{const a=c.args.filter(x=>!x.startsWith('-'));if(a.length!==2){c.err('cp: missing file operand\n');return 1;}const r=readFile(a[0],'cp');if(r.err){c.err(r.err.replace('cp: ','cp: cannot stat ')+'\n');return 1;}
+  let dst=a[1];if(fsGet(dst)&&fsGet(dst).type==='dir')dst=dst+'/'+a[0].split('/').pop();const e=fsWrite(dst,r.data);if(e){c.err('cp: '+e+'\n');return 1;}};
+CMDS.history=async c=>{SH.history.forEach((h,i)=>c.out(String(i+1).padStart(5)+'  '+h+'\n'));};
+CMDS.which=async c=>{let code=0;for(const a of c.args){if(CMDS[a])c.out((['ifconfig','arp','route','tcpdump','hping3'].includes(a)?'/usr/sbin/':'/usr/bin/')+a+'\n');else code=1;}return code;};
+function inputLines(c,files,cmd){
+  if(!files.length)return {text:c.stdin||''};
+  let t='';for(const f of files){const r=readFile(f,cmd);if(r.err){c.err(r.err+'\n');continue;}t+=r.data;}return {text:t};
+}
+CMDS.grep=async c=>{
+  const o=getopt(c.args,'ivncEowrlh');if(!o._.length){c.err('Usage: grep [OPTION]... PATTERNS [FILE]...\n');return 2;}
+  const pat=o._[0];const files=o._.slice(1);let re;
+  try{let src=pat;if(!o.E){src=pat.replace(/\\\|/g,'\u0001').replace(/\\\(/g,'\u0002').replace(/\\\)/g,'\u0003').replace(/[+?{}()|]/g,'\\$&').replace(/\u0001/g,'|').replace(/\u0002/g,'(').replace(/\u0003/g,')');}if(o.w)src='\\b(?:'+src+')\\b';re=new RegExp(src,o.i?'gi':'g');}catch(e){c.err('grep: Invalid regular expression\n');return 2;}
+  let count=0;const multi=files.length>1;
+  const srcs=files.length?files.map(f=>{const r=readFile(f,'grep');if(r.err){c.err(r.err+'\n');return null;}return [f,r.data];}).filter(Boolean):[[null,c.stdin||'']];
+  for(const [fname,text] of srcs){
+    const lines=text.split('\n');if(lines[lines.length-1]==='')lines.pop();let fc=0;
+    lines.forEach((l,idx)=>{
+      re.lastIndex=0;const hit=re.test(l);re.lastIndex=0;
+      if(hit===!o.v){count++;fc++;
+        if(o.c||o.l)return;
+        const pre=(multi&&!o.h?fname+':':'')+(o.n?(idx+1)+':':'');
+        if(pre)c.out(pre,c.tty?'magenta':undefined);
+        if(o.o&&!o.v){(l.match(re)||[]).forEach(m=>{c.out(m,c.tty?'match':undefined);c.out('\n');});return;}
+        if(c.tty&&!o.v){let last=0;l.replace(re,(m,...rest)=>{const off=rest[rest.length-2];c.out(l.slice(last,off));c.out(m,'match');last=off+m.length;return m;});c.out(l.slice(last)+'\n');}
+        else c.out(l+'\n');
+      }
+    });
+    if(o.c)c.out((multi?fname+':':'')+fc+'\n');
+    if(o.l&&fc)c.out(fname+'\n');
+  }
+  return count?0:1;
+};
+CMDS.head=async c=>{const o=getopt(c.args,'n:c:');let n=parseInt(o.n||10);o._=o._.filter(a=>{if(/^-\d+$/.test(a)){n=+a.slice(1);return false;}return true;});const {text}=inputLines(c,o._,'head');const l=text.split('\n');if(l[l.length-1]==='')l.pop();l.slice(0,n).forEach(x=>c.out(x+'\n'));};
+CMDS.tail=async c=>{const o=getopt(c.args,'n:f');let n=parseInt(o.n||10);o._=o._.filter(a=>{if(/^-\d+$/.test(a)){n=+a.slice(1);return false;}return true;});const {text}=inputLines(c,o._,'tail');const l=text.split('\n');if(l[l.length-1]==='')l.pop();l.slice(-n).forEach(x=>c.out(x+'\n'));};
+CMDS.wc=async c=>{const o=getopt(c.args,'lwc');const {text}=inputLines(c,o._,'wc');const L=(text.match(/\n/g)||[]).length,W=(text.match(/\S+/g)||[]).length,C=utf8Bytes(text).length;
+  const sel=o.l||o.w||o.c;const parts=[];if(!sel||o.l)parts.push(L);if(!sel||o.w)parts.push(W);if(!sel||o.c)parts.push(C);
+  c.out((sel&&parts.length===1?String(parts[0]):parts.map(x=>String(x).padStart(sel?1:7)).join(' '))+(o._.length?' '+o._[0]:'')+'\n');};
+CMDS.sort=async c=>{const o=getopt(c.args,'rnu');const {text}=inputLines(c,o._,'sort');let l=text.split('\n');if(l[l.length-1]==='')l.pop();
+  l.sort(o.n?(a,b)=>parseFloat(a)-parseFloat(b):undefined);if(o.r)l.reverse();if(o.u)l=[...new Set(l)];l.forEach(x=>c.out(x+'\n'));};
+CMDS.uniq=async c=>{const o=getopt(c.args,'c');const {text}=inputLines(c,o._,'uniq');let l=text.split('\n');if(l[l.length-1]==='')l.pop();
+  const res=[];l.forEach(x=>{if(res.length&&res[res.length-1][0]===x)res[res.length-1][1]++;else res.push([x,1]);});res.forEach(([x,n])=>c.out((o.c?String(n).padStart(7)+' ':'')+x+'\n'));};
+CMDS.awk=async c=>{const prog=c.args[0]||'';const m=prog.match(/^\{\s*print\s+([$\d,\s]+)\s*\}$/);if(!m){c.err('awk: this lab only supports simple programs like \'{print $1}\'\n');return 2;}
+  const cols=m[1].split(',').map(s=>parseInt(s.trim().slice(1)));const {text}=inputLines(c,c.args.slice(1),'awk');text.split('\n').filter((x,i,a)=>i<a.length-1||x).forEach(l=>{const f=l.trim().split(/\s+/);c.out(cols.map(k=>k===0?l:(f[k-1]||'')).join(' ')+'\n');});};
+CMDS.help=async c=>{c.out(
+`NETLAB commands
+  Lab focus:   whoami  cat  ip  ifconfig  route  arp  ping  traceroute
+               nslookup  dig  netstat  ss  nc  curl  tcpdump  hping3
+               md5sum  sha256sum
+  Helpers:     ls cd pwd echo printf grep head tail wc sort uniq awk
+               touch mkdir cp rm history clear id hostname uname date
+               which sudo man
+
+  man <command>      full documentation for a lab command
+  <command> --help   quick usage
+  Ctrl+C             stop a running command (ping, tcpdump, nc -l ...)
+  Ctrl+L / clear     clear the screen      Tab   complete commands/paths
+  Up / Down          command history
+`);};
+CMDS.man=async c=>{const t=c.args[0];if(!t){c.out('What manual page do you want?\nFor example, try \'man ping\'.\n');return 1;}
+  const key=DOC_ALIAS[t]||t;const d=DOCS[key];if(!d){c.err(`No manual entry for ${t}\n`);return 16;}
+  c.out(docToText(key,d));GRADER.onDoc(key);};
+CMDS.true=async c=>0;CMDS.false=async c=>1;
+// ===== Interface / routing / neighbor commands =====
+const IFACES={
+  lo:{idx:1,flags:'LOOPBACK,UP,LOWER_UP',mtu:65536,state:'UNKNOWN',mac:'00:00:00:00:00:00',ip:'127.0.0.1',pfx:8,v6:'::1/128',rx:[18432,214],tx:[18432,214]},
+  eth0:{idx:2,flags:'BROADCAST,MULTICAST,UP,LOWER_UP',mtu:1500,state:'UP',mac:ME.mac,ip:ME.ip,pfx:24,brd:'10.10.10.255',v6:'fe80::250:56ff:fea1:3c50/64',rx:[48211933,61877],tx:[6120554,30211]},
+  eth1:{idx:3,flags:'BROADCAST,MULTICAST',mtu:1500,state:'DOWN',mac:'00:50:56:a1:3c:51',rx:[0,0],tx:[0,0]},
+};
+function ipAddrText(names,o){
+  let s='';
+  for(const n of names){const i=IFACES[n];
+    if(o.br){s+=`${n.padEnd(17)}${i.state.padEnd(15)}${i.ip?i.ip+'/'+i.pfx+' ':''}${o.v4?'':i.v6?i.v6+' ':''}\n`;continue;}
+    s+=`${i.idx}: ${n}: <${i.flags}> mtu ${i.mtu} qdisc ${n==='lo'?'noqueue':n==='eth0'?'fq_codel':'noop'} state ${i.state} group default qlen 1000\n`;
+    s+=`    link/${n==='lo'?'loopback':'ether'} ${i.mac} brd ${n==='lo'?'00:00:00:00:00:00':'ff:ff:ff:ff:ff:ff'}${n==='eth0'?'\n    altname enp2s1':''}\n`;
+    if(o.link)continue;
+    if(i.ip&&!o.v6)s+=`    inet ${i.ip}/${i.pfx} ${i.brd?'brd '+i.brd+' ':''}scope ${n==='lo'?'host':'global dynamic noprefixroute'} ${n}\n       valid_lft ${n==='lo'?'forever':'85912sec'} preferred_lft ${n==='lo'?'forever':'85912sec'}\n`;
+    if(i.v6&&!o.v4)s+=`    inet6 ${i.v6} scope ${n==='lo'?'host':'link'} noprefixroute \n       valid_lft forever preferred_lft forever\n`;
+  }
+  return s;
+}
+function linkBrief(names){return names.map(n=>{const i=IFACES[n];return `${n.padEnd(17)}${i.state.padEnd(15)}${i.mac} <${i.flags}> \n`;}).join('');}
+const ROUTES=[
+  {dst:'0.0.0.0',gw:'10.10.10.1',mask:'0.0.0.0',flags:'UG',metric:100,cidr:'default',proto:'dhcp'},
+  {dst:'10.10.10.0',gw:'0.0.0.0',mask:'255.255.255.0',flags:'U',metric:100,cidr:'10.10.10.0/24',proto:'kernel'},
+  {dst:'10.10.20.0',gw:'10.10.10.254',mask:'255.255.255.0',flags:'UG',metric:0,cidr:'10.10.20.0/24',proto:'static'},
+];
+function routeFor(ip){if(ip.startsWith('127.'))return {dev:'lo'};if(inLan(ip))return {dev:'eth0',gw:null};if(ip.startsWith('10.10.20.'))return {dev:'eth0',gw:'10.10.10.254'};return {dev:'eth0',gw:'10.10.10.1'};}
+function ipRouteText(){return `default via 10.10.10.1 dev eth0 proto dhcp src 10.10.10.50 metric 100 \n10.10.10.0/24 dev eth0 proto kernel scope link src 10.10.10.50 metric 100 \n10.10.20.0/24 via 10.10.10.254 dev eth0 proto static \n`;}
+function neighText(){return Object.entries(SH.arp).sort((a,b)=>ipNum(a[0])-ipNum(b[0])).map(([ip,e])=>e.mac?`${ip} dev eth0 lladdr ${e.mac} ${e.state}\n`:`${ip} dev eth0 FAILED \n`).join('');}
+const ipNum=ip=>ip.split('.').reduce((a,b)=>a*256+(+b),0);
+CMDS.ip=async c=>{
+  const o={};let a=c.args.slice();
+  while(a[0]&&a[0].startsWith('-')){const f=a.shift();if(f==='-br'||f==='-brief')o.br=1;else if(f==='-4')o.v4=1;else if(f==='-6')o.v6=1;else if(f==='-c'||f==='-color'||f==='--color'){}else if(f==='-s')o.s=1;else{c.err(`Option "${f}" is unknown, try "ip -help".\n`);return 255;}}
+  const obj=a.shift()||'';const sub=a[0]||'show';
+  const match=(full,min)=>obj.length>=min&&full.startsWith(obj);
+  if(!obj||obj==='help'||obj==='-help'||obj==='--help'){c.out('Usage: ip [ OPTIONS ] OBJECT { COMMAND | help }\nwhere  OBJECT := { address | link | neigh | route | ... }\n       OPTIONS := { -4 | -6 | -br[ief] | -s[tatistics] | -c[olor] }\nTry: ip a | ip -br a | ip route | ip neigh | ip link\n');return obj?0:255;}
+  if(match('address',1)){
+    if(['add','del','flush','change','replace'].includes(sub)){if(!c.root){c.err('RTNETLINK answers: Operation not permitted\n');return 2;}c.out('');c.err('netlab: address changes are disabled in this lab so the network stays consistent.\n');return 2;}
+    let names=Object.keys(IFACES);const dv=a.indexOf('dev');const nm=dv>=0?a[dv+1]:(sub==='show'&&a[1]?a[1]:null);
+    if(nm){if(!IFACES[nm]){c.err(`Device "${nm}" does not exist.\n`);return 1;}names=[nm];}
+    c.out(ipAddrText(names,o));return 0;
+  }
+  if(match('link',1)){
+    if(sub==='set'){if(!c.root){c.err('RTNETLINK answers: Operation not permitted\n');return 2;}
+      const dev=a[1];const st=a[2];if(!IFACES[dev]){c.err(`Cannot find device "${dev}"\n`);return 1;}
+      if(dev==='eth0'&&st==='down'){c.err('netlab: refusing to take eth0 down - you would lose the whole lab network!\n');return 2;}
+      if(dev==='eth1'){if(st==='up'){IFACES.eth1.flags='NO-CARRIER,BROADCAST,MULTICAST,UP';IFACES.eth1.state='DOWN';}else{IFACES.eth1.flags='BROADCAST,MULTICAST';IFACES.eth1.state='DOWN';}}
+      return 0;}
+    let names=Object.keys(IFACES);if(a[1]&&IFACES[a[1]])names=[a[1]];
+    c.out(o.br?linkBrief(names):ipAddrText(names,Object.assign({link:1},o)));return 0;
+  }
+  if(match('route',1)){
+    if(sub==='get'){const t=a[1];if(!t||!isIP(t)){c.err('Error: any valid address is expected rather than "'+(t||'')+'".\n');return 1;}const r=routeFor(t);
+      c.out(r.dev==='lo'?`local ${t} dev lo table local src 127.0.0.1 uid 1000 \n    cache <local> \n`:`${t} ${r.gw?'via '+r.gw+' ':''}dev eth0 src 10.10.10.50 uid 1000 \n    cache \n`);return 0;}
+    if(['add','del','delete','replace','change','flush'].includes(sub)){if(!c.root){c.err('RTNETLINK answers: Operation not permitted\n');return 2;}c.err('netlab: the routing table is read-only in this lab.\n');return 2;}
+    c.out(ipRouteText());return 0;
+  }
+  if(match('neighbour',1)||obj==='neighbor'){if(sub==='flush'){if(!c.root){c.err('Failed to send flush request: Operation not permitted\n');return 2;}Object.keys(SH.arp).forEach(k=>delete SH.arp[k]);return 0;}c.out(neighText());return 0;}
+  c.err(`Object "${obj}" is unknown, try "ip help".\n`);return 1;
+};
+const hb=b=>b>=1e6?(b/1e6).toFixed(1)+' MB':b>=1000?(b/1000).toFixed(1)+' KB':b+'.0 B';
+function ifconfigText(n){const i=IFACES[n];let s='';
+  const up=i.state!=='DOWN'||i.flags.includes('UP,');
+  if(n==='lo')s+=`lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536\n        inet 127.0.0.1  netmask 255.0.0.0\n        inet6 ::1  prefixlen 128  scopeid 0x10<host>\n        loop  txqueuelen 1000  (Local Loopback)\n`;
+  else if(n==='eth0')s+=`eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500\n        inet 10.10.10.50  netmask 255.255.255.0  broadcast 10.10.10.255\n        inet6 fe80::250:56ff:fea1:3c50  prefixlen 64  scopeid 0x20<link>\n        ether ${i.mac}  txqueuelen 1000  (Ethernet)\n`;
+  else s+=`eth1: flags=${up?'4099<UP,BROADCAST,MULTICAST>':'4098<BROADCAST,MULTICAST>'}  mtu 1500\n        ether ${i.mac}  txqueuelen 1000  (Ethernet)\n`;
+  s+=`        RX packets ${i.rx[1]}  bytes ${i.rx[0]} (${hb(i.rx[0])})\n        RX errors 0  dropped 0  overruns 0  frame 0\n        TX packets ${i.tx[1]}  bytes ${i.tx[0]} (${hb(i.tx[0])})\n        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0\n\n`;
+  return s;}
+CMDS.ifconfig=async c=>{const a=c.args;
+  if(a[0]==='-a'||!a.length){const names=a[0]==='-a'?['eth0','eth1','lo']:['eth0','lo'];c.out(names.map(ifconfigText).join(''));return 0;}
+  const n=a[0];if(!IFACES[n]){c.err(`${n}: error fetching interface information: Device not found\n`);return 1;}
+  if(a.length>1){if(!c.root){c.err('SIOCSIFFLAGS: Operation not permitted\n');return 1;}if(n==='eth0'&&a[1]==='down'){c.err('netlab: refusing to take eth0 down - you would lose the whole lab network!\n');return 1;}if(n==='eth1'){IFACES.eth1.state='DOWN';IFACES.eth1.flags=a[1]==='up'?'NO-CARRIER,BROADCAST,MULTICAST,UP':'BROADCAST,MULTICAST';}return 0;}
+  c.out(ifconfigText(n));};
+function routeTable(numeric){
+  const nm=ip=>numeric?ip:(ip==='0.0.0.0'?(numeric?ip:'0.0.0.0'):(PTR[ip]||ip));
+  let s='Kernel IP routing table\nDestination     Gateway         Genmask         Flags Metric Ref    Use Iface\n';
+  ROUTES.forEach(r=>{const d=numeric?r.dst:(r.dst==='0.0.0.0'?'default':r.dst);const g=numeric?r.gw:(r.gw==='0.0.0.0'?'0.0.0.0':(PTR[r.gw]||r.gw));
+    s+=`${d.padEnd(16)}${(numeric?g:(g==='0.0.0.0'?'0.0.0.0':g)).slice(0,15).padEnd(16)}${r.mask.padEnd(16)}${r.flags.padEnd(6)}${String(r.metric).padEnd(7)}0        0 eth0\n`;});
+  return s;}
+CMDS.route=async c=>{const o=getopt(c.args,'neFC');if(o._[0]==='add'||o._[0]==='del'){if(!c.root){c.err('SIOCADDRT: Operation not permitted\n');return 7;}c.err('netlab: the routing table is read-only in this lab.\n');return 7;}
+  if(!o.n){c.out('Kernel IP routing table\nDestination     Gateway         Genmask         Flags Metric Ref    Use Iface\n');
+    c.out('default         fw01.lab.local  0.0.0.0         UG    100    0        0 eth0\n10.10.10.0      0.0.0.0         255.255.255.0   U     100    0        0 eth0\n10.10.20.0      fw-dmz.lab.loca 255.255.255.0   UG    0      0        0 eth0\n');return 0;}
+  c.out(routeTable(true));};
+CMDS.arp=async c=>{const o=getopt(c.args,'anvei:d:');
+  if(o.d){if(!c.root){c.err('SIOCDARP(dontpub): Operation not permitted\n');return 1;}delete SH.arp[o.d];return 0;}
+  const ents=Object.entries(SH.arp).sort((x,y)=>ipNum(x[0])-ipNum(y[0]));
+  if(o.a){ents.forEach(([ip,e])=>{const nm=o.n?'?':(PTR[ip]||'?');c.out(e.mac?`${nm} (${ip}) at ${e.mac} [ether] on eth0\n`:`${nm} (${ip}) at <incomplete> on eth0\n`);});return 0;}
+  c.out('Address                  HWtype  HWaddress           Flags Mask            Iface\n');
+  ents.forEach(([ip,e])=>{const nm=o.n?ip:(PTR[ip]||ip);c.out(e.mac?`${nm.padEnd(25)}ether   ${e.mac}   C                     eth0\n`:`${nm.padEnd(25)}        (incomplete)                              eth0\n`);});
+};
+// ===== ping =====
+CMDS.ping=async c=>{
+  const o=getopt(c.args,'c:i:s:W:w:t:qn4vb');
+  if(o.help||o.h||!o._.length){c.out('\nUsage\n  ping [options] <destination>\n\nOptions:\n  -c <count>     stop after <count> replies\n  -i <interval>  seconds between sending each packet\n  -s <size>      use <size> as number of data bytes to be sent\n  -W <timeout>   time to wait for response\n  -n             no dns name resolution\n  -q             quiet output\n');return o._.length?0:2;}
+  const tgt=o._[0];const r=resolve(tgt);
+  if(!r){c.err(`ping: ${tgt}: ${tgt.includes('.')||true?'Name or service not known':''}\n`);return 2;}
+  const count=o.c?parseInt(o.c):Infinity;let iv=o.i?parseFloat(o.i):1;if(iv<0.2&&!c.root){c.err('ping: cannot flood; minimal interval allowed for user is 200ms\n');return 2;}
+  const size=o.s?parseInt(o.s):56;const ip=r.ip;const h=hostInfo(ip);
+  const disp=isIP(tgt)?ip:(r.canon||r.name);
+  c.out(`PING ${disp} (${ip}) ${size}(${size+28}) bytes of data.\n`);
+  let sent=0,recv=0,errs=0;const rtts=[];const t0=Date.now();
+  const reach=h&&h.icmp;const local=ip.startsWith('127.')||ip===ME.ip;
+  const lanDead=!h&&inLan(ip);
+  if(inLan(ip))touchArp(ip);else nextHopArp(ip);
+  try{
+    for(let seq=1;seq<=count;seq++){
+      sent++;
+      if(reach||local){const rt=local?rnd(0.04):rnd(h.rtt);rtts.push(rt);recv++;
+        if(!o.q){const who=isIP(tgt)||o.n?ip:`${PTR[ip]||disp} (${ip})`;c.out(`${size+8} bytes from ${who}: icmp_seq=${seq} ttl=${local?64:h.ttl} time=${fmtMs(rt)} ms\n`);}
+        GRADER.onEvent('ping-reply',{ip});}
+      else if(lanDead&&seq%3===0){errs+=3;if(!o.q)for(let k=seq-2;k<=seq;k++)c.out(`From ${ME.ip} icmp_seq=${k} Destination Host Unreachable\n`);}
+      if(seq>=count)break;
+      await c.sleep(iv*1000);
+    }
+    if(!reach&&!local&&count!==Infinity)await c.sleep(Math.min(3000,(o.W?parseFloat(o.W):1)*1000));
+  }catch(e){if(!(e instanceof Interrupt))throw e;c.out('^C');SH.intr=false;}
+  const el=Date.now()-t0;const loss=Math.round((sent-recv)/sent*100);
+  c.out(`\n--- ${disp} ping statistics ---\n${sent} packets transmitted, ${recv} received,${errs?` +${errs} errors,`:''} ${loss}% packet loss, time ${Math.max(0,el-1)}ms\n`);
+  if(recv){const mn=Math.min(...rtts),mx=Math.max(...rtts),av=rtts.reduce((a,b)=>a+b,0)/rtts.length;const md=Math.sqrt(rtts.reduce((a,b)=>a+(b-av)**2,0)/rtts.length);c.out(`rtt min/avg/max/mdev = ${mn.toFixed(3)}/${av.toFixed(3)}/${mx.toFixed(3)}/${md.toFixed(3)} ms\n`);}
+  else if(lanDead)c.out('pipe 3\n');
+  GRADER.onEvent('ping',{ip,sent,recv,loss,target:tgt});
+  return recv?0:1;
+};
+// ===== traceroute =====
+const EXT_PATH=[['10.10.10.1',0.6],['100.64.0.1',4.2],null,['198.51.100.9',9.8],['203.0.113.33',11.5]];
+const EXT_TAIL={goog:[['142.251.65.110',12.6]],cf:[],edge:[['192.0.2.10',19.9]]};
+const HOPNAMES={'100.64.0.1':null,'198.51.100.9':'core1.bos.transit.example','203.0.113.33':'ae-2.edge.nyc.transit.example','192.0.2.10':'cdn-pop.nyc.example','142.251.65.110':'142.251.65.110'};
+function pathTo(ip,mode){
+  if(ip.startsWith('127.')||ip===ME.ip)return [[ip,0.05]];
+  const h=HOSTS[ip];
+  if(inLan(ip))return h?[[ip,h.rtt]]:[];
+  if(ip.startsWith('10.10.20.')){const p=[['10.10.10.254',0.6]];if(h&&(mode==='T'?true:mode==='I'?h.icmp:!h.filtered))p.push([ip,h.rtt]);return p;}
+  const p=EXT_PATH.slice();if(h){(EXT_TAIL[h.ext]||[]).forEach(x=>p.push(x));if(mode==='U'&&!h.icmp){}else p.push([ip,h.rtt]);}
+  return p;
+}
+CMDS.traceroute=async c=>{
+  const o=getopt(c.args,'nITm:q:p:w:46');
+  if(o.help||!o._.length){c.out('Usage:\n  traceroute [ -46dFITnreAUDV ] [ -f first_ttl ] [ -m max_ttl ] [ -p port ] [ -q nqueries ] [ -w waittime ] host\nOptions:\n  -I  Use ICMP ECHO for tracerouting (root)\n  -T  Use TCP SYN for tracerouting (root, default port 80)\n  -n  Do not resolve IP addresses to their domain names\n  -m  Set the max number of hops (default 30)\n  -q  Set the number of probes per each hop (default 3)\n');return o._.length?0:2;}
+  if((o.I||o.T)&&!c.root){c.err('You do not have enough privileges to use this traceroute method.\nsocket: Operation not permitted\n');return 1;}
+  const tgt=o._[0];const r=resolve(tgt);if(!r){c.err(`${tgt}: Name or service not known\nCannot handle "host" cmdline arg \`${tgt}' on position 1 (argc ${c.args.length})\n`);return 2;}
+  const ip=r.ip;const max=parseInt(o.m||30);const q=parseInt(o.q||3);const mode=o.T?'T':o.I?'I':'U';
+  let path=pathTo(ip,mode);
+  // UDP probes to hardened host / github are dropped -> stars until max hops
+  c.out(`traceroute to ${isIP(tgt)?ip:tgt} (${ip}), ${max} hops max, ${o.T?'60':o.I?'60':'60'} byte packets\n`);
+  nextHopArp(ip);let reached=false;let hops=0;
+  if(inLan(ip)&&!HOSTS[ip]){await c.sleep(3000);c.out(` 1  ${o.n?ME.ip:'netlab.lab.local ('+ME.ip+')'}  3061.402 ms !H  3061.311 ms !H  3061.290 ms !H\n`);GRADER.onEvent('traceroute',{ip,target:tgt,reached:false,hops:1,mode});return 0;}
+  try{
+    for(let hop=1;hop<=max;hop++){
+      hops=hop;const e=path[hop-1];await c.sleep(e?120:350);
+      let line=String(hop).padStart(2)+'  ';
+      if(!e&&hop<=path.length){line+=Array(q).fill('*').join(' ');}
+      else if(!e){line+=Array(q).fill('*').join(' ');}
+      else{const [hip,base]=e;const nm=o.n?hip:(PTR[hip]||HOPNAMES[hip]||hip);line+=(o.n?hip:`${nm} (${hip})`)+'  '+Array.from({length:q},()=>fmtMs(rnd(base))+' ms').join('  ');if(hip===ip)reached=true;}
+      c.out(line+'\n');
+      if(reached)break;
+      if(!e&&hop>path.length&&path.length&&path[path.length-1][0]===ip)break;
+    }
+  }catch(e){if(!(e instanceof Interrupt))throw e;throw e;}
+  GRADER.onEvent('traceroute',{ip,target:tgt,reached,hops,mode});
+  return 0;
+};
+CMDS.tracepath=async c=>{c.err('tracepath: this lab focuses on traceroute - try: traceroute '+(c.args[0]||'example.com')+'\n');return 1;};
+// ===== DNS tools =====
+const QTYPES=['A','AAAA','MX','NS','TXT','CNAME','SOA','PTR','ANY'];
+function serverIP(s){if(!s)return ME.dns;if(isIP(s))return s;const r=resolve(s);return r?r.ip:null;}
+function dnsReachable(ip){return ip===ME.dns||ip==='8.8.8.8'||ip==='1.1.1.1'||ip==='8.8.4.4'||ip==='1.0.0.1';}
+CMDS.nslookup=async c=>{
+  let type='A',args=[];
+  for(const a of c.args){const m=a.match(/^-(?:type|query|q|querytype)=(\w+)$/i);if(m){type=m[1].toUpperCase();continue;}if(a.startsWith('-')){continue;}args.push(a);}
+  if(!args.length){c.err('nslookup: interactive mode is not supported in this lab. Usage: nslookup [-type=TYPE] name [server]\n');return 1;}
+  let [name,srv]=args;const sip=serverIP(srv);
+  if(srv&&!sip){c.err(`nslookup: couldn't get address for '${srv}': not found\n`);return 1;}
+  if(!dnsReachable(sip)){await c.sleep(1500);c.out(`;; communications error to ${sip}#53: timed out\n;; communications error to ${sip}#53: timed out\n;; no servers could be reached\n\n`);return 1;}
+  await c.sleep(150);
+  c.out(`Server:\t\t${sip}\nAddress:\t${sip}#53\n\n`);
+  if(isIP(name)){type='PTR';name=revName(name);}
+  const tries=type==='PTR'||name.includes('.')?[name]:[name+'.lab.local',name];
+  let r,used;for(const t of tries){r=dnsQuery(t,type,sip);used=t;if(r.status==='NOERROR'&&r.answers.length)break;}
+  if(r.status==='NXDOMAIN'){c.out(`** server can't find ${name}: NXDOMAIN\n\n`);GRADER.onEvent('dns',{tool:'nslookup',name:used,type,server:sip,status:'NXDOMAIN'});return 1;}
+  if(!r.aa)c.out('Non-authoritative answer:\n');
+  if(!r.answers.length){c.out(`*** Can't find ${used}: No answer\n\n`);return 0;}
+  r.answers.forEach(a=>{const n=a.name.replace(/\.$/,'');
+    if(a.type==='A')c.out(`Name:\t${n}\nAddress: ${a.data}\n`);
+    else if(a.type==='AAAA')c.out(`Name:\t${n}\nAddress: ${a.data}\n`);
+    else if(a.type==='CNAME')c.out(`${n}\tcanonical name = ${a.data}\n`);
+    else if(a.type==='MX')c.out(`${n}\tmail exchanger = ${a.data}\n`);
+    else if(a.type==='NS')c.out(`${n}\tnameserver = ${a.data}\n`);
+    else if(a.type==='TXT')c.out(`${n}\ttext = ${a.data}\n`);
+    else if(a.type==='PTR')c.out(`${a.name.replace(/\.$/,'')}\tname = ${a.data}\n`);
+  });
+  if(type==='A'&&!r.aa){const v6=dnsQuery(used,'AAAA',sip).answers.filter(a=>a.type==='AAAA');v6.forEach(a=>c.out(`Name:\t${a.name.replace(/\.$/,'')}\nAddress: ${a.data}\n`));}
+  c.out('\n');
+  if(r.aa&&type!=='PTR'){}
+  GRADER.onEvent('dns',{tool:'nslookup',name:used,type,server:sip,status:'NOERROR',answers:r.answers});
+  return 0;
+};
+CMDS.dig=async c=>{
+  let server=null,type=null,name=null,short=false,rev=false,sections={cmd:1,comments:1,question:1,answer:1,authority:1,additional:1,stats:1};
+  const a=c.args;
+  for(let i=0;i<a.length;i++){const x=a[i];
+    if(x.startsWith('@')){server=x.slice(1);continue;}
+    if(x==='-x'){rev=true;name=a[++i];continue;}
+    if(x==='-t'){type=(a[++i]||'').toUpperCase();continue;}
+    if(x==='-h'||x==='--help'){c.out('Usage:  dig [@global-server] [domain] [q-type] [q-class] {q-opt}\nWhere:  q-type  is one of (a,mx,ns,soa,txt,aaaa,cname,ptr,any...) [default:a]\n        q-opt   +short, +noall, +answer, ...\n        -x dot-notation    shortcut for reverse lookups\n');return 0;}
+    if(x.startsWith('+')){const k=x.slice(1).toLowerCase();if(k==='short')short=true;else if(k==='noall')Object.keys(sections).forEach(s=>sections[s]=0);else if(k.startsWith('no')&&sections[k.slice(2)]!==undefined)sections[k.slice(2)]=0;else if(sections[k]!==undefined)sections[k]=1;continue;}
+    if(QTYPES.includes(x.toUpperCase())&&name!==null){type=x.toUpperCase();continue;}
+    if(x.toUpperCase()==='IN')continue;
+    if(name===null)name=x;else if(QTYPES.includes(x.toUpperCase()))type=x.toUpperCase();
+  }
+  if(name===null){name='.';type=type||'NS';}
+  if(rev){if(!isIP(name)){c.err(`Invalid IP address ${name}\n`);return 1;}name=revName(name);type='PTR';}
+  type=type||'A';
+  const sip=serverIP(server);if(server&&!sip){c.err(`dig: couldn't get address for '${server}': not found\n`);return 10;}
+  if(!dnsReachable(sip)){await c.sleep(2000);c.out(`;; communications error to ${sip}#53: timed out\n;; communications error to ${sip}#53: timed out\n;; communications error to ${sip}#53: timed out\n\n; <<>> DiG 9.20.11-4-Debian <<>>${server?' @'+server:''} ${name}\n; (1 server found)\n;; global options: +cmd\n;; no servers could be reached\n`);return 9;}
+  await c.sleep(120);
+  const fq=name.replace(/\.$/,'')+'.';const r=name==='.'?{status:'NOERROR',answers:['a','b','c'].map(l=>({name:'.',type:'NS',data:l+'.root-servers.net.',ttl:518400}))}:dnsQuery(name,type,sip);
+  const qt=Date.now();
+  if(short){r.answers.filter(x=>type==='ANY'||x.type===type||x.type==='CNAME').forEach(x=>c.out(x.data+'\n'));GRADER.onEvent('dns',{tool:'dig',name,type,server:sip,status:r.status,short:true,answers:r.answers});return 0;}
+  const id=Math.floor(Math.random()*65535);
+  const rr=x=>`${x.name}\t${x.name.length<8?'\t\t':x.name.length<16?'\t':''}${x.ttl}\tIN\t${x.type}\t${x.data}\n`;
+  let s='';
+  if(sections.cmd)s+=`\n; <<>> DiG 9.20.11-4-Debian <<>>${server?' @'+server:''} ${c.args.filter(x=>!x.startsWith('@')).join(' ')}\n;; global options: +cmd\n`;
+  const auth=r.status==='NXDOMAIN'||(!r.answers.length);
+  if(sections.comments)s+=`;; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: ${r.status}, id: ${id}\n;; flags: qr${r.aa?' aa':''} rd ra; QUERY: 1, ANSWER: ${r.answers.length}, AUTHORITY: ${auth?1:0}, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version: 0, flags:; udp: 1232\n`;
+  if(sections.question)s+=`;; QUESTION SECTION:\n;${fq.padEnd(31)}IN\t${type}\n\n`;
+  if(r.answers.length&&sections.answer){if(sections.comments)s+=';; ANSWER SECTION:\n';r.answers.forEach(x=>s+=rr(x));s+='\n';}
+  if(auth&&sections.authority){const single=!name.replace(/\.$/,'').includes('.')&&type!=='PTR';const z=single?'.':(r.soaZone||'lab.local')+'.';if(single){if(sections.comments)s+=';; AUTHORITY SECTION:\n';s+=rr({name:'.',ttl:86400,type:'SOA',data:'a.root-servers.net. nstld.verisign-grs.com. 2026110500 1800 900 604800 86400'})+'\n';}else{if(sections.comments)s+=';; AUTHORITY SECTION:\n';s+=rr({name:z,ttl:3600,type:'SOA',data:z==='lab.local.'?DNS['lab.local'].SOA:`ns1.${z} dns-admin.${z} 2026110401 900 900 1800 60`});s+='\n';}}
+  if(sections.stats)s+=`;; Query time: ${sip===ME.dns?Math.floor(Math.random()*3)+1:Math.floor(Math.random()*15)+11} msec\n;; SERVER: ${sip}#53(${sip}) (UDP)\n;; WHEN: ${new Date().toUTCString().replace('GMT','UTC')}\n;; MSG SIZE  rcvd: ${60+r.answers.length*16}\n\n`;
+  c.out(s);
+  GRADER.onEvent('dns',{tool:'dig',name,type,server:sip,status:r.status,answers:r.answers});
+  return 0;
+};
+CMDS.host=async c=>{const n=c.args.filter(x=>!x.startsWith('-'))[0];if(!n){c.err('Usage: host [-t type] name [server]\n');return 1;}
+  if(isIP(n)){const r=dnsQuery(revName(n),'PTR');if(!r.answers.length){c.out(`Host ${revName(n)} not found: 3(NXDOMAIN)\n`);return 1;}c.out(`${revName(n)} domain name pointer ${r.answers[0].data}\n`);return 0;}
+  const t=n.includes('.')?n:n+'.lab.local';const r=dnsQuery(t,'A');if(!r.answers.length){c.out(`Host ${n} not found: 3(NXDOMAIN)\n`);return 1;}
+  r.answers.forEach(a=>{if(a.type==='CNAME')c.out(`${a.name.replace(/\.$/,'')} is an alias for ${a.data}\n`);else c.out(`${a.name.replace(/\.$/,'')} has address ${a.data}\n`);});
+  (DNS[t]&&DNS[t].MX||[]).forEach(m=>c.out(`${t} mail is handled by ${m}\n`));};
+// ===== netstat / ss =====
+const SOCKS=[
+  {p:'tcp',l:'0.0.0.0:22',r:'0.0.0.0:*',st:'LISTEN',pid:'812/sshd: /usr/sbin',own:'root'},
+  {p:'tcp',l:'127.0.0.1:631',r:'0.0.0.0:*',st:'LISTEN',pid:'905/cupsd',own:'root'},
+  {p:'tcp',l:'127.0.0.1:5432',r:'0.0.0.0:*',st:'LISTEN',pid:'1010/postgres',own:'postgres'},
+  {p:'tcp',l:'0.0.0.0:8080',r:'0.0.0.0:*',st:'LISTEN',pid:'2231/python3',own:'student'},
+  {p:'tcp',l:'0.0.0.0:31337',r:'0.0.0.0:*',st:'LISTEN',pid:'3133/nc',own:'root'},
+  {p:'tcp',l:'10.10.10.50:22',r:'10.10.10.5:51744',st:'ESTABLISHED',pid:'2001/sshd: student',own:'root'},
+  {p:'tcp',l:'10.10.10.50:43122',r:'10.10.10.20:443',st:'ESTABLISHED',pid:'2410/firefox-esr',own:'student'},
+  {p:'tcp',l:'10.10.10.50:39880',r:'10.10.10.10:389',st:'ESTABLISHED',pid:'733/sssd_be',own:'root'},
+  {p:'tcp',l:'10.10.10.50:51522',r:'93.184.215.14:443',st:'TIME_WAIT',pid:'-',own:'-'},
+  {p:'tcp6',l:':::22',r:':::*',st:'LISTEN',pid:'812/sshd: /usr/sbin',own:'root'},
+  {p:'udp',l:'0.0.0.0:68',r:'0.0.0.0:*',st:'',pid:'640/dhclient',own:'root'},
+  {p:'udp',l:'127.0.0.1:323',r:'0.0.0.0:*',st:'',pid:'701/chronyd',own:'_chrony'},
+  {p:'udp',l:'0.0.0.0:5353',r:'0.0.0.0:*',st:'',pid:'655/avahi-daemon: r',own:'avahi'},
+  {p:'udp6',l:':::5353',r:':::*',st:'',pid:'655/avahi-daemon: r',own:'avahi'},
+];
+function sockName(addr,numeric){
+  if(numeric)return addr;const i=addr.lastIndexOf(':');let h=addr.slice(0,i),p=addr.slice(i+1);
+  if(h==='0.0.0.0')h='0.0.0.0';else if(h==='127.0.0.1')h='localhost';else if(h==='::')h='[::]';else if(PTR[h])h=PTR[h].split('.')[0]==='netlab'?'netlab':PTR[h];
+  if(p!=='*'){const s={'631':'ipp','5432':'postgresql','8080':'http-alt','22':'ssh','443':'https','389':'ldap','68':'bootpc','323':'323','5353':'mdns'}[p];if(s)p=s;}
+  return (h+':'+p).slice(0,23);
+}
+CMDS.netstat=async c=>{
+  const o=getopt(c.args,'tulnparise');
+  if(o.r){c.out('Kernel IP routing table\nDestination     Gateway         Genmask         Flags   MSS Window  irtt Iface\n'+(o.n?'0.0.0.0         10.10.10.1      0.0.0.0         UG        0 0          0 eth0\n10.10.10.0      0.0.0.0         255.255.255.0   U         0 0          0 eth0\n10.10.20.0      10.10.10.254    255.255.255.0   UG        0 0          0 eth0\n':'default         fw01.lab.local  0.0.0.0         UG        0 0          0 eth0\n10.10.10.0      0.0.0.0         255.255.255.0   U         0 0          0 eth0\n10.10.20.0      fw-dmz.lab.loca 255.255.255.0   UG        0 0          0 eth0\n'));GRADER.onEvent('route',{});return 0;}
+  if(o.i){c.out('Kernel Interface table\nIface             MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg\neth0             1500    61877      0      0 0         30211      0      0      0 BMRU\nlo              65536      214      0      0 0           214      0      0      0 LRU\n');return 0;}
+  if(o.s){c.out('Ip:\n    Forwarding: 2\n    92088 total packets received\n    0 forwarded\n    0 incoming packets discarded\n    92088 incoming packets delivered\n    30425 requests sent out\nTcp:\n    412 active connection openings\n    3 passive connection openings\n    18 failed connection attempts\n    5 connections established\nUdp:\n    3022 packets received\n    0 packets to unknown port received\n');return 0;}
+  let wantT=o.t,wantU=o.u;if(!wantT&&!wantU){wantT=wantU=true;}
+  const rows=SOCKS.filter(s=>(s.p.startsWith('tcp')?wantT:wantU)&&(o.l?(s.st==='LISTEN'||(s.p.startsWith('udp'))):(o.a?true:s.st!=='LISTEN'&&!s.p.startsWith('udp'))));
+  c.out(`Active Internet connections ${o.l?'(only servers)':o.a?'(servers and established)':'(w/o servers)'}\n`);
+  c.out(`Proto Recv-Q Send-Q Local Address           Foreign Address         State      ${o.p?' PID/Program name    ':''}\n`);
+  let hidden=false;
+  rows.forEach(s=>{
+    let pid='';if(o.p){if(c.root||s.own==='student')pid=s.pid;else{pid='-';hidden=true;}}
+    c.out(`${s.p.padEnd(6)}${'0'.padStart(6)} ${'0'.padStart(6)} ${sockName(s.l,o.n).padEnd(24)}${sockName(s.r,o.n).padEnd(24)}${s.st.padEnd(11)}${o.p?' '+pid:''}\n`);
+  });
+  if(o.p&&hidden)c.err('(Not all processes could be identified, non-owned process info\n will not be shown, you would have to be root to see it all.)\n');
+  GRADER.onEvent('netstat',{opts:o,root:c.root});
+};
+CMDS.ss=async c=>{const o=getopt(c.args,'tulnpaH');let wantT=o.t,wantU=o.u;if(!wantT&&!wantU){wantT=wantU=true;}
+  const rows=SOCKS.filter(s=>(s.p.startsWith('tcp')?wantT:wantU)&&(o.l?(s.st==='LISTEN'||s.p.startsWith('udp')):(o.a?true:s.st==='ESTABLISHED')));
+  c.out('Netid State  Recv-Q Send-Q   Local Address:Port    Peer Address:Port Process\n');
+  rows.forEach(s=>{const pr=o.p&&(c.root||s.own==='student')?`users:(("${s.pid.split('/')[1].split(':')[0]}",pid=${s.pid.split('/')[0]},fd=3))`:'';
+    c.out(`${(s.p.startsWith('tcp')?'tcp':'udp').padEnd(6)}${(s.st==='LISTEN'?'LISTEN':s.st===''?'UNCONN':s.st==='ESTABLISHED'?'ESTAB':'TIME-WAIT').padEnd(7)}0      ${s.st==='LISTEN'?'4096':'0'.padEnd(4)}   ${sockName(s.l,o.n).padStart(18)}  ${sockName(s.r,o.n).padStart(18)} ${pr}\n`);});
+  GRADER.onEvent('netstat',{opts:Object.assign({},o,{ss:1}),root:c.root});};
+// ===== Simulated application servers =====
+function httpServer(host,ip,port,tls){
+  // returns handler(method,path,body,hostHeader) -> {status,headers,body}  or null if no http server
+  const date=new Date().toUTCString();
+  const H=(st,ct,body,extra)=>({status:st,headers:Object.assign({'Date':date,'Server':ip==='10.10.10.30'?'SimpleHTTP/0.6 Python/3.12.8':ip==='10.10.10.50'||ip==='127.0.0.1'?'SimpleHTTP/0.6 Python/3.13.7':ip.startsWith('10.')?'Apache/2.4.62 (Debian)':ip==='93.184.215.14'?'ECAcc (nyd/D184)':'gws','Content-Type':ct,'Content-Length':String(utf8Bytes(body).length)},extra||{}),body});
+  const nf=()=>H(404,'text/html; charset=iso-8859-1','<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\n<p>The requested URL was not found on this server.</p>\n</body></html>\n');
+  if(ip==='10.10.10.20'){
+    return (m,path,body,hh)=>{
+      if((hh||'').startsWith('intranet')&&!tls)return H(301,'text/html; charset=iso-8859-1',`<html><body><h1>Moved Permanently</h1><p>The document has moved <a href="https://intranet.lab.local/">here</a>.</p></body></html>\n`,{'Location':'https://intranet.lab.local'+path});
+      if(path==='/'||path==='/index.html')return H(200,'text/html; charset=UTF-8',`<!DOCTYPE html>\n<html>\n<head><title>lab.local Intranet</title></head>\n<body>\n  <h1>Welcome to the lab.local intranet</h1>\n  <p>Host: web01.lab.local</p>\n  <ul>\n    <li><a href="/downloads/">Software downloads</a></li>\n    <li><a href="/login">Staff login</a></li>\n  </ul>\n  <!-- TODO: remove before go-live. Health check JSON lives at /api/status -->\n</body>\n</html>\n`,{'Last-Modified':'Mon, 02 Nov 2026 14:12:09 GMT','ETag':'"1a4-5f1e2c"','Accept-Ranges':'bytes'});
+      if(path==='/api/status')return H(200,'application/json',`{"service":"intranet","status":"ok","version":"2.4.1","uptime_days":41,"flag":"NETLAB{curl_talks_http}"}\n`);
+      if(path==='/downloads/'||path==='/downloads')return H(200,'text/html;charset=UTF-8',`<html><head><title>Index of /downloads</title></head><body>\n<h1>Index of /downloads</h1>\n<pre><a href="SHA256SUMS">SHA256SUMS</a>        05-Nov-2026 09:00   86\n<a href="netlab-tool.tar.gz">netlab-tool.tar.gz</a>  05-Nov-2026 09:00  ${utf8Bytes(TOOL_TGZ).length}\n</pre></body></html>\n`);
+      if(path==='/downloads/netlab-tool.tar.gz')return H(200,'application/x-gzip',TOOL_TGZ);
+      if(path==='/downloads/SHA256SUMS')return H(200,'text/plain',sha256(TOOL_TGZ)+'  netlab-tool.tar.gz\n');
+      if(path==='/login'&&m==='POST'){const ok=/user=jsmith&pass=Summer2026!/.test(body||'');return H(ok?200:401,'text/html',ok?'<html><body>Welcome back, jsmith!</body></html>\n':'<html><body>Invalid username or password</body></html>\n');}
+      if(path==='/login')return H(200,'text/html','<html><body><form method="POST" action="/login">User: <input name="user"> Pass: <input name="pass" type="password"> <button>Login</button></form><p>Note: this form is served over plain HTTP.</p></body></html>\n');
+      if(path==='/robots.txt')return H(200,'text/plain','User-agent: *\nDisallow: /api/\n');
+      return nf();
+    };
+  }
+  if(ip==='10.10.10.30'&&port===8042){
+    return (m,path)=>{
+      if(path==='/')return H(200,'text/html; charset=utf-8',`<!DOCTYPE HTML>\n<html lang="en">\n<head><title>Directory listing for /</title></head>\n<body>\n<h1>Directory listing for /</h1>\n<hr>\n<ul>\n<li><a href="flag.txt">flag.txt</a></li>\n<li><a href="flag.txt.sha256">flag.txt.sha256</a></li>\n</ul>\n<hr>\n</body>\n</html>\n`);
+      if(path==='/flag.txt')return H(200,'text/plain',FLAG_TXT);
+      if(path==='/flag.txt.sha256')return H(200,'application/octet-stream',sha256(FLAG_TXT)+'  flag.txt\n');
+      return H(404,'text/html;charset=utf-8','<!DOCTYPE HTML>\n<html><head><title>Error response</title></head><body><h1>Error response</h1><p>Error code: 404</p><p>Message: File not found.</p></body></html>\n');
+    };
+  }
+  if(ip==='10.10.20.5'&&port===443)return (m,path)=>path==='/'?H(200,'text/plain','hardened.lab.local - authorized access only. All connections are logged.\n'):nf();
+  if((ip==='127.0.0.1'||ip===ME.ip)&&port===8080)return (m,path)=>path==='/'?H(200,'text/html; charset=utf-8','<!DOCTYPE HTML>\n<html><head><title>Directory listing for /</title></head><body><h1>Directory listing for /</h1><hr><ul>\n<li><a href="README.txt">README.txt</a></li>\n<li><a href="evidence/">evidence/</a></li>\n<li><a href="network-diagram.txt">network-diagram.txt</a></li>\n</ul><hr></body></html>\n'):H(404,'text/html','<h1>Error response</h1><p>Error code: 404</p>\n');
+  if(ip==='93.184.215.14')return (m,path)=>H(200,'text/html','<!doctype html>\n<html>\n<head><title>Example Domain</title></head>\n<body>\n<div>\n  <h1>Example Domain</h1>\n  <p>This domain is reserved for documentation examples.</p>\n</div>\n</body>\n</html>\n',{'Cache-Control':'max-age=3600','Age':'1822'});
+  if(ip==='142.250.80.46')return (m,path)=>H(301,'text/html; charset=UTF-8','<HTML><HEAD><TITLE>301 Moved</TITLE></HEAD><BODY>\n<H1>301 Moved</H1>\nThe document has moved\n<A HREF="'+(tls?'https':'http')+'://www.google.com/">here</A>.\n</BODY></HTML>\n',{'Location':(tls?'https':'http')+'://www.google.com/'});
+  if(ip==='142.250.80.68')return (m,path)=>H(200,'text/html; charset=ISO-8859-1','<!doctype html><html><head><title>Google</title></head><body>(search page - simulated)</body></html>\n');
+  if(ip==='34.160.111.145')return (m,path)=>H(200,'text/plain; charset=utf-8',ME.pub,{'Server':'Google Frontend'});
+  if(ip==='1.1.1.1')return (m,path)=>H(301,'text/html','',{'Location':'https://one.one.one.one/','Server':'cloudflare'});
+  if(ip==='140.82.112.4')return (m,path)=>H(tls?200:301,'text/html',tls?'<html><title>GitHub</title>(simulated)</html>\n':'',tls?{'Server':'github.com'}:{'Location':'https://github.com/','Server':'github.com'});
+  return null;
+}
+const BANNERS={'10.10.10.20:22':'SSH-2.0-OpenSSH_9.2p1 Debian-2+deb12u5\r\n','10.10.10.30:22':'SSH-2.0-OpenSSH_9.2p1 Debian-2+deb12u5\r\n','10.10.10.1:22':'SSH-2.0-OpenSSH_8.8\r\n','10.10.10.5:22':'SSH-2.0-OpenSSH_9.6\r\n','10.10.10.254:22':'SSH-2.0-OpenSSH_8.8\r\n','10.10.10.50:22':'SSH-2.0-OpenSSH_10.0p2 Debian-5\r\n','127.0.0.1:22':'SSH-2.0-OpenSSH_10.0p2 Debian-5\r\n',
+  '10.10.10.30:21':'220 (vsFTPd 3.0.3)\r\n','10.10.10.25:25':'220 mail.lab.local ESMTP Postfix (Debian/GNU)\r\n','10.10.10.25:143':'* OK [CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN] Dovecot ready.\r\n','127.0.0.1:31337':'', '10.10.10.50:31337':''};
+// ===== netcat (traditional) =====
+function parsePorts(list){const out=[];for(const x of list){for(const part of String(x).split(',')){const m=part.match(/^(\d+)-(\d+)$/);if(m){for(let p=+m[1];p<=+m[2]&&out.length<70000;p++)out.push(p);}else if(/^\d+$/.test(part))out.push(+part);else if(PORTNAME_TO_NUM[part])out.push(PORTNAME_TO_NUM[part]);else return null;}}return out;}
+function rawHttp(ip,port,reqText){
+  const lines=reqText.replace(/\r/g,'').split('\n');const m=(lines[0]||'').match(/^(\w+)\s+(\S+)(?:\s+HTTP\/(\d\.\d))?/);
+  if(!m)return 'HTTP/1.1 400 Bad Request\nServer: Apache/2.4.62 (Debian)\nContent-Length: 226\nConnection: close\nContent-Type: text/html; charset=iso-8859-1\n\n<html><body><h1>Bad Request</h1><p>Your browser sent a request that this server could not understand.</p></body></html>\n';
+  const hh=(lines.find(l=>/^host:/i.test(l))||'').split(':')[1];const h=httpServer(null,ip,port,false);
+  const r=h(m[1].toUpperCase(),m[2],'',hh?hh.trim():PTR[ip]);
+  return `HTTP/1.1 ${r.status} ${REASON[r.status]}\n`+Object.entries(r.headers).map(([k,v])=>k+': '+v).join('\n')+'\nConnection: close\n\n'+(m[1].toUpperCase()==='HEAD'?'':r.body);
+}
+CMDS.nc=async c=>{
+  const o=getopt(c.args,'lvnzup:w:kq:e:hc:');
+  if(o.h||o.help){c.out(`[v1.10-50]\nconnect to somewhere:\tnc [-options] hostname port[s] [ports] ...\nlisten for inbound:\tnc -l -p port [-options] [hostname] [port]\noptions:\n\t-l\t\t\tlisten mode, for inbound connects\n\t-n\t\t\tnumeric-only IP addresses, no DNS\n\t-p port\t\t\tlocal port number\n\t-u\t\t\tUDP mode\n\t-v\t\t\tverbose [use twice to be more verbose]\n\t-w secs\t\t\ttimeout for connects and final net reads\n\t-z\t\t\tzero-I/O mode [used for scanning]\nport numbers can be individual or ranges: lo-hi [inclusive]\n`);return 0;}
+  if(o.e||o.c){c.err('nc: -e/-c (execute a program) is disabled in this lab.\n');return 1;}
+  const verbose=!!o.v;
+  if(o.l){
+    const port=parseInt(o.p||o._[0]||o._[1]);
+    if(!port){c.err('nc: no port[s] to connect to\n');return 1;}
+    if(port<1024&&!c.root){c.err(`Can't grab 0.0.0.0:${port} with bind : Permission denied\n`);return 1;}
+    if([22,8080,31337].includes(port)){c.err(`Can't grab 0.0.0.0:${port} with bind : Address already in use\n`);return 1;}
+    if(verbose)c.err(`listening on [any] ${port} ...\n`);
+    GRADER.onEvent('nc-listen',{port});
+    if(port!==4444){while(true)await c.sleep(60000);}
+    await c.sleep(2500);
+    if(verbose)c.err(`connect to [10.10.10.50] from ${o.n?'(UNKNOWN)':'files01.lab.local'} [10.10.10.30] 40512\n`);
+    const msg=['Hello from files01! Your listener on port 4444 works.','Netcat can move data between any two hosts over TCP or UDP.','FLAG: NETLAB{netcat_swiss_army_knife}','Type a reply and press Enter...'];
+    for(const l of msg){await c.sleep(450);c.out(l+'\n');}
+    GRADER.onEvent('nc-listen-flag',{port});
+    const reply=await c.readLine('',false);
+    await c.sleep(600);c.out(`files01 says: got "${reply}" - thanks, closing the connection. Bye!\n`);
+    GRADER.onEvent('nc-chat',{reply});
+    return 0;
+  }
+  const host=o._[0];if(!host){c.err('nc: no destination\n');return 1;}
+  const portArgs=o._.slice(1);if(!portArgs.length){c.err('nc: no port[s] to connect to\n');return 1;}
+  if(o.n&&!isIP(host)){c.err(`${host}: forward host lookup failed: Unknown host\n`);return 1;}
+  const r=resolve(host);if(!r){c.err(`${host}: forward host lookup failed: Unknown host\n`);return 1;}
+  const ports=parsePorts(portArgs);if(!ports){c.err(`nc: invalid port ${portArgs.join(' ')}\n`);return 1;}
+  const ip=r.ip;const disp=o.n?'(UNKNOWN)':(PTR[ip]||host);
+  const label=p=>`${disp} [${ip}] ${p} (${SVC[p]||'?'})`;
+  const wait=o.w?Math.min(parseFloat(o.w),5)*1000:2500;
+  if(o.z){
+    let anyOpen=false;const big=ports.length>30;
+    for(const p of ports){
+      let st=o.u?(HOSTS[ip]?'open':'filtered'):tcpState(ip,p);
+      if(!big)await c.sleep(st==='filtered'?wait:60);else if(st==='filtered'){if(p===ports[0])await c.sleep(wait);}
+      if(st==='open'){anyOpen=true;if(verbose)c.err(`${label(p)} open\n`);}
+      else if(st==='noroute'){if(verbose)c.err(`${label(p)} : No route to host\n`);break;}
+      else if(verbose&&!big)c.err(`${label(p)} : ${st==='closed'?'Connection refused':'Connection timed out'}\n`);
+      if(SH.intr)throw new Interrupt();
+    }
+    if(big&&verbose)c.err(`(${ports.length} ports scanned - closed/filtered ports hidden for ranges over 30 ports)\n`);
+    GRADER.onEvent('nc-scan',{ip,ports,host,udp:!!o.u,open:ports.filter(p=>tcpState(ip,p)==='open')});
+    return anyOpen?0:1;
+  }
+  const port=ports[0];const st=o.u?'open':tcpState(ip,port);
+  if(st!=='open'){if(st==='filtered')await c.sleep(wait);if(verbose||true)c.err(`${label(port)} : ${st==='closed'?'Connection refused':st==='noroute'?'No route to host':'Connection timed out'}\n`);return 1;}
+  if(verbose)c.err(`${label(port)} open\n`);
+  const key=ip+':'+port;const local=ip==='127.0.0.1'||ip===ME.ip;
+  const banner=BANNERS[key]||(local&&BANNERS['127.0.0.1:'+port])||'';
+  GRADER.onEvent('nc-connect',{ip,port,host,banner,stdin:c.stdin});
+  if(banner){await c.sleep(200);c.out(banner.replace(/\r/g,''));}
+  const isHttp=!!httpServer(null,ip,port,false)&&(port===80||port===8042||port===8080);
+  const shellResp=l=>{l=l.trim();return l==='whoami'?'root\n':l==='id'?'uid=0(root) gid=0(root) groups=0(root)\n':l==='hostname'?'netlab\n':l==='pwd'?'/\n':l?`sh: 1: ${l.split(' ')[0]}: not found\n`:'';};
+  const respond=line=>{ // returns [text, close]
+    const L=line.trim().toUpperCase();
+    if(port===22)return ['Invalid SSH identification string.\n',true];
+    if(port===25){if(/^(HELO|EHLO)/.test(L))return ['250 mail.lab.local\n',false];if(L==='QUIT')return ['221 2.0.0 Bye\n',true];return ['502 5.5.2 Error: command not recognized\n',false];}
+    if(port===21){if(L.startsWith('USER'))return ['331 Please specify the password.\n',false];if(L.startsWith('PASS'))return ['530 Login incorrect.\n',false];if(L==='QUIT')return ['221 Goodbye.\n',true];return ['530 Please login with USER and PASS.\n',false];}
+    if(port===143)return [`${line.split(' ')[0]||'*'} BAD Error in IMAP command received by server.\n`,false];
+    if(port===31337&&local){if(L==='EXIT')return ['',true];return [shellResp(line),false];}
+    return ['',false];
+  };
+  if(c.stdin!==null&&c.stdin!==undefined){
+    await c.sleep(250);
+    if(isHttp){c.out(rawHttp(ip,port,c.stdin));GRADER.onEvent('nc-http',{ip,port,req:c.stdin});return 0;}
+    for(const l of c.stdin.split('\n').filter(Boolean)){const [t,cl]=respond(l);c.out(t);if(cl)break;}
+    return 0;
+  }
+  if(port===31337&&local){c.err('(hint: this looks like a shell... try typing whoami)\n');}
+  let req='';
+  while(true){
+    const line=await c.readLine('',false);
+    if(isHttp){req+=line+'\n';if(line.trim()===''&&req.trim()){c.out(rawHttp(ip,port,req));GRADER.onEvent('nc-http',{ip,port,req});return 0;}continue;}
+    const [t,cl]=respond(line);if(t)c.out(t);if(port===31337&&local&&/whoami|id/.test(line))GRADER.onEvent('bindshell',{});if(cl)return 0;
+  }
+};
+CMDS.netcat=CMDS.nc;CMDS['nc.traditional']=CMDS.nc;
+CMDS.ncat=async c=>{c.err('ncat: this lab uses traditional netcat - run it as: nc\n');return 1;};
+// ===== curl =====
+const REASON={200:'OK',204:'No Content',301:'Moved Permanently',302:'Found',304:'Not Modified',400:'Bad Request',401:'Unauthorized',403:'Forbidden',404:'Not Found',405:'Method Not Allowed',500:'Internal Server Error'};
+function parseURL(u){const m=u.match(/^(?:(\w+):\/\/)?([^/:?#\s]+)(?::(\d+))?(\/[^#\s]*)?$/);if(!m)return null;const scheme=(m[1]||'http').toLowerCase();return {scheme,host:m[2],port:m[3]?+m[3]:scheme==='https'?443:80,path:m[4]||'/'};}
+CMDS.curl=async c=>{
+  const a=c.args;const opt={H:[]};const urls=[];
+  for(let i=0;i<a.length;i++){const x=a[i];
+    const val=()=>a[++i];
+    if(x==='-I'||x==='--head')opt.I=1;else if(x==='-i'||x==='--include')opt.i=1;else if(x==='-v'||x==='--verbose')opt.v=1;
+    else if(x==='-s'||x==='--silent')opt.s=1;else if(x==='-S'||x==='--show-error')opt.S=1;else if(x==='-sS'||x==='-Ss')opt.s=opt.S=1;
+    else if(x==='-L'||x==='--location')opt.L=1;else if(x==='-k'||x==='--insecure')opt.k=1;else if(x==='-f'||x==='--fail')opt.f=1;
+    else if(x==='-o'||x==='--output')opt.o=val();else if(x==='-O'||x==='--remote-name')opt.O=1;
+    else if(x==='-X'||x==='--request')opt.X=(val()||'').toUpperCase();else if(x==='-d'||x==='--data'||x==='--data-raw')opt.d=val();
+    else if(x==='-H'||x==='--header')opt.H.push(val());else if(x==='-w'||x==='--write-out')opt.w=val();else if(x==='-A'||x==='--user-agent')opt.A=val();
+    else if(x==='--connect-timeout'||x==='-m'||x==='--max-time')opt.t=parseFloat(val());
+    else if(x==='-h'||x==='--help'){c.out('Usage: curl [options...] <url>\n -d, --data <data>          HTTP POST data\n -f, --fail                 Fail fast with no output on HTTP errors\n -H, --header <header>      Pass custom header(s) to server\n -I, --head                 Show document info only\n -i, --include              Include response headers in output\n -k, --insecure             Allow insecure server connections\n -L, --location             Follow redirects\n -o, --output <file>        Write to file instead of stdout\n -O, --remote-name          Write output to file named as remote file\n -s, --silent               Silent mode\n -v, --verbose              Make the operation more talkative\n -w, --write-out <format>   Use output FORMAT after completion\n -X, --request <method>     Specify request method to use\n');return 0;}
+    else if(/^-[a-zA-Z]{2,}$/.test(x)){for(const ch of x.slice(1)){if(ch==='s')opt.s=1;else if(ch==='S')opt.S=1;else if(ch==='L')opt.L=1;else if(ch==='k')opt.k=1;else if(ch==='I')opt.I=1;else if(ch==='i')opt.i=1;else if(ch==='v')opt.v=1;else if(ch==='O')opt.O=1;else if(ch==='f')opt.f=1;}}
+    else if(x.startsWith('-')){c.err(`curl: option ${x}: is unknown\ncurl: try 'curl --help' for more information\n`);return 2;}
+    else urls.push(x);}
+  if(!urls.length){c.err("curl: try 'curl --help' or 'curl --manual' for more information\n");return 2;}
+  let url=urls[0];let method=opt.X||(opt.I?'HEAD':opt.d?'POST':'GET');let hops=0;let code=0;
+  const showErr=m=>{if(!opt.s||opt.S)c.err(m+'\n');};
+  const vb=s=>{if(opt.v)c.err(s);};
+  let final=null;
+  while(true){
+    const u=parseURL(url);if(!u||!['http','https'].includes(u.scheme)){showErr(`curl: (${u?1:3}) ${u?'Protocol "'+u.scheme+'" not supported':'URL rejected: Malformed input to a URL function'}`);return u?1:3;}
+    const r=resolve(u.host);
+    if(!r){vb(`* Could not resolve host: ${u.host}\n* shutting down connection #0\n`);showErr(`curl: (6) Could not resolve host: ${u.host}`);GRADER.onEvent('curl',{url,error:6});return 6;}
+    const ip=r.ip;vb(`* Host ${u.host}:${u.port} was resolved.\n* IPv6: (none)\n* IPv4: ${ip}\n*   Trying ${ip}:${u.port}...\n`);
+    const st=tcpState(ip,u.port);
+    if(st!=='open'){
+      if(st==='filtered'){const t=opt.t?opt.t*1000:3000;await c.sleep(Math.min(t,4000));vb(`* Connection timed out after ${opt.t?opt.t*1000:10002} milliseconds\n`);showErr(`curl: (28) Failed to connect to ${u.host} port ${u.port} after ${opt.t?opt.t*1000:10002} ms: Timeout was reached`);GRADER.onEvent('curl',{url,error:28});return 28;}
+      await c.sleep(30);vb(`* connect to ${ip} port ${u.port} from ${ME.ip} port 4${Math.floor(Math.random()*9000+1000)} failed: ${st==='noroute'?'No route to host':'Connection refused'}\n`);
+      showErr(`curl: (7) Failed to connect to ${u.host} port ${u.port} after ${st==='noroute'?3071:1} ms: ${st==='noroute'?'Could not connect to server':"Couldn't connect to server"}`);GRADER.onEvent('curl',{url,error:7});return 7;}
+    await c.sleep(ip.startsWith('10.')||ip.startsWith('127.')?80:220);
+    vb(`* Connected to ${u.host} (${ip}) port ${u.port}\n`);
+    const tls=u.scheme==='https';
+    const handler=httpServer(u.host,ip,u.port,tls);
+    if(!handler){
+      if(tls){vb('* ALPN: curl offers h2,http/1.1\n* TLSv1.3 (OUT), TLS handshake, Client hello (1):\n');showErr(`curl: (35) TLS connect error: error:0A00010B:SSL routines::wrong version number`);return 35;}
+      const b=BANNERS[ip+':'+u.port];
+      if(b){showErr('curl: (1) Received HTTP/0.9 when not allowed');return 1;}
+      showErr(`curl: (52) Empty reply from server`);return 52;}
+    if(tls){
+      vb('* ALPN: curl offers h2,http/1.1\n* TLSv1.3 (OUT), TLS handshake, Client hello (1):\n*  CAfile: /etc/ssl/certs/ca-certificates.crt\n*  CApath: /etc/ssl/certs\n* TLSv1.3 (IN), TLS handshake, Server hello (2):\n* TLSv1.3 (IN), TLS handshake, Certificate (11):\n');
+      if((ip.startsWith('10.'))&&!opt.k){
+        vb('* TLSv1.3 (OUT), TLS alert, unknown CA (560):\n* SSL certificate problem: self-signed certificate in certificate chain\n* closing connection #0\n');
+        showErr('curl: (60) SSL certificate problem: self-signed certificate in certificate chain\nMore details here: https://curl.se/docs/sslcerts.html\n\ncurl failed to verify the legitimacy of the server and therefore could not\nestablish a secure connection to it. To learn more about this situation and\nhow to fix it, please visit the webpage mentioned above.');
+        GRADER.onEvent('curl',{url,error:60});return 60;}
+      vb(`* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / x25519 / RSASSA-PSS\n* Server certificate:\n*  subject: CN=${ip.startsWith('10.')?u.host:u.host}\n*  issuer: ${ip.startsWith('10.')?'CN=lab.local Root CA':'C=US; O=Example Trust Services; CN=Example TLS CA'}\n${ip.startsWith('10.')&&opt.k?'*  SSL certificate verify result: self-signed certificate in certificate chain (19), continuing anyway.\n':'*  SSL certificate verify ok.\n'}`);
+    }
+    const hdrs={Host:u.host+(u.port!==(tls?443:80)?':'+u.port:''),'User-Agent':opt.A||'curl/8.15.0',Accept:'*/*'};
+    opt.H.forEach(h=>{const k=h.split(':')[0];hdrs[k]=h.slice(k.length+1).trim();});
+    if(opt.d){hdrs['Content-Length']=String(opt.d.length);hdrs['Content-Type']='application/x-www-form-urlencoded';}
+    vb(`* using HTTP/1.x\n> ${method} ${u.path} HTTP/1.1\n`+Object.entries(hdrs).map(([k,v])=>`> ${k}: ${v}\n`).join('')+'> \n'+(opt.d?`* upload completely sent off: ${opt.d.length} bytes\n`:'')+'* Request completely sent off\n');
+    const res=handler(method,u.path,opt.d||'',u.host);
+    final={res,u,ip};
+    const statusLine=`HTTP/1.1 ${res.status} ${REASON[res.status]||''}`;
+    const hdrText=[statusLine].concat(Object.entries(res.headers).map(([k,v])=>`${k}: ${v}`)).join('\n')+'\n\n';
+    vb('< '+hdrText.trim().split('\n').join('\n< ')+'\n< \n');
+    GRADER.onEvent('curl',{url,method,status:res.status,ip,host:u.host,port:u.port,path:u.path,tls,insecure:!!opt.k,head:!!opt.I,location:res.headers.Location,body:res.body,data:opt.d});
+    if(opt.L&&res.headers.Location&&hops<10&&res.status>=300&&res.status<400){
+      if(opt.i||opt.I)c.out(hdrText);
+      hops++;url=res.headers.Location;vb(`* Ignoring the response-body\n* Connection #0 to host ${u.host} left intact\n* Issue another request to this URL: '${url}'\n`);
+      if(method!=='HEAD'&&res.status!==307)method=opt.X||'GET';continue;}
+    break;
+  }
+  const {res,u,ip}=final;
+  if(opt.f&&res.status>=400){showErr(`curl: (22) The requested URL returned error: ${res.status}`);return 22;}
+  let out='';
+  if(opt.I)out=[`HTTP/1.1 ${res.status} ${REASON[res.status]||''}`].concat(Object.entries(res.headers).map(([k,v])=>`${k}: ${v}`)).join('\n')+'\n\n';
+  else{if(opt.i)out=[`HTTP/1.1 ${res.status} ${REASON[res.status]||''}`].concat(Object.entries(res.headers).map(([k,v])=>`${k}: ${v}`)).join('\n')+'\n\n';out+=res.body;}
+  let file=opt.o||(opt.O?(u.path.split('/').pop()||''):null);
+  if(opt.O&&!file){c.err('curl: (23) Remote file name has no length\n');return 23;}
+  const size=utf8Bytes(res.body).length;
+  if(file&&file!=='-'){
+    if(!opt.s){c.err(`  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n`);await c.sleep(150);c.err(`100  ${String(size).padStart(4)}  100  ${String(size).padStart(4)}    0     0  ${String(Math.round(size*9.7)).padStart(5)}      0 --:--:-- --:--:-- --:--:--  ${String(Math.round(size*9.9)).padStart(5)}\n`);}
+    const e=fsWrite(file,out);if(e){c.err(`curl: (23) Failure writing output to destination, passed 1 returned 0\n`);return 23;}
+    GRADER.onEvent('curl-save',{file:normPath(file),url:'',path:u.path,content:out});
+  }else{
+    if(c.tty&&/gzip|octet/.test(res.headers['Content-Type'])&&!opt.I&&method!=='HEAD'&&!/sha256/.test(u.path)){c.err('Warning: Binary output can mess up your terminal. Use "--output -" to tell curl to output\nWarning: it to your terminal anyway, or consider "--output <FILE>" to save to a file.\n');return 23;}
+    c.out(out);
+  }
+  if(opt.w){c.out(opt.w.replace(/%\{http_code\}|%\{response_code\}/g,res.status).replace(/%\{remote_ip\}/g,ip).replace(/%\{time_total\}/g,(ip.startsWith('10.')?0.004:0.084).toFixed(6)).replace(/%\{size_download\}/g,size).replace(/%\{content_type\}/g,res.headers['Content-Type']).replace(/%\{num_redirects\}/g,hops).replace(/%\{url_effective\}/g,url).replace(/\\n/g,'\n'));}
+  return code;
+};
+CMDS.wget=async c=>{c.err('wget: this lab focuses on curl - try: curl -O '+(c.args[0]||'<url>')+'\n');return 1;};
+// ===== tcpdump =====
+// Scripted background traffic (the lab NIC sits on a switch mirror/SPAN port, so it sees other hosts' traffic)
+function trafficScript(){
+  const P=[];let seq=1000;
+  const tcp=(s,sp,d,dp,flags,len,payload,extra)=>P.push(Object.assign({proto:'tcp',src:s,sport:sp,dst:d,dport:dp,flags,len,payload},extra||{}));
+  const udp=(s,sp,d,dp,info,len,payload)=>P.push({proto:'udp',src:s,sport:sp,dst:d,dport:dp,info,len,payload});
+  const icmp=(s,d,kind,id,sq)=>P.push({proto:'icmp',src:s,dst:d,kind,id,sq,len:64});
+  const arp=(s,d,info)=>P.push({proto:'arp',src:s,dst:d,info,len:46});
+  arp('10.10.10.30','10.10.10.1','Request who-has 10.10.10.1 tell 10.10.10.30');
+  arp('10.10.10.1','10.10.10.30','Reply 10.10.10.1 is-at 00:1c:7f:3a:10:01');
+  icmp('10.10.10.30',ME.ip,'echo request',4113,7);icmp(ME.ip,'10.10.10.30','echo reply',4113,7);
+  udp('10.10.10.77',53122,'10.10.10.10',53,'DNSQ',35,{q:'updates.lab.local.',id:4821});
+  udp('10.10.10.10',53,'10.10.10.77',53122,'DNSR',72,{q:'updates.lab.local.',id:4821,a:'CNAME web01.lab.local., A 10.10.10.20'});
+  tcp('10.10.10.5',51744,ME.ip,22,'P.',36,null,{enc:true});
+  tcp('10.10.10.77',49822,'10.10.10.20',80,'S',0);
+  tcp('10.10.10.20',80,'10.10.10.77',49822,'S.',0);
+  tcp('10.10.10.77',49822,'10.10.10.20',80,'.',0);
+  tcp('10.10.10.77',49822,'10.10.10.20',80,'P.',189,'POST /login HTTP/1.1\nHost: web01.lab.local\nUser-Agent: Mozilla/5.0 (Windows NT 10.0)\nContent-Type: application/x-www-form-urlencoded\nContent-Length: 30\n\nuser=jsmith&pass=Summer2026!');
+  tcp('10.10.10.20',80,'10.10.10.77',49822,'P.',245,'HTTP/1.1 200 OK\nServer: Apache/2.4.62 (Debian)\nContent-Type: text/html\n\n<html><body>Welcome back, jsmith!</body></html>');
+  tcp(ME.ip,22,'10.10.10.5',51744,'P.',52,null,{enc:true});
+  icmp('10.10.10.30',ME.ip,'echo request',4113,8);icmp(ME.ip,'10.10.10.30','echo reply',4113,8);
+  udp(ME.ip,123,'10.10.10.1',123,'NTP',48);
+  udp('10.10.10.1',123,ME.ip,123,'NTPR',48);
+  udp(ME.ip,41877,'10.10.10.10',53,'DNSQ',30,{q:'ntp.lab.local.',id:3310});
+  udp('10.10.10.10',53,ME.ip,41877,'DNSR',87,{q:'ntp.lab.local.',id:3310,nx:true});
+  tcp(ME.ip,43122,'10.10.10.20',443,'P.',517,null,{enc:true});
+  tcp('10.10.10.20',443,ME.ip,43122,'P.',1460,null,{enc:true});
+  icmp('10.10.10.30',ME.ip,'echo request',4113,9);icmp(ME.ip,'10.10.10.30','echo reply',4113,9);
+  tcp('10.10.10.77',49822,'10.10.10.20',80,'F.',0);
+  tcp('10.10.10.20',80,'10.10.10.77',49822,'F.',0);
+  arp('10.10.10.77','10.10.10.20','Request who-has 10.10.10.20 tell 10.10.10.77');
+  arp('10.10.10.20','10.10.10.77','Reply 10.10.10.20 is-at 00:50:56:a1:5b:20');
+  return P;
+}
+const PORTNAMES_TD={22:'ssh',53:'domain',80:'http',123:'ntp',443:'https',389:'ldap'};
+function fmtPkt(p,o,ts){
+  const nn=o.nn,n=o.n||o.nn;
+  const host=ip=>n?ip:(PTR[ip]||ip);
+  const port=pt=>nn?String(pt):(PORTNAMES_TD[pt]||String(pt));
+  const t=ts.toTimeString().slice(0,8)+'.'+String(ts.getMilliseconds()*1000+Math.floor(Math.random()*999)).padStart(6,'0');
+  let s=t+' ';
+  if(p.proto==='arp'){s+=`ARP, ${p.info.replace(/(\d+\.\d+\.\d+\.\d+)/g,ip=>host(ip))}, length ${p.len}`;}
+  else if(p.proto==='icmp'){s+=`IP ${host(p.src)} > ${host(p.dst)}: ICMP ${p.kind}, id ${p.id}, seq ${p.sq}, length ${p.len}`;}
+  else if(p.proto==='udp'){
+    s+=`IP ${host(p.src)}.${port(p.sport)} > ${host(p.dst)}.${port(p.dport)}: `;
+    if(p.info==='DNSQ')s+=`${p.payload.id}+ A? ${p.payload.q} (${p.len})`;
+    else if(p.info==='DNSR')s+=p.payload.nx?`${p.payload.id} NXDomain* 0/1/0 (${p.len})`:`${p.payload.id}* 2/0/0 ${p.payload.a} (${p.len})`;
+    else if(p.info==='NTP')s+=`NTPv4, Client, length ${p.len}`;else if(p.info==='NTPR')s+=`NTPv4, Server, length ${p.len}`;
+    else s+=`UDP, length ${p.len}`;
+  } else {
+    s+=`IP ${host(p.src)}.${port(p.sport)} > ${host(p.dst)}.${port(p.dport)}: Flags [${p.flags}], `;
+    s+=p.flags==='S'?`seq 2219740132, win 64240, options [mss 1460,sackOK,TS val 1 ecr 0,nop,wscale 7], length 0`:p.flags==='S.'?`seq 977193011, ack 2219740133, win 65160, options [mss 1460,sackOK,TS val 2 ecr 1,nop,wscale 7], length 0`:p.len?`seq 1:${p.len+1}, ack 1, win 502, length ${p.len}`:`ack 1, win 502, length 0`;
+    if(p.payload&&!p.enc&&p.dport===80||p.sport===80&&p.payload)s+=p.dport===80?`: HTTP: ${p.payload.split('\n')[0]}`:`: HTTP: ${p.payload.split('\n')[0]}`;
+  }
+  let extra='';
+  if((o.A||o.X)&&(p.payload||p.enc)){
+    const pl=p.enc?'\u00d3\u0019\u008a\u00e2\u0004\u00b1\u00f7\u0011\u0085\u00c9\u0003\u00e7q\u0016\u00a0\u0094encrypted':typeof p.payload==='string'?p.payload:'';
+    if(o.X){const b=utf8Bytes(pl);for(let i=0;i<Math.min(b.length,160);i+=16){const ch=b.slice(i,i+16);let hx='';for(let j=0;j<16;j+=2)hx+=(j<ch.length?ch[j].toString(16).padStart(2,'0')+(j+1<ch.length?ch[j+1].toString(16).padStart(2,'0'):'  '):'    ')+' ';extra+=`\t0x${i.toString(16).padStart(4,'0')}:  ${hx} ${Array.from(ch).map(x=>x>=32&&x<127?String.fromCharCode(x):'.').join('')}\n`;}}
+    else extra=pl.replace(/[^\x20-\x7e\n]/g,'.')+'\n';
+  }
+  return s+'\n'+extra;
+}
+function tdFilter(expr){
+  // returns predicate. pcap-filter subset: proto, [src|dst] host X, [src|dst] port N, net, and/or/not, parentheses
+  const t=expr.replace(/\(/g,' ( ').replace(/\)/g,' ) ').split(/\s+/).filter(Boolean);let i=0;
+  const peek=()=>t[i],next=()=>t[i++];
+  function prim(){
+    let k=next();if(k===undefined)throw 'syntax error';
+    if(k==='not'||k==='!'){const f=prim();return p=>!f(p);}
+    if(k==='('){const f=expr_();if(next()!==')')throw 'syntax error';return f;}
+    let dir=null;if(k==='src'||k==='dst'){dir=k;k=next();if(k!=='host'&&k!=='port'&&k!=='net'){i--;k='host';}}
+    if(['icmp','arp','tcp','udp','ip'].includes(k)){if(k==='ip')return p=>p.proto!=='arp';return p=>p.proto===k;}
+    if(k==='host'||k==='net'){let v=next();if(!v)throw 'syntax error';let ip=v;if(k==='host'&&!isIP(v)){const r=resolve(v);if(!r)throw `can't resolve '${v}'`;ip=r.ip;}
+      const m=k==='net'?x=>x.startsWith(v.replace(/\.0(\/\d+)?$/,'').replace(/\/\d+$/,'')+'.'):x=>x===ip;
+      return p=>dir==='src'?m(p.src):dir==='dst'?m(p.dst):(m(p.src)||m(p.dst));}
+    if(k==='port'){let v=next();const n=/^\d+$/.test(v)?+v:PORTNAME_TO_NUM[v];if(!n)throw `unknown port '${v}'`;return p=>(p.proto==='tcp'||p.proto==='udp')&&(dir==='src'?p.sport===n:dir==='dst'?p.dport===n:(p.sport===n||p.dport===n));}
+    if(isIP(k)){const ip=k;return p=>p.src===ip||p.dst===ip;}
+    throw `syntax error in filter expression: unknown keyword '${k}'`;
+  }
+  function expr_(){let f=prim();while(peek()==='and'||peek()==='or'||peek()==='&&'||peek()==='||'){const op=next();const g=prim();const ff=f;f=(op==='and'||op==='&&')?p=>ff(p)&&g(p):p=>ff(p)||g(p);}return f;}
+  if(!t.length)return ()=>true;const f=expr_();if(i<t.length)throw 'syntax error';return f;
+}
+CMDS.tcpdump=async c=>{
+  const o=getopt(c.args,'i:c:nAXvDw:r:qe');
+  if(c.args.includes('-nn')){o.nn=true;}
+  if(o.help||o.h){c.out('tcpdump version 4.99.5\nlibpcap version 1.10.5\nUsage: tcpdump [-AnnXv] [-c count] [-i interface] [-r file] [-w file] [expression]\n');return 0;}
+  if(o.D){c.out('1.eth0 [Up, Running, Connected]\n2.any (Pseudo-device that captures on all interfaces) [Up, Running]\n3.lo [Up, Running, Loopback]\n4.eth1 [none]\n5.bluetooth-monitor (Bluetooth Linux Monitor) [Wireless]\n6.nflog (Linux netfilter log (NFLOG) interface) [none]\n');return 0;}
+  let pred;try{pred=tdFilter(o._.join(' '));}catch(e){c.err('tcpdump: '+e+'\n');return 1;}
+  const max=o.c?parseInt(o.c):Infinity;
+  if(o.r){const f=fsGet(o.r);if(!f){c.err(`tcpdump: ${o.r}: No such file or directory\n`);return 1;}if(!f.content||!f.content.pcap){c.err(`tcpdump: ${o.r}: unknown file format\n`);return 1;}
+    c.err(`reading from file ${o.r}, link-type EN10MB (Ethernet), snapshot length 262144\n`);let k=0;
+    for(const rec of f.content.pkts){if(k>=max)break;const p=rec.p;if(!pred(p))continue;k++;c.out(fmtPkt(p,o,new Date(rec.t)));}
+    GRADER.onEvent('tcpdump-read',{file:o.r,filter:o._.join(' '),A:!!o.A});return 0;}
+  const iface=o.i||'eth0';
+  if(!c.root){c.err(`tcpdump: ${iface}: You don't have permission to perform this capture on that device\n(socket: Operation not permitted)\n`);return 1;}
+  if(!['eth0','eth1','lo','any'].includes(iface)){c.err(`tcpdump: ${iface}: No such device exists\n(No such device exists)\n`);return 1;}
+  if(iface==='eth1'){c.err('tcpdump: eth1: That device is not up\n');return 1;}
+  if(!o.v&&!o.w)c.err('tcpdump: verbose output suppressed, use -v[v]... for full protocol decode\n');
+  c.err(`listening on ${iface}, link-type ${iface==='any'?'LINUX_SLL2 (Linux cooked v2)':'EN10MB (Ethernet)'}, snapshot length 262144 bytes\n`);
+  GRADER.onEvent('tcpdump-start',{filter:o._.join(' '),iface,o});
+  const script=trafficScript();let idx=0,cap=0,seen=0;const saved=[];const shown=[];
+  try{
+    while(cap<max){
+      if(iface==='lo'){await c.sleep(5000);continue;}
+      const loop=Math.floor(idx/script.length);let p=script[idx%script.length];idx++;if(p.proto==='icmp'&&loop)p=Object.assign({},p,{sq:p.sq+loop*3});
+      await c.sleep(p.proto==='tcp'&&p.flags!=='P.'?40:150+Math.random()*350);
+      seen++;if(!pred(p))continue;cap++;
+      const now=new Date();
+      if(o.w)saved.push({t:now.getTime(),p});else{c.out(fmtPkt(p,o,now));shown.push(p);}
+      GRADER.onEvent('tcpdump-pkt',{p,o});
+    }
+  }catch(e){if(!(e instanceof Interrupt))throw e;c.out('^C');SH.intr=false;}
+  if(o.w){fsWrite(o.w,{pcap:true,pkts:saved,raw:'\u00d4\u00c3\u00b2\u00a1\u0002\u0000\u0004\u0000'+saved.map(x=>x.p.src+x.p.dst+(x.p.payload||'')).join('')});GRADER.onEvent('tcpdump-write',{file:normPath(o.w),count:saved.length});}
+  c.err(`\n${cap} packets captured\n${seen} packets received by filter\n0 packets dropped by kernel\n`);
+  GRADER.onEvent('tcpdump-done',{count:cap,filter:o._.join(' '),o,shown});
+  return 0;
+};
+// ===== hping3 =====
+CMDS.hping3=async c=>{
+  const o=getopt(c.args.map(x=>x==='-1'?'--icmp':x==='-2'?'--udp':x),'c:p:i:SAFRUPVd:');
+  if(o.help||o.h){c.out('usage: hping3 host [options]\n  -c  --count      packet count\n  -i  --interval   wait (uX for X microseconds, for example -i u1000)\n  -1  --icmp       ICMP mode\n  -2  --udp        UDP mode\n  -p  --destport   destination port (default 0)\n  -S  --syn        set SYN flag\n  -A  --ack        set ACK flag\n  -F  --fin        set FIN flag\n  -R  --rst        set RST flag\n');return 0;}
+  if(o.flood||o.faster){c.err('hping3: --flood/--faster are disabled in this lab (they are denial-of-service techniques).\n');return 1;}
+  if(o.scan){c.err('hping3: --scan is not supported in this lab - use: hping3 -S -p <port> -c 1 <host>\n');return 1;}
+  const tgt=o._[0];if(!tgt){c.err('Warning: Unable to guess the output interface\n[main] no target host specified\n');return 1;}
+  const r=resolve(tgt);if(!r){c.err(`[resolve] Unknown host: ${tgt}\n`);return 1;}
+  if(!c.root){c.err('[open_sockraw] socket(): Operation not permitted\n[main] can\'t open raw socket\n');return 1;}
+  const ip=r.ip;const h=HOSTS[ip];const local=ip==='127.0.0.1'||ip===ME.ip;
+  const mode=o['1']||o.icmp?'icmp':o['2']||o.udp?'udp':'tcp';
+  const port=parseInt(o.p||o.destport||(mode==='udp'?0:0));const count=o.c?parseInt(o.c):Infinity;
+  let flagsSet=(o.S?'S':'')+(o.A?'A':'')+(o.F?'F':'')+(o.R?'R':'')+(o.P?'P':'')+(o.U?'U':'');
+  const flagDesc=mode==='icmp'?'icmp mode set, 28 headers + 0 data bytes':mode==='udp'?'udp mode set, 28 headers + 0 data bytes':(flagsSet?flagsSet.split('').join('')+' set, 40 headers + 0 data bytes':'NO FLAGS are set, 40 headers + 0 data bytes');
+  c.out(`HPING ${tgt} (${local?'lo':'eth0'} ${ip}): ${flagDesc}\n`);
+  nextHopArp(ip);
+  let sent=0,recv=0;const rtts=[];const ttl=local?64:h?h.ttl:64;
+  const reply=(seq)=>{
+    if(local)return mode==='icmp'?'icmp':mode==='udp'?'unreach':(HOSTS['127.0.0.1'].tcp[port]&&o.S&&!o.A?'SA':'RA');
+    if(!h)return null;
+    if(mode==='icmp')return h.icmp?'icmp':null;
+    if(mode==='udp')return h.filtered||h.ext?null:(h.udp&&h.udp[port]?null:'unreach');
+    const st=tcpState(ip,port);
+    if(st==='filtered')return null;
+    if(o.S&&!o.A)return st==='open'?'SA':'RA';
+    if(o.A&&!o.S)return 'R';
+    if(o.F||!flagsSet)return st==='open'&&o.F?null:'RA';
+    return 'RA';
+  };
+  try{
+    for(let seq=0;seq<count;seq++){
+      sent++;const rp=reply(seq);
+      if(rp){recv++;const rt=local?rnd(0.05):rnd(h.rtt);rtts.push(rt);const id=Math.floor(Math.random()*60000);
+        if(rp==='icmp')c.out(`len=28 ip=${ip} ttl=${ttl} id=${id} icmp_seq=${seq} rtt=${rt.toFixed(1)} ms\n`);
+        else if(rp==='unreach')c.out(`ICMP Port Unreachable from ip=${ip} name=${PTR[ip]||'UNKNOWN'}\nstatus=0 port=${2000+seq} seq=${seq}\n`);
+        else c.out(`len=${rp==='SA'?44:40} ip=${ip} ttl=${ttl} DF id=${rp==='SA'?0:id} sport=${port} flags=${rp} seq=${seq} win=${rp==='SA'?64240:0} rtt=${rt.toFixed(1)} ms\n`);
+        GRADER.onEvent('hping-reply',{ip,port,mode,flags:rp,syn:!!o.S});}
+      if(seq+1>=count)break;
+      await c.sleep(1000);
+    }
+    if(recv<sent&&count!==Infinity)await c.sleep(900);
+  }catch(e){if(!(e instanceof Interrupt))throw e;c.out('^C');SH.intr=false;}
+  const loss=Math.round((sent-recv)/sent*100);
+  c.out(`\n--- ${tgt} hping statistic ---\n${sent} packets transmitted, ${recv} packets received, ${loss}% packet loss\nround-trip min/avg/max = ${recv?`${Math.min(...rtts).toFixed(1)}/${(rtts.reduce((a,b)=>a+b,0)/rtts.length).toFixed(1)}/${Math.max(...rtts).toFixed(1)}`:'0.0/0.0/0.0'} ms\n`);
+  GRADER.onEvent('hping',{ip,port,mode,S:!!o.S,A:!!o.A,recv,sent,target:tgt});
+  return 0;
+};
+CMDS.hping=CMDS.hping3;
+// ===== md5sum / sha256sum =====
+function hashCmd(name,fn,len){
+  return async c=>{
+    const o=getopt(c.args,'cbtw');if(o.check)o.c=true;if(o.quiet)o.q=true;if(c.args.includes('--status'))o.status=true;
+    if(o.help){c.out(`Usage: ${name} [OPTION]... [FILE]...\nPrint or check ${name==='md5sum'?'MD5 (128-bit)':'SHA256 (256-bit)'} checksums.\n\nWith no FILE, or when FILE is -, read standard input.\n  -c, --check   read checksums from the FILEs and check them\n      --quiet   don't print OK for each successfully verified file\n`);return 0;}
+    let files=o._;
+    if(o.c){
+      let bad=0,missing=0,okc=0,code=0;const results=[];
+      const lists=files.length?files.map(f=>{const r=readFile(f,name);if(r.err){c.err(r.err+'\n');return '';}return r.data;}):[c.stdin||''];
+      for(const txt of lists){for(const line of txt.split('\n')){const m=line.match(new RegExp(`^([0-9a-fA-F]{${len}})\\s+\\*?(.+)$`));if(!line.trim())continue;if(!m){continue;}
+        const fn2=m[2].trim();const r=readFile(fn2,name);
+        if(r.err){c.out(`${fn2}: FAILED open or read\n`);c.err(r.err+'\n');missing++;results.push([fn2,'MISSING']);continue;}
+        const ok=fn(r.data)===m[1].toLowerCase();if(ok){okc++;if(!o.q&&!o.quiet)c.out(`${fn2}: OK\n`);}else{bad++;c.out(`${fn2}: FAILED\n`);}results.push([fn2,ok?'OK':'FAILED']);}}
+      if(missing)c.err(`${name}: WARNING: ${missing} listed file${missing>1?'s':''} could not be read\n`);
+      if(bad)c.err(`${name}: WARNING: ${bad} computed checksum${bad>1?'s':''} did NOT match\n`);
+      GRADER.onEvent('hash-check',{algo:name,results,cwd:SH.cwd});
+      return bad||missing?1:0;
+    }
+    if(!files.length)files=['-'];let code=0;const results=[];
+    for(const f of files){
+      let data;if(f==='-'){data=c.stdin||'';}else{const r=readFile(f,name);if(r.err){c.err(r.err+'\n');code=1;continue;}data=r.data;}
+      const h=fn(data);c.out(`${h}  ${f}\n`);results.push({file:f==='-'?'-':normPath(f),hash:h,data});
+    }
+    GRADER.onEvent('hash',{algo:name,results});
+    return code;
+  };
+}
+CMDS.md5sum=hashCmd('md5sum',md5,32);CMDS.sha256sum=hashCmd('sha256sum',sha256,64);
+CMDS.sha1sum=async c=>{c.err('sha1sum: this lab covers md5sum and sha256sum - SHA-1 is deprecated for integrity checks.\n');return 1;};
+// ===== Documentation (Docs tab + man pages) =====
+const DOC_ORDER=['whoami','cat','ip','ifconfig','route','arp','ping','traceroute','nslookup','dig','netstat','nc','curl','tcpdump','hping3','md5sum','sha256sum'];
+const DOC_ALIAS={netcat:'nc','nc.traditional':'nc',hping:'hping3',ss:'netstat'};
+const DOCS={
+whoami:{cat:'Basics',pkg:'coreutils',summary:'Print the user name associated with the current effective user ID.',
+ synopsis:'whoami',
+ desc:'Shows which account your commands are running as. It sounds trivial, but it answers a critical question after sudo, su, SSH, or exploiting a service: "who am I right now?" Running a command with sudo changes the effective user to root.',
+ options:[['(none)','whoami takes no useful options.']],
+ examples:[['whoami','Show your current user (student).'],['sudo whoami','Run whoami as root - prints root.'],['id','Related: show your UID, GID and group memberships.']],
+ read:'One word: the effective user name.',tips:'Always confirm who you are before running destructive commands, especially in a root shell.'},
+cat:{cat:'Basics',pkg:'coreutils',summary:'Concatenate files and print them to standard output.',
+ synopsis:'cat [OPTION]... [FILE]...',
+ desc:'Prints the contents of one or more files. With no file (or "-"), it reads standard input. It is the quickest way to read small text files such as configs, logs and checksum lists.',
+ options:[['-n','Number all output lines.'],['-b','Number non-blank lines only.'],['-E','Show $ at the end of each line (reveals trailing spaces).']],
+ examples:[['cat README.txt','Print a file.'],['cat -n /etc/hosts','Print with line numbers.'],['cat /etc/resolv.conf','See which DNS server and search domain you use.'],['cat a.txt b.txt > both.txt','Join two files into a new file.']],
+ read:'Output is the raw file content. Binary files print as garbage - use a hash or a dedicated tool instead.',tips:'For long files use head, tail or grep instead of scrolling a huge cat output.'},
+ip:{cat:'Interfaces & routing',pkg:'iproute2',summary:'Show and manipulate routing, network devices, interfaces and neighbors.',
+ synopsis:'ip [ -4 | -6 | -br ] OBJECT { COMMAND }\n  OBJECT := address (a) | link | route (r) | neigh (n)',
+ desc:'The modern replacement for ifconfig, route and arp. Objects can be abbreviated: "ip a" = "ip address show". Changing settings (add/del/set) requires root.',
+ options:[['ip a','Show all addresses on all interfaces.'],['ip -br a','Brief one-line-per-interface view.'],['ip -4 a','IPv4 addresses only.'],['ip link','Layer-2 view: state and MAC addresses.'],['ip route','Show the routing table.'],['ip route get <IP>','Which route/gateway would be used to reach <IP>.'],['ip neigh','Show the ARP/neighbor cache.']],
+ examples:[['ip a','All interfaces with IPv4/IPv6 addresses.'],['ip a show eth0','Just eth0.'],['ip -br a','Quick summary.'],['ip route get 8.8.8.8','Shows the next hop for an Internet address.'],['ip neigh','Neighbor table (like arp -n).']],
+ read:'"state UP" means the link is up. "inet 10.10.10.50/24" is the IPv4 address with prefix length /24 (netmask 255.255.255.0). "link/ether" is the MAC address. "scope link" fe80:: addresses are IPv6 link-local.',tips:'If you remember one networking command on modern Linux, make it ip.'},
+ifconfig:{cat:'Interfaces & routing',pkg:'net-tools',summary:'Configure or display network interfaces (legacy).',
+ synopsis:'ifconfig [-a] [interface]',
+ desc:'The classic interface tool from net-tools. Still everywhere in documentation, older systems, macOS and BSD. On modern Linux it is deprecated in favor of ip, but reading its output is an essential skill.',
+ options:[['(none)','Show interfaces that are UP.'],['-a','Show all interfaces, including DOWN ones.'],['<iface>','Show a single interface.'],['<iface> up|down','Enable/disable an interface (root).']],
+ examples:[['ifconfig','Active interfaces.'],['ifconfig -a','Include down interfaces like eth1.'],['ifconfig eth0','Only eth0.']],
+ read:'"flags=4163<UP,BROADCAST,RUNNING,MULTICAST>" - UP and RUNNING mean the link is active. "inet" = IPv4, "netmask" = subnet mask, "ether" = MAC. RX/TX counters show traffic and errors.',tips:'Interface missing from plain ifconfig? It is probably down - try ifconfig -a.'},
+route:{cat:'Interfaces & routing',pkg:'net-tools',summary:'Show or manipulate the IP routing table (legacy).',
+ synopsis:'route [-n]\nroute add|del ... (root)',
+ desc:'Displays the kernel routing table: which gateway and interface are used for each destination network. The default route (0.0.0.0/0) is used for anything that does not match a more specific route.',
+ options:[['-n','Numeric: do not resolve names (faster, unambiguous).'],['add / del','Add or delete routes (root).']],
+ examples:[['route -n','Numeric routing table.'],['ip route','Modern equivalent.'],['netstat -rn','Another equivalent.']],
+ read:'Destination 0.0.0.0 with Flags UG = the default gateway. Flags: U = route is up, G = uses a gateway (router), H = route to a single host. Gateway 0.0.0.0 means "directly connected, no router needed".',tips:'Most-specific (longest prefix) match wins: 10.10.20.0/24 beats the default route.'},
+arp:{cat:'Interfaces & routing',pkg:'net-tools',summary:'Manipulate the system ARP cache (IPv4 -> MAC mappings).',
+ synopsis:'arp [-a] [-n] [-d address]',
+ desc:'ARP (Address Resolution Protocol) maps IPv4 addresses on your local subnet to MAC addresses. Your host only learns MACs for local devices it talks to. Traffic to remote networks is sent to the gateway\'s MAC.',
+ options:[['-a','BSD-style output: name (IP) at MAC.'],['-n','Numeric table, no name resolution.'],['-d <ip>','Delete an entry (root).']],
+ examples:[['arp -n','ARP table, numeric.'],['arp -a','BSD-style list.'],['ip neigh','Modern equivalent.']],
+ read:'C flag = complete (learned) entry. "(incomplete)" / FAILED means an ARP request was sent but nobody answered - the host is down or not there. Duplicate MACs for different IPs can be a sign of ARP spoofing.',tips:'Ping a local host first, then check arp - you will see its MAC appear.'},
+ping:{cat:'Reachability & path',pkg:'iputils-ping',summary:'Send ICMP ECHO_REQUEST to network hosts.',
+ synopsis:'ping [-c count] [-i interval] [-s size] [-W timeout] [-n] destination',
+ desc:'The first test for "can I reach it?". Sends ICMP echo requests and reports replies, round-trip time (RTT) and packet loss. On Linux, ping runs forever until you press Ctrl+C unless you give -c.',
+ options:[['-c N','Stop after N packets.'],['-i S','Seconds between packets (default 1).'],['-s N','Payload size in bytes (default 56).'],['-W S','Seconds to wait for each reply.'],['-n','Numeric output only.'],['-q','Quiet: only the summary.']],
+ examples:[['ping -c 4 10.10.10.1','Four pings to the gateway.'],['ping -c 3 web01','Ping by name (uses DNS + search domain).'],['ping 8.8.8.8','Runs until Ctrl+C.']],
+ read:'ttl = remaining hops. Typical starting values: Linux/macOS 64, Windows 128, network gear 255 - so ttl=128 on a LAN host hints at Windows. time = RTT. "Destination Host Unreachable" from your own IP means no ARP reply on the local subnet. 100% loss with no errors usually means ICMP is filtered or the host is down.',tips:'No reply does NOT prove a host is down - firewalls often drop ICMP. Use hping3 or nc to test a TCP port.'},
+traceroute:{cat:'Reachability & path',pkg:'traceroute',summary:'Print the route packets take to a network host.',
+ synopsis:'traceroute [-n] [-I | -T [-p port]] [-m max_ttl] [-q nqueries] host',
+ desc:'Sends probes with increasing TTL (1, 2, 3...). Each router that decrements the TTL to 0 replies with "ICMP time exceeded", revealing itself. By default Linux traceroute uses UDP probes to high ports. -I uses ICMP echo and -T uses TCP SYN (both need root) - useful when firewalls block UDP.',
+ options:[['-n','Do not resolve hop names.'],['-I','ICMP echo probes (root).'],['-T','TCP SYN probes (root), default port 80.'],['-p N','Destination port for -T.'],['-m N','Maximum hops (default 30).'],['-q N','Probes per hop (default 3).']],
+ examples:[['traceroute example.com','Path to an Internet host.'],['traceroute -n 8.8.8.8','Numeric, faster.'],['sudo traceroute -T -p 443 hardened.lab.local','Trace with TCP SYN to port 443 through a firewall that drops UDP.']],
+ read:'Each line is a hop: number, router name (IP), then three RTTs. "* * *" = no reply for that hop (router silently drops/ratelimits probes, or a firewall). Stars at the end mean your probes are being blocked. !H = host unreachable.',tips:'A single silent hop in the middle is normal. Stars until hop 30 means "try a different probe type".'},
+nslookup:{cat:'DNS',pkg:'bind9-dnsutils',summary:'Query Internet name servers.',
+ synopsis:'nslookup [-type=TYPE] name|IP [server]',
+ desc:'A simple DNS lookup tool available on Linux, macOS and Windows. Unlike dig, nslookup applies your search domain (from /etc/resolv.conf), so "web01" becomes web01.lab.local. Give an IP to do a reverse (PTR) lookup.',
+ options:[['-type=A|AAAA|MX|NS|TXT|CNAME|PTR|SOA','Record type to ask for (default A).'],['name server','Second argument = which DNS server to ask.']],
+ examples:[['nslookup web01','Forward lookup via the default server.'],['nslookup 10.10.10.25','Reverse lookup.'],['nslookup -type=mx lab.local','Mail servers for a domain.'],['nslookup web01.lab.local 8.8.8.8','Ask a public resolver instead.']],
+ read:'"Server/Address" = the resolver that answered. "Non-authoritative answer" = the server answered from cache/recursion, not as the owner of the zone. "canonical name =" is a CNAME alias. NXDOMAIN = the name does not exist (on that server).',tips:'Internal names often only exist on internal DNS (split-horizon). Public resolvers return NXDOMAIN for them.'},
+dig:{cat:'DNS',pkg:'bind9-dnsutils',summary:'DNS lookup utility (Domain Information Groper).',
+ synopsis:'dig [@server] name [type] [+short] [+noall +answer]\ndig -x IP',
+ desc:'The professional\'s DNS tool. Shows the full DNS response: header flags, question, answer, authority sections, TTLs and which server answered. dig does NOT use the search domain, so always give fully qualified names.',
+ options:[['@server','Ask a specific DNS server (e.g. @8.8.8.8).'],['type','A, AAAA, MX, NS, TXT, CNAME, SOA, ANY...'],['-x IP','Reverse lookup.'],['+short','Just the answer data.'],['+noall +answer','Only the answer section.']],
+ examples:[['dig example.com','Full A-record response.'],['dig +short example.com','Just the IP.'],['dig lab.local MX','Mail exchangers.'],['dig lab.local TXT','TXT records (SPF, verification tokens...).'],['dig -x 8.8.8.8','Reverse lookup.'],['dig @1.1.1.1 example.com','Use Cloudflare\'s resolver.']],
+ read:'status: NOERROR / NXDOMAIN / SERVFAIL. flags: qr = response, aa = authoritative answer, rd = recursion desired, ra = recursion available. In the ANSWER section the second column is the TTL in seconds (how long it may be cached). "SERVER:" shows who answered.',tips:'Use +short in scripts; use the full output when troubleshooting.'},
+netstat:{cat:'Sockets',pkg:'net-tools',summary:'Print network connections, routing tables, interface statistics.',
+ synopsis:'netstat [-t] [-u] [-l] [-a] [-n] [-p]\nnetstat -r | -i | -s',
+ desc:'Lists sockets: which services are listening, and which connections are established. Combining -tulpn is the classic "what is listening on this box?" command. Process names of other users\' sockets are only visible as root. ss is the modern replacement with similar options.',
+ options:[['-t / -u','TCP / UDP sockets.'],['-l','Listening sockets only.'],['-a','All sockets (listening + connected).'],['-n','Numeric addresses and ports.'],['-p','Show PID/program (root for other users\' processes).'],['-r','Routing table.'],['-i','Interface statistics.']],
+ examples:[['netstat -tuln','Listening TCP/UDP ports.'],['sudo netstat -tulpn','...with owning program.'],['netstat -tan','All TCP sockets incl. ESTABLISHED.'],['netstat -an | grep ESTABLISHED','Just live connections.'],['ss -tulpn','Modern equivalent.']],
+ read:'Local Address 0.0.0.0:22 = listening on all IPv4 interfaces (reachable from the network). 127.0.0.1:631 = loopback only (local access only). State LISTEN = waiting for connections, ESTABLISHED = active session, TIME_WAIT = recently closed.',tips:'An unexpected root-owned listener (like a netcat on a high port) is a classic sign of a backdoor.'},
+nc:{cat:'Sockets',pkg:'netcat-traditional',summary:'Netcat - the TCP/IP swiss army knife.',
+ synopsis:'nc [-v] [-n] [-w secs] [-z] host port[s]\nnc -l [-v] [-n] -p port',
+ desc:'Reads and writes raw data across TCP or UDP connections. Use it to test whether a port is open, grab service banners, talk to a service by hand (HTTP, SMTP), transfer data, or listen for an incoming connection.',
+ options:[['-v','Verbose (show connection status).'],['-z','Zero-I/O mode: just test whether ports are open.'],['-n','No DNS - IP addresses only.'],['-w N','Timeout in seconds.'],['-l -p N','Listen on local port N.'],['-u','UDP mode (port results are unreliable - UDP has no handshake).']],
+ examples:[['nc -zv web01 80','Is TCP/80 open?'],['nc -zv web01 20-25','Test a port range.'],['nc web01 22','Grab the SSH banner (Ctrl+C to quit).'],['printf "GET / HTTP/1.0\\r\\n\\r\\n" | nc web01 80','Speak HTTP by hand.'],['nc -lvnp 4444','Listen on port 4444.']],
+ read:'"open" = TCP handshake completed. "Connection refused" = host answered with RST: reachable, nothing listening. "Connection timed out" = no answer at all: usually a firewall dropping packets.',tips:'Ports below 1024 need root to listen on. Only test systems you are authorized to test.'},
+curl:{cat:'Application',pkg:'curl',summary:'Transfer data from or to a server (HTTP, HTTPS and more).',
+ synopsis:'curl [options] URL',
+ desc:'The universal HTTP client for the command line. Fetch pages and APIs, inspect headers, follow redirects, download files, send POST data and debug TLS.',
+ options:[['-I','HEAD request: headers only.'],['-i','Include response headers with the body.'],['-v','Verbose: DNS, TCP, TLS and full request/response headers.'],['-L','Follow redirects (3xx + Location).'],['-k','Skip TLS certificate verification (testing only!).'],['-o FILE / -O','Save to FILE / save using the remote file name.'],['-s','Silent (no progress meter).'],['-X / -d','Request method / POST data.'],['-w FMT','Print info after transfer, e.g. "%{http_code}\\n".']],
+ examples:[['curl http://web01','Fetch a page.'],['curl -I http://web01','Headers only.'],['curl http://web01/api/status','Call a JSON API.'],['curl -kL http://intranet.lab.local','Follow redirect to HTTPS, accept the lab CA.'],['curl -O http://web01/downloads/netlab-tool.tar.gz','Download a file.'],['curl -s -o /dev/null -w "%{http_code}\\n" http://web01/x','Just the status code.']],
+ read:'Status codes: 2xx success, 3xx redirect (see Location header), 4xx client error (404 not found, 401 unauthorized), 5xx server error. Error codes: (6) could not resolve host = DNS, (7) failed to connect = port closed/unreachable, (28) timeout = filtered, (60) certificate problem = TLS trust.',tips:'-k is fine for a lab with an internal CA - never make it a habit in production scripts.'},
+tcpdump:{cat:'Packet capture',pkg:'tcpdump',summary:'Dump traffic on a network interface.',
+ synopsis:'sudo tcpdump [-i iface] [-c count] [-n|-nn] [-A|-X] [-w file] [-r file] [filter]',
+ desc:'Captures packets and prints a one-line summary per packet. Requires root (or the right capabilities). Filters use pcap-filter syntax: host, net, port, src/dst, protocol names, combined with and/or/not.',
+ options:[['-i IFACE','Interface to capture on (-D lists them).'],['-c N','Stop after N packets.'],['-n / -nn','Do not resolve hosts / hosts and ports.'],['-A','Print payload as ASCII.'],['-X','Print payload as hex + ASCII.'],['-w FILE','Write raw packets to a pcap file.'],['-r FILE','Read packets from a pcap file.'],['-D','List interfaces.']],
+ examples:[['sudo tcpdump -i eth0 -c 10','Ten packets.'],['sudo tcpdump -n icmp','Only ICMP.'],['sudo tcpdump -nn port 53','DNS traffic.'],['sudo tcpdump -A port 80','HTTP with readable payload.'],['sudo tcpdump -n host 10.10.10.77 and tcp','Combine filters.'],['sudo tcpdump -c 20 -w capture.pcap','Save to a file (open later in Wireshark).']],
+ read:'Format: time, protocol, src.port > dst.port, then details. TCP Flags: [S] SYN, [S.] SYN-ACK, [.] ACK, [P.] push data, [F.] FIN, [R] reset. DNS: "A? name" is a query; "1/0/0" counts answer/authority/additional records.',tips:'Anything sent over plain HTTP, FTP or Telnet - including passwords - is readable in a capture. That is why we use TLS.'},
+hping3:{cat:'Packet crafting',pkg:'hping3',summary:'Send (almost) arbitrary TCP/IP packets to network hosts.',
+ synopsis:'sudo hping3 [-1 | -2 | -S | -A | -F] [-p port] [-c count] host',
+ desc:'A packet crafter: send TCP packets with chosen flags, UDP or ICMP, and see how the target responds. Great for testing firewalls and proving a host is alive when ping is blocked. Needs root for raw sockets.',
+ options:[['-c N','Packet count.'],['-p N','Destination port.'],['-S','Set SYN flag (like the first step of a TCP handshake).'],['-A','Set ACK flag (tests for stateful filtering).'],['-F','Set FIN flag.'],['-1','ICMP mode (like ping).'],['-2','UDP mode.']],
+ examples:[['sudo hping3 -1 -c 3 web01','ICMP echo, like ping.'],['sudo hping3 -S -p 443 -c 3 hardened.lab.local','SYN to an HTTPS port.'],['sudo hping3 -S -p 8080 -c 3 web01','SYN to a closed port.']],
+ read:'flags=SA (SYN-ACK) = port open. flags=RA (RST-ACK) = port closed but host is up. No reply = filtered (a firewall dropped it). ttl hints at OS and distance.',tips:'Flood and spoofing options exist in the real tool - they are denial-of-service techniques and are disabled here. Only test systems you are authorized to test.'},
+md5sum:{cat:'Integrity',pkg:'coreutils',summary:'Compute and check MD5 message digests.',
+ synopsis:'md5sum [FILE]...\nmd5sum -c CHECKSUM_FILE',
+ desc:'Produces a 128-bit (32 hex character) fingerprint of a file. Any change to the content - even one bit - changes the hash. MD5 is fast and fine for detecting accidental corruption or duplicates, but it is broken for security purposes (collisions can be crafted), so use SHA-256 for anything adversarial.',
+ options:[['-c FILE','Check files against a list of "hash  filename" lines.'],['--quiet','With -c, only print failures.'],['-','Read from standard input.']],
+ examples:[['md5sum ~/evidence/*.pdf','Hash several files - identical hashes = identical content.'],['echo -n hello | md5sum','Hash a string (note -n: no trailing newline).'],['md5sum file > file.md5; md5sum -c file.md5','Create, then verify.']],
+ read:'Output: hash, two spaces, file name. With -c: "file: OK" or "file: FAILED".',tips:'echo adds a newline by default, which changes the hash - use echo -n or printf.'},
+sha256sum:{cat:'Integrity',pkg:'coreutils',summary:'Compute and check SHA-256 message digests.',
+ synopsis:'sha256sum [FILE]...\nsha256sum -c CHECKSUM_FILE',
+ desc:'Produces a 256-bit (64 hex character) SHA-2 hash. This is the standard way to verify downloads (vendors publish SHA256SUMS files) and to prove evidence has not been altered.',
+ options:[['-c FILE','Verify files listed in FILE.'],['--quiet','Only show failures.'],['--status','No output; exit code tells the result.']],
+ examples:[['sha256sum netlab-tool.tar.gz','Hash a download.'],['sha256sum -c SHA256SUMS','Verify every file in a checksum list.'],['sha256sum -c SHA256SUMS 2>/dev/null | grep FAILED','Show only failures.']],
+ read:'Compare the full 64-character hash - not just the first few characters. A FAILED line means the file content differs from when the hash was published: corrupted or tampered.',tips:'A checksum is only as trustworthy as where you got it from. If an attacker can change the file AND the checksum on the same server, the check proves nothing - prefer signed checksums.'},
+};
+function docToText(k,d){
+  const w=(t)=>t.replace(/(.{1,72})(\s+|$)/g,'       $1\n');
+  let s=`${k.toUpperCase()}(8)                 NETLAB Manual                 ${k.toUpperCase()}(8)\n\nNAME\n       ${k} - ${d.summary}\n\nSYNOPSIS\n${d.synopsis.split('\n').map(l=>'       '+l).join('\n')}\n\nDESCRIPTION\n${w(d.desc)}\nOPTIONS\n`;
+  d.options.forEach(([o,x])=>s+=`       ${o}\n              ${x}\n`);
+  s+=`\nEXAMPLES\n`;d.examples.forEach(([e,x])=>s+=`       $ ${e}\n              ${x}\n`);
+  s+=`\nREADING THE OUTPUT\n${w(d.read)}\nTIP\n${w(d.tips)}\nPACKAGE\n       ${d.pkg}\n\n`;
+  return s;
+}
+// ===== Lessons, tasks, quizzes =====
+// Task check types: on:'cmd' -> check(ev) where ev={cmd,args,sudo,raw,line,output,code}; on:<event> -> check(data)
+const has=(ev,re)=>re.test(' '+ev.args.join(' ')+' ');
+const C=(cmd,fn)=>({on:'cmd',check:ev=>ev.cmd===cmd&&(!fn||fn(ev))});
+const E=(name,fn)=>({on:name,check:d=>!fn||fn(d)});
+const LESSONS=[
+{id:'basics',title:'1. Terminal basics: whoami & cat',cmds:['whoami','cat'],
+ body:`<p>Welcome to <b>NETLAB</b>. The terminal on the right is a simulated Kali Linux workstation called <code>netlab</code> on a small company network, <code>lab.local</code>. Nothing you type leaves your browser.</p>
+<h4>Anatomy of a command</h4>
+<pre class="ex">command  -options  arguments
+cat      -n        /etc/hosts</pre>
+<p>The <b>prompt</b> <code>┌──(student㉿netlab)-[~]</code> tells you <i>who</i> you are (student), <i>where</i> (host netlab) and the current directory (<code>~</code> = your home folder). The <code>$</code> means a normal user; <code>#</code> means root.</p>
+<h4>whoami</h4>
+<p>Prints the user your commands run as. Prefix any command with <code>sudo</code> to run it as <b>root</b> (the administrator). Your sudo password is anything non-empty, e.g. <code>student</code>.</p>
+<h4>cat</h4>
+<p>Prints files. Use <code>ls</code> to list files and <code>cd</code> to change directories. <code>-n</code> numbers the lines.</p>
+<div class="tip">Click any grey command in a lesson - like <code class="run">whoami</code> - to paste it into the terminal, then press Enter. Press <b>Tab</b> to auto-complete and <b>↑</b> for history. Type <code class="run">man cat</code> or use the <b>Docs</b> tab for full documentation.</div>`,
+ tasks:[
+  {id:'b1',text:'Find out who you are logged in as.',cmd:'whoami',hint:'Type <code class="run">whoami</code>',...C('whoami',ev=>!ev.sudo)},
+  {id:'b2',text:'Run whoami as root using sudo.',cmd:'sudo whoami',hint:'<code class="run">sudo whoami</code> - enter any password.',...C('whoami',ev=>ev.sudo)},
+  {id:'b3',text:'List your home directory, then read README.txt with cat.',cmd:'cat README.txt',hint:'<code class="run">ls</code> then <code class="run">cat README.txt</code>',...C('cat',ev=>ev.output.includes('NETLAB{welcome_aboard}'))},
+  {id:'b4',text:'Print /etc/hosts with line numbers.',cmd:'cat -n /etc/hosts',hint:'<code class="run">cat -n /etc/hosts</code>',...C('cat',ev=>has(ev,/ -n /)&&ev.output.includes('localhost'))},
+  {id:'b5',text:'Open the manual page for any lab command.',cmd:'man cat',hint:'<code class="run">man cat</code>',...E('man')},
+ ],
+ quiz:[
+  {id:'bq1',q:'What is the flag inside README.txt?',a:['NETLAB{welcome_aboard}'],hint:'cat README.txt'},
+  {id:'bq2',q:'Which user does <code>sudo whoami</code> report?',a:['root']},
+  {id:'bq3',q:'According to /etc/hosts, which IP is files01 mapped to?',a:['10.10.10.30']},
+ ]},
+{id:'iface',title:'2. Network interfaces: ip a & ifconfig',cmds:['ip','ifconfig'],
+ body:`<p>Every network conversation starts at an <b>interface</b> - a network card (physical or virtual). Each has a <b>MAC address</b> (layer 2, burned into the NIC) and usually one or more <b>IP addresses</b> (layer 3).</p>
+<h4>ip a (modern)</h4>
+<pre class="ex">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; ... state UP
+    link/ether 00:50:56:a1:3c:50          &lt;- MAC address
+    inet 10.10.10.50/24 brd 10.10.10.255  &lt;- IPv4 / prefix length</pre>
+<p><code>/24</code> is CIDR notation: the first 24 bits are the network, so the netmask is <code>255.255.255.0</code> and all <code>10.10.10.x</code> hosts are on your local subnet. <code>lo</code> (127.0.0.1) is the loopback interface - the machine talking to itself.</p>
+<h4>ifconfig (legacy)</h4>
+<p>Older but still everywhere in docs, on macOS and on network appliances. Plain <code>ifconfig</code> hides interfaces that are down - use <code>-a</code> to see everything.</p>`,
+ tasks:[
+  {id:'i1',text:'Show all interfaces and addresses with ip.',hint:'<code class="run">ip a</code>',...C('ip',ev=>/^a/.test(ev.args.filter(x=>!x.startsWith('-'))[0]||'')&&!has(ev,/-br/))},
+  {id:'i2',text:'Show the brief one-line view.',hint:'<code class="run">ip -br a</code>',...C('ip',ev=>has(ev,/ -br /))},
+  {id:'i3',text:'Show active interfaces with ifconfig.',hint:'<code class="run">ifconfig</code>',...C('ifconfig',ev=>ev.code===0&&ev.output.includes('eth0'))},
+  {id:'i4',text:'Use ifconfig to reveal the interface that is down.',hint:'<code class="run">ifconfig -a</code>',...C('ifconfig',ev=>ev.output.includes('eth1'))},
+ ],
+ quiz:[
+  {id:'iq1',q:'What is the IPv4 address of eth0?',a:['10.10.10.50','10.10.10.50/24']},
+  {id:'iq2',q:'What is the MAC address of eth0?',a:['00:50:56:a1:3c:50']},
+  {id:'iq3',q:'Which interface is DOWN?',a:['eth1']},
+  {id:'iq4',q:'eth0 is a /24. What is its netmask in dotted-decimal?',a:['255.255.255.0']},
+ ]},
+{id:'route',title:'3. Routing: route & ip route',cmds:['route','ip'],
+ body:`<p>The <b>routing table</b> decides where each packet goes. If the destination is on a directly connected subnet, the packet is delivered directly. Otherwise it is sent to a <b>gateway</b> (router). The <b>default route</b> (<code>0.0.0.0/0</code>) catches everything else.</p>
+<pre class="ex">Destination  Gateway       Genmask        Flags
+0.0.0.0      10.10.10.1    0.0.0.0        UG    &lt;- default gateway
+10.10.10.0   0.0.0.0       255.255.255.0  U     &lt;- local subnet
+10.10.20.0   10.10.10.254  255.255.255.0  UG    &lt;- static route</pre>
+<p>Flags: <b>U</b> = up, <b>G</b> = via a gateway. The <b>most specific</b> matching route wins, so traffic to <code>10.10.20.5</code> uses the static route, not the default.</p>
+<p><code>ip route get &lt;IP&gt;</code> asks the kernel exactly which route it would choose.</p>`,
+ tasks:[
+  {id:'r1',text:'Show the routing table numerically with route.',hint:'<code class="run">route -n</code>',...C('route',ev=>has(ev,/ -n/))},
+  {id:'r2',text:'Show the routing table with ip.',hint:'<code class="run">ip route</code>',...C('ip',ev=>/^r/.test(ev.args.filter(x=>!x.startsWith('-'))[0]||'')&&ev.args.length<=2)},
+  {id:'r3',text:'Ask the kernel which route it uses to reach 8.8.8.8.',hint:'<code class="run">ip route get 8.8.8.8</code>',...C('ip',ev=>has(ev,/ get /)&&ev.code===0)},
+  {id:'r4',text:'Ask which route it uses to reach the DMZ host 10.10.20.5.',hint:'<code class="run">ip route get 10.10.20.5</code>',...C('ip',ev=>has(ev,/ get 10\.10\.20\./))},
+ ],
+ quiz:[
+  {id:'rq1',q:'What is the default gateway?',a:['10.10.10.1']},
+  {id:'rq2',q:'Which gateway is used to reach the 10.10.20.0/24 DMZ?',a:['10.10.10.254']},
+  {id:'rq3',q:'In route -n output, what does the G flag mean?',choices:['The route is a gateway-less local subnet','Packets for this destination are sent via a gateway (router)','The route is generated by DHCP','The route is disabled'],answer:1},
+ ]},
+{id:'ping',title:'4. Reachability: ping',cmds:['ping'],
+ body:`<p><code>ping</code> sends ICMP <i>echo request</i> packets and waits for <i>echo replies</i>. It answers: is the host reachable, how fast (RTT), and is anything lost?</p>
+<pre class="ex">64 bytes from web01.lab.local (10.10.10.20): icmp_seq=1 ttl=64 time=0.51 ms</pre>
+<ul><li><b>ttl</b> - hops left. Common starting values: Linux 64, Windows 128, routers 255. A LAN host showing <code>ttl=128</code> is probably Windows.</li>
+<li><b>time</b> - round-trip time. LAN &lt; 1 ms, Internet 10-100 ms.</li>
+<li>On Linux ping runs <b>forever</b> - use <code>-c 4</code> or press <b>Ctrl+C</b>.</li></ul>
+<p><b>Failure modes:</b> <i>Destination Host Unreachable</i> from your own IP = nobody answered ARP on the local subnet. Plain <i>100% packet loss</i> = no reply at all, often because a firewall drops ICMP - the host may still be up!</p>`,
+ tasks:[
+  {id:'p1',text:'Send exactly 4 pings to the default gateway.',hint:'<code class="run">ping -c 4 10.10.10.1</code>',...E('ping',d=>d.ip==='10.10.10.1'&&d.sent>=4&&d.recv>0)},
+  {id:'p2',text:'Ping web01 by name (DNS does the lookup).',hint:'<code class="run">ping -c 3 web01</code>',...E('ping',d=>d.ip==='10.10.10.20'&&!isIP(d.target)&&d.recv>0)},
+  {id:'p3',text:'Ping dc01 and note its TTL.',hint:'<code class="run">ping -c 3 dc01</code>',...E('ping',d=>d.ip==='10.10.10.10'&&d.recv>0)},
+  {id:'p4',text:'Ping Google DNS on the Internet.',hint:'<code class="run">ping -c 3 8.8.8.8</code>',...E('ping',d=>d.ip==='8.8.8.8'&&d.recv>0)},
+  {id:'p5',text:'Ping an address with no host behind it: 10.10.10.99.',hint:'<code class="run">ping -c 3 10.10.10.99</code>',...E('ping',d=>d.ip==='10.10.10.99')},
+  {id:'p6',text:'Ping hardened.lab.local - a host that blocks ICMP.',hint:'<code class="run">ping -c 3 hardened.lab.local</code>',...E('ping',d=>d.ip==='10.10.20.5')},
+ ],
+ quiz:[
+  {id:'pq1',q:'What TTL do replies from 8.8.8.8 have?',a:['117']},
+  {id:'pq2',q:'dc01 replies with ttl=128. Which OS family does that usually indicate?',choices:['Linux','Windows','Cisco IOS','macOS'],answer:1},
+  {id:'pq3',q:'What packet loss percentage did you get for 10.10.10.99? (number only)',a:['100','100%']},
+  {id:'pq4',q:'hardened.lab.local does not answer ping. What can you conclude?',choices:['The host is definitely down','Nothing for certain - ICMP may simply be filtered','DNS is broken','Your gateway is down'],answer:1},
+ ]},
+{id:'arp',title:'5. Neighbors: arp',cmds:['arp','ip'],
+ body:`<p>IP addresses get packets across networks, but on the local Ethernet segment frames are delivered by <b>MAC address</b>. <b>ARP</b> asks "who has 10.10.10.30? tell 10.10.10.50" and caches the answer.</p>
+<pre class="ex">Address        HWtype  HWaddress           Flags  Iface
+10.10.10.1     ether   00:1c:7f:3a:10:01   C      eth0
+10.10.10.99            (incomplete)               eth0</pre>
+<p>You only learn MACs of <b>local</b> hosts you talk to. For Internet hosts your machine sends frames to the <b>gateway's</b> MAC, so 8.8.8.8 never appears in the table. <i>(incomplete)</i> means a request went out and nobody answered.</p>
+<div class="tip">Security note: if two different IPs suddenly share one MAC (especially the gateway's IP), suspect ARP spoofing / man-in-the-middle.</div>`,
+ tasks:[
+  {id:'a1',text:'Display the ARP cache numerically.',hint:'<code class="run">arp -n</code>',...C('arp',ev=>has(ev,/ -n/)||has(ev,/ -an/))},
+  {id:'a2',text:'Ping files01 once, then confirm its MAC appears in the ARP cache.',hint:'<code class="run">ping -c 1 files01</code> then <code class="run">arp -a</code>',...C('arp',ev=>ev.output.includes('10.10.10.30'))},
+  {id:'a3',text:'View the same table with the modern ip neigh.',hint:'<code class="run">ip neigh</code>',...C('ip',ev=>/^n/.test(ev.args.filter(x=>!x.startsWith('-'))[0]||''))},
+  {id:'a4',text:'Find the (incomplete) entry left by pinging 10.10.10.99.',hint:'Ping 10.10.10.99 (lesson 4), then <code class="run">arp -n</code>',...C('arp',ev=>ev.output.includes('10.10.10.99')&&ev.output.includes('incomplete'))},
+ ],
+ quiz:[
+  {id:'aq1',q:'What is the MAC address of the default gateway (10.10.10.1)?',a:['00:1c:7f:3a:10:01']},
+  {id:'aq2',q:'What is the MAC address of files01?',a:['00:50:56:a1:7d:30']},
+  {id:'aq3',q:'Why will 8.8.8.8 never appear in your ARP cache?',choices:['ARP only works with private IPs','8.8.8.8 is not on your local subnet - frames go to the gateway\'s MAC','8.8.8.8 blocks ARP','ARP entries for public IPs expire immediately'],answer:1},
+ ]},
+{id:'nslookup',title:'6. DNS basics: nslookup',cmds:['nslookup'],
+ body:`<p><b>DNS</b> turns names into IP addresses (and back). Your resolver is set in <code>/etc/resolv.conf</code> - here <code>10.10.10.10</code> (dc01) with search domain <code>lab.local</code>.</p>
+<p>Common record types: <b>A</b> (IPv4), <b>AAAA</b> (IPv6), <b>CNAME</b> (alias), <b>MX</b> (mail server), <b>NS</b> (name servers), <b>TXT</b> (free text: SPF, verification), <b>PTR</b> (reverse: IP → name).</p>
+<pre class="ex">Server:   10.10.10.10            &lt;- who answered
+Name:     web01.lab.local
+Address:  10.10.10.20</pre>
+<p><b>Split-horizon DNS:</b> internal names (<code>*.lab.local</code>) exist only on the internal DNS server. Ask a public resolver like 8.8.8.8 and you get <b>NXDOMAIN</b> (non-existent domain).</p>`,
+ tasks:[
+  {id:'n1',text:'Look up web01 (the search domain completes the name).',hint:'<code class="run">nslookup web01</code>',...E('dns',d=>d.tool==='nslookup'&&d.name==='web01.lab.local'&&d.status==='NOERROR')},
+  {id:'n2',text:'Look up intranet.lab.local and spot the CNAME.',hint:'<code class="run">nslookup intranet.lab.local</code>',...E('dns',d=>d.tool==='nslookup'&&/^intranet/.test(d.name)&&d.status==='NOERROR')},
+  {id:'n3',text:'Do a reverse lookup of 10.10.10.25.',hint:'<code class="run">nslookup 10.10.10.25</code>',...E('dns',d=>d.tool==='nslookup'&&d.type==='PTR'&&d.name.startsWith('25.10.10.10'))},
+  {id:'n4',text:'Find the mail server (MX) for lab.local.',hint:'<code class="run">nslookup -type=mx lab.local</code>',...E('dns',d=>d.tool==='nslookup'&&d.type==='MX')},
+  {id:'n5',text:'Ask the public resolver 8.8.8.8 for web01.lab.local.',hint:'<code class="run">nslookup web01.lab.local 8.8.8.8</code>',...E('dns',d=>d.tool==='nslookup'&&d.server==='8.8.8.8'&&/lab\.local/.test(d.name))},
+ ],
+ quiz:[
+  {id:'nq1',q:'intranet.lab.local is an alias. What is its canonical name?',a:['web01.lab.local','web01.lab.local.','web01']},
+  {id:'nq2',q:'Which host name belongs to 10.10.10.25?',a:['mail.lab.local','mail.lab.local.','mail']},
+  {id:'nq3',q:'What status does 8.8.8.8 return for web01.lab.local?',a:['NXDOMAIN']},
+  {id:'nq4',q:'Which DNS server answers your queries by default?',a:['10.10.10.10','dc01','dc01.lab.local']},
+ ]},
+{id:'dig',title:'7. DNS deep dive: dig',cmds:['dig'],
+ body:`<p><code>dig</code> shows the <i>whole</i> DNS response - the tool admins and security analysts reach for first.</p>
+<pre class="ex">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1
+;; ANSWER SECTION:
+example.com.     300   IN   A   93.184.215.14
+                 ^TTL (seconds it may be cached)</pre>
+<p>Flags: <b>qr</b> response, <b>aa</b> authoritative answer (the server owns the zone), <b>rd</b>/<b>ra</b> recursion desired/available.</p>
+<p>Useful forms: <code>dig +short name</code>, <code>dig name MX</code>, <code>dig -x IP</code>, <code>dig @1.1.1.1 name</code>.</p>
+<div class="tip">Unlike nslookup and ping, dig does <b>not</b> apply the search domain. <code>dig web01</code> asks for the top-level name "web01." - always use fully qualified names with dig.</div>`,
+ tasks:[
+  {id:'d1',text:'Run a full dig for example.com.',hint:'<code class="run">dig example.com</code>',...E('dns',d=>d.tool==='dig'&&!d.short&&d.name.replace(/\.$/,'')==='example.com'&&d.type==='A')},
+  {id:'d2',text:'Get just the answer with +short.',hint:'<code class="run">dig +short example.com</code>',...E('dns',d=>d.tool==='dig'&&d.short)},
+  {id:'d3',text:'Read the TXT records for lab.local.',hint:'<code class="run">dig lab.local TXT</code>',...E('dns',d=>d.tool==='dig'&&d.type==='TXT'&&/lab\.local/.test(d.name))},
+  {id:'d4',text:'Reverse-lookup 8.8.8.8 with dig.',hint:'<code class="run">dig -x 8.8.8.8</code>',...E('dns',d=>d.tool==='dig'&&d.type==='PTR')},
+  {id:'d5',text:'Query a specific server: Cloudflare 1.1.1.1.',hint:'<code class="run">dig @1.1.1.1 example.com</code>',...E('dns',d=>d.tool==='dig'&&d.server==='1.1.1.1')},
+  {id:'d6',text:'See what happens with a short name: dig web01',hint:'<code class="run">dig web01</code>',...E('dns',d=>d.tool==='dig'&&d.name==='web01')},
+ ],
+ quiz:[
+  {id:'dq1',q:'What flag is hidden in the lab.local TXT records?',a:['NETLAB{txt_records_tell_tales}']},
+  {id:'dq2',q:'What is the TTL (seconds) of the example.com A record?',a:['300']},
+  {id:'dq3',q:'What status does <code>dig web01</code> return?',a:['NXDOMAIN']},
+  {id:'dq4',q:'Answers for lab.local names include the <b>aa</b> flag. What does it mean?',choices:['Answer was cached','Authoritative answer - the server owns the zone','Answer is encrypted','Additional answers follow'],answer:1},
+ ]},
+{id:'trace',title:'8. Path discovery: traceroute',cmds:['traceroute'],
+ body:`<p><code>traceroute</code> reveals each router between you and a destination. It sends probes with TTL=1, 2, 3... Each router that drops a probe because TTL hit zero sends back "ICMP time exceeded", revealing its address.</p>
+<pre class="ex"> 1  fw01.lab.local (10.10.10.1)  0.512 ms  0.488 ms  0.471 ms
+ 2  100.64.0.1 (100.64.0.1)  4.112 ms  4.301 ms  4.087 ms
+ 3  * * *          &lt;- this hop didn't answer (normal)</pre>
+<p>Linux traceroute uses <b>UDP</b> probes by default. If a firewall drops them, you see stars to the end. Switch probe type: <code>-I</code> (ICMP) or <code>-T -p 443</code> (TCP SYN to a port that's allowed) - both need root. Press <b>Ctrl+C</b> to stop a long trace.</p>`,
+ tasks:[
+  {id:'t1',text:'Trace the path to example.com.',hint:'<code class="run">traceroute example.com</code>',...E('traceroute',d=>d.ip==='93.184.215.14'&&d.reached)},
+  {id:'t2',text:'Trace to 8.8.8.8 without name resolution.',hint:'<code class="run">traceroute -n 8.8.8.8</code>',...C('traceroute',ev=>has(ev,/ -n/)&&has(ev,/8\.8\.8\.8/))},
+  {id:'t3',text:'Trace to hardened.lab.local with default UDP probes (Ctrl+C when bored).',hint:'<code class="run">traceroute hardened.lab.local</code>',...C('traceroute',ev=>has(ev,/hardened/)&&!has(ev,/ -T/))},
+  {id:'t4',text:'Reach hardened.lab.local using TCP SYN probes to port 443.',hint:'<code class="run">sudo traceroute -T -p 443 hardened.lab.local</code>',...E('traceroute',d=>d.ip==='10.10.20.5'&&d.reached&&d.mode==='T')},
+ ],
+ quiz:[
+  {id:'tq1',q:'How many hops is example.com away?',a:['7']},
+  {id:'tq2',q:'What is the first hop on the way to hardened.lab.local?',a:['10.10.10.254','fw-dmz.lab.local','fw-dmz']},
+  {id:'tq3',q:'What does a line of <code>* * *</code> mean?',choices:['The route is broken and nothing gets through','That hop did not reply to the probes (filtered or rate-limited)','The destination was reached','DNS resolution failed'],answer:1},
+ ]},
+{id:'netstat',title:'9. Sockets: netstat',cmds:['netstat'],
+ body:`<p>A <b>socket</b> is an endpoint: IP + port + protocol. <code>netstat</code> shows what is <b>listening</b> (services waiting for connections) and what is <b>connected</b>.</p>
+<pre class="ex">netstat -tulpn
+  -t TCP  -u UDP  -l listening  -p program  -n numeric</pre>
+<ul><li><code>0.0.0.0:22</code> - listening on <b>all</b> interfaces: reachable from the network.</li>
+<li><code>127.0.0.1:631</code> - loopback only: reachable from this machine only.</li>
+<li><b>-p</b> shows other users' programs only when run as root.</li></ul>
+<div class="tip">Investigating a possibly compromised host? An unexpected listener owned by root on an odd port is a red flag.</div>`,
+ tasks:[
+  {id:'s1',text:'List listening TCP and UDP ports numerically.',hint:'<code class="run">netstat -tuln</code>',...E('netstat',d=>d.opts.l&&d.opts.n&&d.opts.t)},
+  {id:'s2',text:'Show listeners with program names as a normal user (notice what\'s hidden).',hint:'<code class="run">netstat -tulpn</code>',...E('netstat',d=>d.opts.l&&d.opts.p&&!d.root)},
+  {id:'s3',text:'Now show them with sudo to reveal every program.',hint:'<code class="run">sudo netstat -tulpn</code>',...E('netstat',d=>d.opts.l&&d.opts.p&&d.root)},
+  {id:'s4',text:'Show only established connections using a pipe to grep.',hint:'<code class="run">netstat -tan | grep ESTABLISHED</code>',...C('grep',ev=>/ESTAB/i.test(ev.line)&&/netstat|ss/.test(ev.line)&&ev.output.length>0)},
+ ],
+ quiz:[
+  {id:'sq1',q:'Which program listens on TCP 8080?',a:['python3','python']},
+  {id:'sq2',q:'Which program listens on TCP 31337 (needs sudo to see)?',a:['nc','netcat']},
+  {id:'sq3',q:'Which remote IP has an SSH session to you?',a:['10.10.10.5']},
+  {id:'sq4',q:'PostgreSQL listens on 127.0.0.1:5432. Can web01 connect to it?',choices:['Yes, any host on the LAN can','No - it only listens on loopback','Only with sudo','Only over UDP'],answer:1},
+ ]},
+{id:'nc',title:'10. Netcat: nc',cmds:['nc'],
+ body:`<p>Netcat reads and writes raw bytes over TCP/UDP - the "swiss army knife" of networking.</p>
+<h4>Port check</h4><pre class="ex">nc -zv web01 80
+web01.lab.local [10.10.10.20] 80 (http) open</pre>
+<p><b>open</b> = TCP handshake completed. <b>Connection refused</b> = host replied with RST (up, but nothing listening). <b>timed out</b> = no reply (firewall dropping).</p>
+<h4>Banner grabbing</h4><p>Many services announce themselves: <code>nc web01 22</code> shows the SSH version. Press <b>Ctrl+C</b> to quit.</p>
+<h4>Speak a protocol by hand</h4><pre class="ex">printf "GET /api/status HTTP/1.0\\r\\n\\r\\n" | nc web01 80</pre>
+<h4>Listen</h4><p><code>nc -lvnp 4444</code> waits for a connection. In this lab, a script on files01 will connect to port 4444 a few seconds after you start listening.</p>`,
+ tasks:[
+  {id:'c1',text:'Check whether TCP/80 is open on web01.',hint:'<code class="run">nc -zv web01 80</code>',...E('nc-scan',d=>d.ip==='10.10.10.20'&&d.ports.includes(80))},
+  {id:'c2',text:'Scan the range 20-25 on web01.',hint:'<code class="run">nc -zv web01 20-25</code>',...E('nc-scan',d=>d.ip==='10.10.10.20'&&d.ports.length>=6&&d.ports.includes(20)&&d.ports.includes(25))},
+  {id:'c3',text:'Grab the SSH banner from web01 (Ctrl+C to exit).',hint:'<code class="run">nc web01 22</code>',...E('nc-connect',d=>d.ip==='10.10.10.20'&&d.port===22)},
+  {id:'c4',text:'Grab the SMTP banner from mail on port 25.',hint:'<code class="run">nc mail 25</code> then type <code>QUIT</code>',...E('nc-connect',d=>d.ip==='10.10.10.25'&&d.port===25)},
+  {id:'c5',text:'Send a raw HTTP request to web01 through nc.',hint:'<code class="run">printf "GET /api/status HTTP/1.0\\r\\n\\r\\n" | nc web01 80</code>',...E('nc-http',d=>d.ip==='10.10.10.20')},
+  {id:'c6',text:'Start a listener on port 4444 and receive the message.',hint:'<code class="run">nc -lvnp 4444</code>',...E('nc-listen-flag')},
+  {id:'c7',text:'Type a reply back through your listener.',hint:'While nc -lvnp 4444 is connected, type something and press Enter.',...E('nc-chat',d=>d.reply&&d.reply.trim().length>0)},
+ ],
+ quiz:[
+  {id:'cq1',q:'What OpenSSH version does web01 advertise? (e.g. 1.2p3)',a:['9.2p1','openssh_9.2p1','ssh-2.0-openssh_9.2p1 debian-2+deb12u5','openssh 9.2p1']},
+  {id:'cq2',q:'Which port between 20 and 25 is open on web01?',a:['22']},
+  {id:'cq3',q:'What mail server software runs on mail.lab.local?',a:['postfix']},
+  {id:'cq4',q:'What flag did files01 send to your listener?',a:['NETLAB{netcat_swiss_army_knife}']},
+ ]},
+{id:'curl',title:'11. Web requests: curl',cmds:['curl'],
+ body:`<p><code>curl</code> speaks HTTP(S) for you - fetch pages, call APIs, inspect headers, download files.</p>
+<pre class="ex">curl -I http://web01
+HTTP/1.1 200 OK            &lt;- status code
+Server: Apache/2.4.62 (Debian)
+Content-Type: text/html</pre>
+<p>Status codes: <b>2xx</b> OK, <b>3xx</b> redirect (see <code>Location</code>), <b>4xx</b> client error, <b>5xx</b> server error. <code>-L</code> follows redirects.</p>
+<p>HTTPS servers in lab.local use certificates from an internal CA your machine doesn't trust, so curl refuses with error <b>(60)</b>. <code>-k</code> skips verification - acceptable in a lab, risky in production.</p>
+<p>Error decoder: <b>(6)</b> DNS failed · <b>(7)</b> connection refused · <b>(28)</b> timeout · <b>(60)</b> certificate problem.</p>`,
+ tasks:[
+  {id:'u1',text:'Fetch the home page of web01.',hint:'<code class="run">curl http://web01</code>',...E('curl',d=>d.ip==='10.10.10.20'&&d.path==='/'&&d.status===200&&!d.head)},
+  {id:'u2',text:'Show only the response headers.',hint:'<code class="run">curl -I http://web01</code>',...E('curl',d=>d.head&&d.status)},
+  {id:'u3',text:'Call the JSON API mentioned in the page source.',hint:'<code class="run">curl http://web01/api/status</code>',...E('curl',d=>d.path==='/api/status'&&d.status===200)},
+  {id:'u4',text:'Follow the intranet redirect with -L and hit the certificate error.',hint:'<code class="run">curl -L http://intranet.lab.local</code>',...E('curl',d=>d.error===60)},
+  {id:'u5',text:'Retry, accepting the lab certificate.',hint:'<code class="run">curl -kL http://intranet.lab.local</code>',...E('curl',d=>d.tls&&d.insecure&&d.status===200)},
+  {id:'u6',text:'Download the tool archive keeping its file name.',hint:'<code class="run">curl -O http://web01/downloads/netlab-tool.tar.gz</code>',...E('curl-save',d=>/netlab-tool\.tar\.gz$/.test(d.file))},
+  {id:'u7',text:'Find your public IP address via ifconfig.me.',hint:'<code class="run">curl ifconfig.me</code>',...E('curl',d=>d.ip==='34.160.111.145'&&d.status===200)},
+ ],
+ quiz:[
+  {id:'uq1',q:'What is the full Server header returned by web01?',a:['Apache/2.4.62 (Debian)']},
+  {id:'uq2',q:'What flag does /api/status return?',a:['NETLAB{curl_talks_http}']},
+  {id:'uq3',q:'Which HTTP status code does http://intranet.lab.local return (before following)?',a:['301']},
+  {id:'uq4',q:'What is your public IP address?',a:['198.51.100.77']},
+ ]},
+{id:'tcpdump',title:'12. Packet capture: tcpdump',cmds:['tcpdump'],
+ body:`<p><code>tcpdump</code> captures packets off the wire. Capturing needs root, so use <code>sudo</code>. Your NIC is connected to a <b>mirror (SPAN) port</b>, so you can see other hosts' traffic too.</p>
+<pre class="ex">10:15:02.1 IP 10.10.10.77.53122 &gt; 10.10.10.10.53: 4821+ A? updates.lab.local. (35)
+           src.port               dst.port        DNS query for an A record</pre>
+<p>TCP flags: <b>[S]</b> SYN, <b>[S.]</b> SYN-ACK, <b>[.]</b> ACK, <b>[P.]</b> data, <b>[F.]</b> FIN, <b>[R]</b> reset.</p>
+<p>Filters: <code>icmp</code>, <code>arp</code>, <code>port 53</code>, <code>host 10.10.10.77</code>, <code>src</code>/<code>dst</code>, combined with <code>and</code>/<code>or</code>/<code>not</code>. Options: <code>-n</code> no name lookups, <code>-c N</code> stop after N packets, <code>-A</code> show payload as text, <code>-w</code>/<code>-r</code> write/read a pcap file.</p>
+<div class="tip">Press <b>Ctrl+C</b> to stop a capture without <code>-c</code>.</div>`,
+ tasks:[
+  {id:'k1',text:'List the capture interfaces.',hint:'<code class="run">sudo tcpdump -D</code>',...C('tcpdump',ev=>has(ev,/ -D /)&&ev.code===0)},
+  {id:'k2',text:'Capture 10 packets on eth0.',hint:'<code class="run">sudo tcpdump -i eth0 -c 10</code>',...E('tcpdump-done',d=>d.count>=10&&!d.filter)},
+  {id:'k3',text:'Capture only ICMP and find out who is pinging you.',hint:'<code class="run">sudo tcpdump -n -c 4 icmp</code>',...E('tcpdump-done',d=>/icmp/.test(d.filter)&&d.count>0)},
+  {id:'k4',text:'Capture DNS traffic (port 53).',hint:'<code class="run">sudo tcpdump -nn -c 4 port 53</code>',...E('tcpdump-done',d=>/53|domain/.test(d.filter)&&d.count>0)},
+  {id:'k5',text:'Capture HTTP with payload in ASCII and find the credentials.',hint:'<code class="run">sudo tcpdump -A -c 8 port 80</code>',...E('tcpdump-done',d=>(d.o.A||d.o.X)&&(d.shown||[]).some(p=>p.payload&&String(p.payload).includes('pass=')))},
+  {id:'k6',text:'Save 20 packets to capture.pcap, then read the file back.',hint:'<code class="run">sudo tcpdump -c 20 -w capture.pcap</code> then <code class="run">tcpdump -r capture.pcap</code>',...E('tcpdump-read')},
+ ],
+ quiz:[
+  {id:'kq1',q:'Which IP address is pinging your machine?',a:['10.10.10.30','files01','files01.lab.local']},
+  {id:'kq2',q:'Which name is 10.10.10.77 looking up in DNS?',a:['updates.lab.local','updates.lab.local.']},
+  {id:'kq3',q:'What password was sent in cleartext over HTTP?',a:['Summer2026!']},
+  {id:'kq4',q:'Why can you see SSH traffic in the capture but not read its content?',choices:['tcpdump cannot decode port 22','SSH is encrypted','You need -X instead of -A','SSH uses UDP'],answer:1},
+ ]},
+{id:'hping',title:'13. Packet crafting: hping3',cmds:['hping3'],
+ body:`<p><code>hping3</code> builds custom packets - pick the protocol, flags and port - and shows how the target responds. It needs raw sockets, so run it with <code>sudo</code>.</p>
+<pre class="ex">sudo hping3 -S -p 443 -c 3 hardened.lab.local
+len=44 ip=10.10.20.5 ttl=63 DF id=0 sport=443 flags=SA ...</pre>
+<table class="mini"><tr><th>Reply</th><th>Meaning</th></tr><tr><td><b>flags=SA</b></td><td>SYN-ACK → port <b>open</b></td></tr><tr><td><b>flags=RA</b></td><td>RST-ACK → port <b>closed</b>, host is up</td></tr><tr><td>no reply</td><td><b>filtered</b> - a firewall dropped it</td></tr></table>
+<p>This is how you prove a host is alive when ICMP ping is blocked - remember hardened.lab.local from lesson 4?</p>
+<div class="tip">Ethics: packet crafting and scanning are only OK on systems you own or have written permission to test. Flood/spoof options are disabled here.</div>`,
+ tasks:[
+  {id:'h1',text:'Send 3 ICMP echoes to web01 with hping3.',hint:'<code class="run">sudo hping3 -1 -c 3 web01</code>',...E('hping',d=>d.mode==='icmp'&&d.ip==='10.10.10.20'&&d.recv>0)},
+  {id:'h2',text:'Send SYNs to TCP 443 on hardened.lab.local.',hint:'<code class="run">sudo hping3 -S -p 443 -c 3 hardened.lab.local</code>',...E('hping',d=>d.ip==='10.10.20.5'&&d.port===443&&d.S&&d.recv>0)},
+  {id:'h3',text:'Send SYNs to TCP 22 on hardened.lab.local.',hint:'<code class="run">sudo hping3 -S -p 22 -c 3 hardened.lab.local</code>',...E('hping',d=>d.ip==='10.10.20.5'&&d.port===22&&d.S)},
+  {id:'h4',text:'Send SYNs to a closed port: 8080 on web01.',hint:'<code class="run">sudo hping3 -S -p 8080 -c 3 web01</code>',...E('hping',d=>d.ip==='10.10.10.20'&&d.port===8080&&d.S)},
+ ],
+ quiz:[
+  {id:'hq1',q:'Which TCP flags come back from an OPEN port?',a:['SA','SYN-ACK','SYN ACK','SYN/ACK']},
+  {id:'hq2',q:'Which TCP flags come back from a CLOSED port?',a:['RA','RST-ACK','RST ACK','RST/ACK']},
+  {id:'hq3',q:'Port 22 on hardened.lab.local is...',choices:['open','closed','filtered'],answer:2},
+  {id:'hq4',q:'Is hardened.lab.local up, even though ping fails?',choices:['Yes - it answered TCP 443','No','Cannot tell'],answer:0},
+ ]},
+{id:'hash',title:'14. File integrity: md5sum & sha256sum',cmds:['md5sum','sha256sum'],
+ body:`<p>A <b>hash</b> is a fixed-length fingerprint of data. Change one bit and the hash changes completely. Use it to verify downloads, detect tampering and find duplicate files.</p>
+<pre class="ex">sha256sum netlab-tool.tar.gz
+7b0c...e91f  netlab-tool.tar.gz</pre>
+<p><b>md5sum</b> (128-bit) is fast but cryptographically broken - attackers can craft collisions. Use <b>sha256sum</b> for anything security-related.</p>
+<p>Verify a list of published hashes: <code>sha256sum -c SHA256SUMS</code> prints <b>OK</b> or <b>FAILED</b> per file.</p>
+<div class="tip"><code>echo hello</code> adds a newline. <code>echo -n hello</code> doesn't - and the hashes differ! Try both.</div>`,
+ tasks:[
+  {id:'m1',text:'Hash the string "hello" (no newline) with md5sum.',hint:'<code class="run">echo -n hello | md5sum</code>',...E('hash',d=>d.algo==='md5sum'&&d.results.some(r=>r.file==='-'&&r.data==='hello'))},
+  {id:'m2',text:'MD5 all the PDFs in ~/evidence to find duplicates.',hint:'<code class="run">md5sum ~/evidence/*.pdf</code>',...E('hash',d=>d.algo==='md5sum'&&d.results.filter(r=>/evidence\/.*\.pdf$/.test(r.file)).length>=3)},
+  {id:'m3',text:'Verify the evidence folder against its SHA256SUMS list.',hint:'<code class="run">cd ~/evidence</code> then <code class="run">sha256sum -c SHA256SUMS</code>',...E('hash-check',d=>d.algo==='sha256sum'&&d.results.some(r=>r[0].includes('invoice-0424')&&r[1]==='FAILED'))},
+  {id:'m4',text:'Compute the SHA-256 of the downloaded netlab-tool.tar.gz.',hint:'Download it (lesson 11), then <code class="run">sha256sum netlab-tool.tar.gz</code>',...E('hash',d=>d.algo==='sha256sum'&&d.results.some(r=>/netlab-tool\.tar\.gz$/.test(r.file)))},
+  {id:'m5',text:'Download the vendor SHA256SUMS and verify the tool with -c.',hint:'<code class="run">curl -O http://web01/downloads/SHA256SUMS</code> then <code class="run">sha256sum -c SHA256SUMS</code> (in the same folder as the tool)',...E('hash-check',d=>d.algo==='sha256sum'&&d.results.some(r=>r[0].includes('netlab-tool')&&r[1]==='OK'))},
+ ],
+ quiz:[
+  {id:'mq1',q:'What is the MD5 of "hello" (no newline)?',a:['5d41402abc4b2a76b9719d911017c592']},
+  {id:'mq2',q:'Which two evidence files are identical?',choices:['invoice-0423.pdf and invoice-0424.pdf','invoice-0423.pdf and invoice-0423-copy.pdf','invoice-0424.pdf and invoice-0423-copy.pdf','None are identical'],answer:1},
+  {id:'mq3',q:'Which evidence file FAILED verification (was tampered with)?',a:['invoice-0424.pdf']},
+  {id:'mq4',q:'Why prefer SHA-256 over MD5 for security?',choices:['SHA-256 is faster','MD5 collisions can be crafted deliberately','MD5 only works on text','SHA-256 hashes are shorter'],answer:1},
+ ]},
+{id:'capstone',title:'15. Capstone challenge',cmds:['all'],
+ body:`<p>Time to combine everything. No step-by-step hints this time - use the Docs tab if you need to.</p>
+<div class="scenario"><b>Scenario.</b> The security team believes someone set up a <b>hidden web service on files01</b> on a port somewhere between <b>8000 and 8100</b>. It serves a file called <code>flag.txt</code> together with a published SHA-256 checksum.<br><br>
+1. Confirm files01 is alive.<br>2. Find the hidden port.<br>3. Download <code>flag.txt</code> <i>and</i> <code>flag.txt.sha256</code>.<br>4. Prove the flag file is intact.<br>5. Finally, investigate the suspicious root listener on <b>localhost port 31337</b> you found with netstat. What can anyone who connects to it do?</div>`,
+ tasks:[
+  {id:'x1',text:'Confirm files01 is alive.',hint:'ping, or hping3',...{on:'any',check:ev=>(ev.t==='ping'&&ev.d.ip==='10.10.10.30'&&ev.d.recv>0)||(ev.t==='hping'&&ev.d.ip==='10.10.10.30'&&ev.d.recv>0)}},
+  {id:'x2',text:'Scan files01 ports 8000-8100 and find the open one.',hint:'nc with -z and a port range',...E('nc-scan',d=>d.ip==='10.10.10.30'&&d.ports.includes(8042))},
+  {id:'x3',text:'Save flag.txt from the hidden service.',hint:'curl -O http://files01:PORT/flag.txt',...E('curl-save',d=>/flag\.txt$/.test(d.file))},
+  {id:'x4',text:'Save flag.txt.sha256 from the hidden service.',hint:'curl -O ...',...E('curl-save',d=>/flag\.txt\.sha256$/.test(d.file))},
+  {id:'x5',text:'Verify flag.txt against its checksum (OK).',hint:'sha256sum -c',...E('hash-check',d=>d.results.some(r=>r[0]==='flag.txt'&&r[1]==='OK'))},
+  {id:'x6',text:'Connect to the root listener on localhost:31337 and run whoami through it.',hint:'nc localhost 31337, then type whoami',...E('bindshell')},
+ ],
+ quiz:[
+  {id:'xq1',q:'Which port is the hidden web service on?',a:['8042']},
+  {id:'xq2',q:'What is the capstone flag?',a:['NETLAB{capstone_complete}']},
+  {id:'xq3',q:'The 31337 listener runs commands as which user?',a:['root']},
+  {id:'xq4',q:'The 31337 listener is best described as...',choices:['A web server','A bind shell / backdoor','A DNS resolver','An SSH server'],answer:1},
+  {id:'xq5',q:'Best tool to see which program owns a listening port?',choices:['sudo netstat -tulpn','traceroute','dig','md5sum'],answer:0},
+  {id:'xq6',q:'Best tool to find a domain\'s mail servers?',choices:['ping','dig MX','arp','route'],answer:1},
+ ]},
+];
+// ===== Grader =====
+const STORE_KEY='netlab-linux-networking-v1';
+const GRADER={
+  st:{done:{},quiz:{},name:'',started:null,hints:{}},
+  load(){try{const s=JSON.parse(localStorage.getItem(STORE_KEY)||'null');if(s)this.st=Object.assign(this.st,s);}catch(e){}if(!this.st.started)this.st.started=new Date().toISOString();},
+  save(){try{localStorage.setItem(STORE_KEY,JSON.stringify(this.st));}catch(e){}},
+  reset(){this.st={done:{},quiz:{},name:this.st.name,started:new Date().toISOString(),hints:{}};this.save();},
+  allTasks(){return LESSONS.flatMap(l=>l.tasks.map(t=>Object.assign({lesson:l.id},t)));},
+  complete(t){if(this.st.done[t.id])return;this.st.done[t.id]=Date.now();this.save();UI.onTaskDone(t);},
+  onCommand(ev){for(const t of this.allTasks()){if(this.st.done[t.id])continue;try{if(t.on==='cmd'&&t.check(ev))this.complete(t);}catch(e){}}},
+  onEvent(type,d){for(const t of this.allTasks()){if(this.st.done[t.id])continue;try{if((t.on===type&&t.check(d))||(t.on==='any'&&t.check({t:type,d})))this.complete(t);}catch(e){}}},
+  onDoc(k){this.onEvent('man',{k});},
+  answer(q,val){
+    const rec=this.st.quiz[q.id]||{ok:false,tries:0};if(rec.ok)return true;rec.tries++;
+    let ok;if(q.choices)ok=+val===q.answer;else{const n=s=>String(s).trim().toLowerCase().replace(/\s+/g,' ').replace(/\.$/,'').replace(/^"|"$/g,'');ok=q.a.some(a=>n(a)===n(val));}
+    rec.ok=ok;this.st.quiz[q.id]=rec;this.save();return ok;
+  },
+  lessonScore(l){const td=l.tasks.filter(t=>this.st.done[t.id]).length;const qd=l.quiz.filter(q=>(this.st.quiz[q.id]||{}).ok).length;return {td,tt:l.tasks.length,qd,qt:l.quiz.length,pts:(td+qd)*10,max:(l.tasks.length+l.quiz.length)*10};},
+  total(){let p=0,m=0;LESSONS.forEach(l=>{const s=this.lessonScore(l);p+=s.pts;m+=s.max;});return {p,m,pct:m?Math.round(p/m*100):0};},
+  grade(pct){return pct>=90?'A':pct>=80?'B':pct>=70?'C':pct>=60?'D':'F';},
+};
+// ===== Terminal UI =====
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const TERM={
+  el:null,input:null,line:null,busy:false,reader:null,hidx:-1,draft:'',
+  init(){
+    this.el=document.getElementById('term');
+    this.el.addEventListener('mouseup',()=>{if(!window.getSelection().toString())this.focus();});
+    document.addEventListener('keydown',e=>{
+      if(e.ctrlKey&&(e.key==='c'||e.key==='C')&&!window.getSelection().toString()){if(document.activeElement===this.input||this.busy){e.preventDefault();this.ctrlC();}}
+    });
+    this.showPrompt();
+  },
+  write(s,cls){
+    if(s==null||s==='')return;s=String(s).replace(/\r/g,'');
+    this.lastChar=s[s.length-1];const span=document.createElement('span');if(cls)span.className=cls;span.textContent=s;
+    if(this.line&&this.line.parentNode)this.el.insertBefore(span,this.line);else this.el.appendChild(span);
+    this.scroll();
+  },
+  writeHTML(h){const d=document.createElement('span');d.innerHTML=h;if(this.line&&this.line.parentNode)this.el.insertBefore(d,this.line);else this.el.appendChild(d);this.scroll();},
+  scroll(){this.el.scrollTop=this.el.scrollHeight;},
+  clear(){this.el.innerHTML='';this.line=null;this.lastChar='\n';},
+  promptHTML(){
+    const p=esc(shortPath(SH.cwd));
+    if(SH.root)return `<span class="p1" style="color:#58a6ff">┌──(</span><span class="pr">root㉿netlab</span><span class="p1" style="color:#58a6ff">)-[</span><span class="pd">${p}</span><span class="p1" style="color:#58a6ff">]</span>\n<span class="p1" style="color:#58a6ff">└─</span><span class="pr">#</span> `;
+    return `<span class="p1">┌──(</span><span class="pu">student㉿netlab</span><span class="p1">)-[</span><span class="pd">${p}</span><span class="p1">]</span>\n<span class="p1">└─</span><span class="pu">$</span> `;
+  },
+  updatePrompt(){},
+  makeInput(promptHTML,mask){
+    const line=document.createElement('span');line.id='inline';line.innerHTML=promptHTML;
+    const inp=document.createElement('input');inp.id='cmd';inp.type=mask?'password':'text';inp.autocomplete='off';inp.spellcheck=false;inp.setAttribute('autocapitalize','off');
+    line.appendChild(inp);this.el.appendChild(line);this.line=line;this.input=inp;this.focus();this.scroll();return inp;
+  },
+  finalizeInput(text,mask){
+    const span=document.createElement('span');span.innerHTML=this.line.innerHTML.replace(/<input[^>]*>/,'');
+    span.appendChild(document.createTextNode((mask?'':text)+'\n'));this.lastChar='\n';
+    this.el.replaceChild(span,this.line);this.line=null;this.input=null;
+  },
+  focus(){if(this.input)this.input.focus({preventScroll:true});},
+  showPrompt(){
+    this.busy=false;this.hidx=-1;
+    if(this.lastChar&&this.lastChar!=='\n'){this.write('\n');}
+    const inp=this.makeInput(this.promptHTML(),false);
+    inp.addEventListener('keydown',e=>this.onKey(e));
+  },
+  async onKey(e){
+    const inp=this.input;
+    if(e.key==='Enter'){
+      e.preventDefault();const v=inp.value;this.finalizeInput(v);
+      if(v.trim()){SH.history.push(v);}
+      this.busy=true;
+      try{await execLine(v);}catch(err){console.error(err);}
+      this.showPrompt();UI.refreshScore();
+    }else if(e.key==='ArrowUp'){e.preventDefault();if(!SH.history.length)return;if(this.hidx===-1){this.draft=inp.value;this.hidx=SH.history.length;}this.hidx=Math.max(0,this.hidx-1);inp.value=SH.history[this.hidx];setTimeout(()=>inp.setSelectionRange(inp.value.length,inp.value.length));}
+    else if(e.key==='ArrowDown'){e.preventDefault();if(this.hidx===-1)return;this.hidx++;if(this.hidx>=SH.history.length){this.hidx=-1;inp.value=this.draft;}else inp.value=SH.history[this.hidx];}
+    else if(e.key==='Tab'){e.preventDefault();this.complete(inp);}
+    else if(e.ctrlKey&&(e.key==='l'||e.key==='L')){e.preventDefault();const v=inp.value;this.clear();this.showPrompt();this.input.value=v;}
+    else if(e.ctrlKey&&(e.key==='u'||e.key==='U')){e.preventDefault();inp.value='';}
+  },
+  ctrlC(){
+    if(this.busy){interruptAll();return;}
+    if(this.input){const v=this.input.value;this.finalizeInput(v+'^C');this.showPrompt();}
+  },
+  readLine(promptText,mask){
+    return new Promise((res,rej)=>{
+      const inp=this.makeInput(esc(promptText||''),mask);
+      this.reader={res,rej,mask};
+      inp.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){e.preventDefault();const v=inp.value;this.finalizeInput(v,mask);const r=this.reader;this.reader=null;r.res(v);}
+      });
+    });
+  },
+  cancelRead(){if(this.reader){const r=this.reader;this.reader=null;if(this.line){this.finalizeInput(this.input.value,r.mask);}r.rej(new Interrupt());}},
+  complete(inp){
+    const v=inp.value;const pos=inp.selectionStart;const before=v.slice(0,pos);const m=before.match(/(\S*)$/);const word=m[1];
+    const words=before.trim().split(/\s+/);const first=!before.includes(' ')||(words[0]==='sudo'&&words.length===1&&before.endsWith(' '))||(words[0]==='sudo'&&words.length===2&&!before.endsWith(' '));
+    let cands=[];
+    if(first&&!word.includes('/')){cands=Object.keys(CMDS).filter(c=>c.startsWith(word));}
+    else{
+      const dirPart=word.includes('/')?word.slice(0,word.lastIndexOf('/')+1):'';const base=word.slice(dirPart.length);
+      const dpath=normPath(dirPart||'.');
+      if(SH.fs[dpath]&&SH.fs[dpath].type==='dir')cands=fsList(dpath).filter(n=>n.startsWith(base)&&(base.startsWith('.')||!n.startsWith('.'))).map(n=>dirPart+n+(SH.fs[(dpath==='/'?'':dpath)+'/'+n].type==='dir'?'/':''));
+      if(!dirPart){const hosts=['web01','dc01','files01','mail','fw01','hardened.lab.local','intranet.lab.local','web01.lab.local','dc01.lab.local','files01.lab.local','mail.lab.local','example.com','localhost','lab.local','eth0','eth1'];cands=cands.concat(hosts.filter(h=>h.startsWith(base)&&base.length>0));}
+    }
+    cands=[...new Set(cands)];
+    if(cands.length===1){const add=cands[0].slice(word.length)+(cands[0].endsWith('/')?'':' ');inp.value=before+add+v.slice(pos);}
+    else if(cands.length>1){let pre=cands[0];for(const c of cands)while(!c.startsWith(pre))pre=pre.slice(0,-1);
+      if(pre.length>word.length)inp.value=before+pre.slice(word.length)+v.slice(pos);
+      else{const cur=inp.value;this.finalizeInput(cur);this.write(cands.join('  ')+'\n');this.showPrompt();this.input.value=cur;}}
+  },
+  type(cmd){if(!this.input||this.busy||this.reader){UI.toast('Finish or stop (Ctrl+C) the running command first',true);return;}this.input.value=cmd;this.focus();}
+};
+// ===== Panels =====
+const UI={
+  cur:0,docSel:'ping',
+  init(){
+    document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>this.tab(b.dataset.tab));
+    document.getElementById('btnStop').onclick=()=>{TERM.ctrlC();TERM.focus();};
+    document.getElementById('btnClear').onclick=()=>{const v=TERM.input?TERM.input.value:'';if(TERM.busy){TERM.el.querySelectorAll('span:not(#inline)').forEach(n=>{if(n!==TERM.line)n.remove();});}else{TERM.clear();TERM.showPrompt();TERM.input.value=v;}};
+    document.addEventListener('click',e=>{const c=e.target.closest('code.run');if(c){TERM.type(c.textContent);}const ch=e.target.closest('.chip');if(ch){this.docSel=ch.dataset.doc;this.tab('docs');}});
+    const last=+localStorage.getItem(STORE_KEY+'-cur');if(last>=0&&last<LESSONS.length)this.cur=last;
+    this.renderLesson();this.renderDocs();this.renderProgress();this.refreshScore();
+  },
+  tab(n){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===n));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='pane-'+n));if(n==='progress')this.renderProgress();if(n==='docs')this.renderDocs();},
+  renderLesson(){
+    const l=LESSONS[this.cur];const s=GRADER.lessonScore(l);const pane=document.getElementById('pane-lessons');
+    const opts=LESSONS.map((x,i)=>{const sc=GRADER.lessonScore(x);const full=sc.pts===sc.max;return `<option value="${i}" ${i===this.cur?'selected':''}>${full?'✓ ':''}${esc(x.title)} (${sc.td+sc.qd}/${sc.tt+sc.qt})</option>`;}).join('');
+    const chips=l.cmds[0]==='all'?'':l.cmds.map(c=>`<span class="chip" data-doc="${c}" title="Open docs">${c} ↗</span>`).join('');
+    let h=`<div class="lnav"><button id="prevL">◀</button><select id="selL">${opts}</select><button id="nextL">▶</button></div>
+    <h2>${esc(l.title)}</h2><div class="chips">${chips}</div>${l.body}
+    <div class="section"><h3>Tasks <small>${s.td}/${s.tt} complete · auto-graded as you work</small></h3>`;
+    l.tasks.forEach(t=>{const d=!!GRADER.st.done[t.id];h+=`<div class="task ${d?'done':''}" id="task-${t.id}"><div class="box">${d?'✓':''}</div><div class="t">${t.text}<div class="hint">${t.hint||''}</div></div>${l.id==='capstone'&&!d?`<button class="hbtn" data-h="${t.id}">Hint</button>`:`<button class="hbtn" data-h="${t.id}">Hint</button>`}</div>`;});
+    h+=`</div><div class="section"><h3>Check your understanding <small>${s.qd}/${s.qt} correct</small></h3>`;
+    l.quiz.forEach(q=>{const r=GRADER.st.quiz[q.id]||{};h+=`<div class="q ${r.ok?'ok':''}" id="q-${q.id}"><div class="qt">${r.ok?'✓ ':''}${q.q}</div>`;
+      if(q.choices){h+=q.choices.map((c,i)=>`<label><input type="radio" name="r-${q.id}" value="${i}" ${r.ok&&i===q.answer?'checked':''} ${r.ok?'disabled':''}> ${esc(c)}</label>`).join('');h+=`<button data-q="${q.id}" ${r.ok?'disabled':''}>Check</button>`;}
+      else h+=`<input type="text" id="in-${q.id}" ${r.ok?`value="${esc(q.a[0])}" disabled`:''} placeholder="Your answer"> <button data-q="${q.id}" ${r.ok?'disabled':''}>Check</button>`;
+      h+=`<span class="fb" id="fb-${q.id}">${r.ok?'<span class="good">Correct</span>':r.tries?`<span class="bad">${r.tries} attempt${r.tries>1?'s':''}</span>`:''}</span></div>`;});
+    h+=`</div><div class="navbtns"><button id="prevB" ${this.cur===0?'disabled':''}>◀ Previous</button><button class="primary" id="nextB" ${this.cur===LESSONS.length-1?'disabled':''}>Next lesson ▶</button></div>`;
+    pane.innerHTML=h;
+    const go=i=>{this.cur=Math.max(0,Math.min(LESSONS.length-1,i));localStorage.setItem(STORE_KEY+'-cur',this.cur);this.renderLesson();pane.scrollTop=0;};
+    pane.querySelector('#selL').onchange=e=>go(+e.target.value);
+    pane.querySelector('#prevL').onclick=()=>go(this.cur-1);pane.querySelector('#nextL').onclick=()=>go(this.cur+1);
+    pane.querySelector('#prevB').onclick=()=>go(this.cur-1);pane.querySelector('#nextB').onclick=()=>go(this.cur+1);
+    pane.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{b.closest('.task').classList.toggle('showhint');});
+    pane.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>this.check(b.dataset.q));
+    pane.querySelectorAll('.q input[type=text]').forEach(i=>i.onkeydown=e=>{if(e.key==='Enter')this.check(i.id.slice(3));});
+  },
+  check(qid){
+    const q=LESSONS.flatMap(l=>l.quiz).find(x=>x.id===qid);let val;
+    if(q.choices){const c=document.querySelector(`input[name="r-${qid}"]:checked`);if(!c){this.toast('Pick an answer first',true);return;}val=c.value;}
+    else{val=document.getElementById('in-'+qid).value;if(!val.trim()){this.toast('Type an answer first',true);return;}}
+    const ok=GRADER.answer(q,val);
+    if(ok){this.toast('✓ Correct! +10 pts');this.renderLesson();}
+    else{const fb=document.getElementById('fb-'+qid);fb.innerHTML=`<span class="bad">Not quite - try again${q.hint?' (hint: '+esc(q.hint)+')':''}</span>`;}
+    this.refreshScore();
+  },
+  onTaskDone(t){
+    this.toast('✓ Task complete: '+t.text.replace(/<[^>]+>/g,'')+'  +10 pts');
+    const el=document.getElementById('task-'+t.id);if(el){el.classList.add('done');el.querySelector('.box').textContent='✓';}
+    clearTimeout(this._rt);this._rt=setTimeout(()=>{this.renderLessonKeepScroll();this.refreshScore();},400);
+    const l=LESSONS.find(x=>x.id===t.lesson);const s=GRADER.lessonScore(l);if(s.td===s.tt)setTimeout(()=>this.toast(`★ All tasks in "${l.title}" complete!`),700);
+  },
+  renderLessonKeepScroll(){const p=document.getElementById('pane-lessons');const st=p.scrollTop;const vals={};p.querySelectorAll('.q input[type=text]').forEach(i=>vals[i.id]=i.value);this.renderLesson();p.scrollTop=st;Object.entries(vals).forEach(([k,v])=>{const i=document.getElementById(k);if(i&&!i.disabled)i.value=v;});},
+  refreshScore(){const t=GRADER.total();document.getElementById('score').textContent=`${t.p} / ${t.m} pts · ${t.pct}%`;document.getElementById('pbar').style.width=t.pct+'%';},
+  toast(m,warn){const d=document.createElement('div');d.textContent=m;if(warn)d.style.background='#9e6a03';document.getElementById('toast').appendChild(d);setTimeout(()=>d.remove(),3200);},
+  renderDocs(){
+    const pane=document.getElementById('pane-docs');const k=this.docSel;const d=DOCS[k];
+    let h=`<p class="legend">Reference for every command in this lab. You can also type <code>man &lt;command&gt;</code> or <code>&lt;command&gt; --help</code> in the terminal.</p><div class="doclist">`+DOC_ORDER.map(x=>`<button class="${x===k?'on':''}" data-d="${x}">${x}</button>`).join('')+'</div>';
+    h+=`<div class="doc"><h2>${k} <span class="pkg">· ${esc(d.cat)} · package: ${esc(d.pkg)}</span></h2><p><b>${esc(d.summary)}</b></p><div class="syn">${esc(d.synopsis)}</div><p>${esc(d.desc)}</p>
+      <h4>Key options</h4><dl>${d.options.map(([o,x])=>`<dt>${esc(o)}</dt><dd>${esc(x)}</dd>`).join('')}</dl>
+      <h4>Examples <span class="legend">(click to paste)</span></h4><dl>${d.examples.map(([e,x])=>`<dt><code class="run">${esc(e)}</code></dt><dd>${esc(x)}</dd>`).join('')}</dl>
+      <h4>Reading the output</h4><p>${esc(d.read)}</p><div class="tip">${esc(d.tips)}</div></div>`;
+    h+=`<div class="section"><h3>Quick reference</h3><table class="prog"><tr><th>Question</th><th>Command</th></tr>
+      <tr><td>What's my IP / MAC?</td><td><code>ip a</code> · <code>ifconfig</code></td></tr><tr><td>Where does traffic go?</td><td><code>ip route</code> · <code>route -n</code></td></tr>
+      <tr><td>Which local MACs do I know?</td><td><code>arp -n</code> · <code>ip neigh</code></td></tr><tr><td>Is a host reachable?</td><td><code>ping -c 4</code> · <code>sudo hping3 -S -p PORT</code></td></tr>
+      <tr><td>Which path do packets take?</td><td><code>traceroute</code></td></tr><tr><td>What does a name resolve to?</td><td><code>nslookup</code> · <code>dig</code></td></tr>
+      <tr><td>What is listening here?</td><td><code>sudo netstat -tulpn</code></td></tr><tr><td>Is a remote port open?</td><td><code>nc -zv HOST PORT</code></td></tr>
+      <tr><td>What does a web server return?</td><td><code>curl -I</code> · <code>curl -v</code></td></tr><tr><td>What is on the wire?</td><td><code>sudo tcpdump -n</code></td></tr>
+      <tr><td>Was this file changed?</td><td><code>sha256sum</code> · <code>md5sum</code></td></tr></table></div>`;
+    pane.innerHTML=h;pane.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{this.docSel=b.dataset.d;this.renderDocs();});
+  },
+  renderProgress(){
+    const pane=document.getElementById('pane-progress');const t=GRADER.total();const g=GRADER.grade(t.pct);
+    let h=`<div class="card"><div class="row" style="justify-content:space-between"><div><div class="big">${t.pct}% <span style="font-size:20px;color:var(--muted)">grade ${g}</span></div><div class="legend">${t.p} of ${t.m} points · tasks and quiz questions are worth 10 points each · 80% required to pass</div></div>
+      <div style="text-align:right">${t.pct>=80?'<b style="color:var(--accent)">PASS ✓</b>':'<b style="color:var(--yellow)">In progress</b>'}</div></div></div>
+      <div class="card"><div class="row"><label>Student name: <input id="sname" value="${esc(GRADER.st.name||'')}" placeholder="Your name"></label>
+      <button id="exp">Export grade report (.txt)</button><button class="primary" id="cert" ${t.pct>=80?'':'disabled title="Reach 80% to unlock"'}>Certificate of completion</button></div></div>
+      <table class="prog"><tr><th>Lesson</th><th>Tasks</th><th>Quiz</th><th class="n">Points</th><th class="n">%</th></tr>`;
+    LESSONS.forEach((l,i)=>{const s=GRADER.lessonScore(l);h+=`<tr><td><a href="#" data-go="${i}" style="color:var(--blue)">${esc(l.title)}</a></td><td>${s.td}/${s.tt}</td><td>${s.qd}/${s.qt}</td><td class="n">${s.pts}/${s.max}</td><td class="n">${Math.round(s.pts/s.max*100)}%</td></tr>`;});
+    h+=`</table><div class="section"><h3>Reset</h3><p class="legend">Progress is saved in this browser automatically. Reset clears grades and restores the lab machine to its original state.</p><button class="danger" id="rst">Reset all progress</button> <button id="rstEnv">Reset lab machine only</button></div>`;
+    pane.innerHTML=h;
+    pane.querySelector('#sname').oninput=e=>{GRADER.st.name=e.target.value;GRADER.save();};
+    pane.querySelector('#exp').onclick=()=>this.exportReport();
+    pane.querySelector('#cert').onclick=()=>this.certificate();
+    pane.querySelector('#rst').onclick=()=>{if(confirm('Reset ALL progress and grades?')){GRADER.reset();resetEnv();this.cur=0;localStorage.setItem(STORE_KEY+'-cur',0);TERM.clear();banner();TERM.showPrompt();this.renderLesson();this.renderProgress();this.refreshScore();}};
+    pane.querySelector('#rstEnv').onclick=()=>{resetEnv();TERM.clear();banner();TERM.showPrompt();this.toast('Lab machine reset (grades kept)');};
+    pane.querySelectorAll('[data-go]').forEach(a=>a.onclick=e=>{e.preventDefault();this.cur=+a.dataset.go;this.renderLesson();this.tab('lessons');});
+  },
+  exportReport(){
+    const t=GRADER.total();const name=GRADER.st.name||'(no name entered)';
+    let s=`NETLAB - Linux & Networking Fundamentals - Grade Report\n${'='.repeat(58)}\nStudent:   ${name}\nGenerated: ${new Date().toLocaleString()}\nStarted:   ${new Date(GRADER.st.started).toLocaleString()}\nScore:     ${t.p}/${t.m} (${t.pct}%)  Grade: ${GRADER.grade(t.pct)}  ${t.pct>=80?'PASS':'NOT YET PASSED'}\n\n`;
+    LESSONS.forEach(l=>{const sc=GRADER.lessonScore(l);s+=`${l.title}\n  Tasks ${sc.td}/${sc.tt}   Quiz ${sc.qd}/${sc.qt}   ${sc.pts}/${sc.max} pts\n`;
+      l.tasks.forEach(tk=>s+=`    [${GRADER.st.done[tk.id]?'x':' '}] ${tk.text.replace(/<[^>]+>/g,'')}\n`);
+      l.quiz.forEach(q=>{const r=GRADER.st.quiz[q.id]||{};s+=`    [${r.ok?'x':' '}] Q: ${q.q.replace(/<[^>]+>/g,'')}${r.tries?` (attempts: ${r.tries})`:''}\n`;});s+='\n';});
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/plain'}));a.download=`netlab-grade-report-${(GRADER.st.name||'student').replace(/\W+/g,'_')}.txt`;a.click();
+  },
+  certificate(){
+    const t=GRADER.total();if(t.pct<80)return;const name=esc(GRADER.st.name||'Student');const w=window.open('','_blank');if(!w){this.toast('Allow pop-ups to open the certificate',true);return;}
+    w.document.write(`<html><head><title>Certificate</title><style>body{font-family:Georgia,serif;text-align:center;padding:60px;background:#fff;color:#222}.b{border:10px double #238636;padding:50px}h1{font-size:40px;margin:0}h2{font-size:32px;color:#238636}p{font-size:18px}</style></head><body><div class="b"><p>NETLAB</p><h1>Certificate of Completion</h1><p>This certifies that</p><h2>${name}</h2><p>has completed <b>Linux &amp; Networking Fundamentals</b><br>covering ip, ifconfig, route, arp, ping, traceroute, nslookup, dig, netstat, netcat, curl, tcpdump, hping3, md5sum, sha256sum, cat and whoami</p><p>Score: <b>${t.pct}%</b> (grade ${GRADER.grade(t.pct)})</p><p>${new Date().toLocaleDateString()}</p></div><script>setTimeout(()=>print(),400)<\/script></body></html>`);w.document.close();
+  }
+};
+function banner(){
+  TERM.write('Linux netlab 6.16.8-amd64 #1 SMP PREEMPT_DYNAMIC Kali 6.16.8-1kali1 x86_64\n\n','sys');
+  TERM.write('┏━(Message from Kali developers)\n┃\n┃ This is a SIMULATED lab machine. Nothing leaves your browser.\n┃ Start with Lesson 1 on the left, or type: help\n┃\n┗━(Run: "cat README.txt" to get started)\n','sys');
+  TERM.write('Last login: '+new Date(Date.now()-86400000).toString().slice(0,24)+' from 10.10.10.5\n','sys');
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  resetEnv();GRADER.load();TERM.el=document.getElementById('term');banner();TERM.init();UI.init();
+});
+
+</script>
+</body>
+</html>
